@@ -1,0 +1,7 @@
+Django
+djangorestframework
+python-dotenv
+PyPDF2
+pdfminer-six
+openai
+django-cors-headers
