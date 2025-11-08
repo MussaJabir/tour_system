@@ -157,15 +157,6 @@ CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.redis.RedisCache',
         'LOCATION': f'redis://{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB}',
-        'OPTIONS': {
-            'CLIENT_CLASS': 'django.core.cache.backends.redis.RedisClient',
-            'PARSER_CLASS': 'redis.connection.PythonParser',
-            'CONNECTION_POOL_CLASS': 'redis.BlockingConnectionPool',
-            'CONNECTION_POOL_CLASS_KWARGS': {
-                'max_connections': 50,
-                'timeout': 20,
-            },
-        },
         'KEY_PREFIX': 'tour_system',
         'TIMEOUT': 300,  # 5 minutes default
     }
