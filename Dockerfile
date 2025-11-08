@@ -22,19 +22,17 @@ COPY requirements.txt /app/
 RUN pip install --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
-# Copy project
+# Copy project files
 COPY . /app/
 
 # Create necessary directories
 RUN mkdir -p /app/staticfiles /app/media
 
-# Copy entrypoint script
-COPY docker/entrypoint.sh /app/
-RUN chmod +x /app/entrypoint.sh
+# Make entrypoint executable
+RUN chmod +x /app/docker/entrypoint.sh
 
 # Expose port
 EXPOSE 8000
 
 # Run entrypoint script
-ENTRYPOINT ["/app/entrypoint.sh"]
-
+ENTRYPOINT ["/app/docker/entrypoint.sh"]
