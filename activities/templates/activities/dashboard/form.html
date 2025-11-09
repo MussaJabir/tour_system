@@ -1,0 +1,275 @@
+{% extends 'backend/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">{{ page_title }}</h1>
+        <a href="{% url 'dashboard_activity_list' %}" class="btn btn-secondary btn-sm">
+            <i class="fas fa-arrow-left"></i> Back to List
+        </a>
+    </div>
+
+    <!-- Activity Form -->
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Activity Information</h6>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        {% if form.errors %}
+                        <div class="alert alert-danger">
+                            <strong>Please correct the following errors:</strong>
+                            <ul>
+                                {% for field, errors in form.errors.items %}
+                                    {% for error in errors %}
+                                    <li>{{ field }}: {{ error }}</li>
+                                    {% endfor %}
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        {% endif %}
+
+                        <!-- Basic Information -->
+                        <div class="form-group">
+                            <label for="{{ form.name.id_for_label }}">Activity Name *</label>
+                            {{ form.name }}
+                            {% if form.name.help_text %}
+                            <small class="form-text text-muted">{{ form.name.help_text }}</small>
+                            {% endif %}
+                        </div>
+
+                        <div class="form-group">
+                            <label for="{{ form.destination.id_for_label }}">Destination *</label>
+                            {{ form.destination }}
+                        </div>
+
+                        <div class="form-group">
+                            <label for="{{ form.short_description.id_for_label }}">Short Description</label>
+                            {{ form.short_description }}
+                            <small class="form-text text-muted">Brief overview for previews</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="{{ form.description.id_for_label }}">Full Description *</label>
+                            {{ form.description }}
+                        </div>
+
+                        <!-- Classification -->
+                        <h5 class="mt-4 mb-3">Classification</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.category.id_for_label }}">Category *</label>
+                                    {{ form.category }}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.difficulty.id_for_label }}">Difficulty *</label>
+                                    {{ form.difficulty }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Logistics -->
+                        <h5 class="mt-4 mb-3">Logistics</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.duration.id_for_label }}">Duration *</label>
+                                    {{ form.duration }}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.duration_unit.id_for_label }}">Duration Unit *</label>
+                                    {{ form.duration_unit }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.min_age.id_for_label }}">Minimum Age</label>
+                                    {{ form.min_age }}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.max_group_size.id_for_label }}">Max Group Size</label>
+                                    {{ form.max_group_size }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Pricing -->
+                        <h5 class="mt-4 mb-3">Pricing</h5>
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="form-group">
+                                    <label for="{{ form.price_per_person.id_for_label }}">Price Per Person *</label>
+                                    {{ form.price_per_person }}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="{{ form.currency.id_for_label }}">Currency</label>
+                                    {{ form.currency }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Media -->
+                        <h5 class="mt-4 mb-3">Media</h5>
+                        <div class="form-group">
+                            <label for="{{ form.featured_image.id_for_label }}">Featured Image</label>
+                            {{ form.featured_image }}
+                            {% if activity.featured_image %}
+                            <div class="mt-2">
+                                <img src="{{ activity.featured_image.url }}" alt="{{ activity.name }}" style="max-width: 300px; height: auto;">
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="form-group">
+                            <label for="{{ form.video_url.id_for_label }}">Video URL</label>
+                            {{ form.video_url }}
+                            <small class="form-text text-muted">YouTube or Vimeo video URL</small>
+                        </div>
+
+                        <!-- Details -->
+                        <h5 class="mt-4 mb-3">Activity Details</h5>
+                        <div class="form-group">
+                            <label for="{{ form.requirements.id_for_label }}">Requirements</label>
+                            {{ form.requirements }}
+                            <small class="form-text text-muted">What participants need (fitness level, equipment)</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="{{ form.included_items.id_for_label }}">What's Included</label>
+                            {{ form.included_items }}
+                        </div>
+
+                        <div class="form-group">
+                            <label for="{{ form.excluded_items.id_for_label }}">What's NOT Included</label>
+                            {{ form.excluded_items }}
+                        </div>
+
+                        <div class="form-group">
+                            <label for="{{ form.best_season.id_for_label }}">Best Season</label>
+                            {{ form.best_season }}
+                        </div>
+
+                        <!-- Status & Visibility -->
+                        <h5 class="mt-4 mb-3">Status & Visibility</h5>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-check mb-3">
+                                    {{ form.is_featured }}
+                                    <label class="form-check-label" for="{{ form.is_featured.id_for_label }}">
+                                        Featured Activity
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check mb-3">
+                                    {{ form.is_active }}
+                                    <label class="form-check-label" for="{{ form.is_active.id_for_label }}">
+                                        Active (Published)
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="{{ form.order.id_for_label }}">Display Order</label>
+                                    {{ form.order }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- SEO Section (Collapsible) -->
+                        <div class="card mt-4">
+                            <div class="card-header" id="seoHeading">
+                                <h5 class="mb-0">
+                                    <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#seoCollapse">
+                                        SEO Settings (Optional)
+                                    </button>
+                                </h5>
+                            </div>
+                            <div id="seoCollapse" class="collapse">
+                                <div class="card-body">
+                                    <div class="form-group">
+                                        <label for="{{ form.meta_title.id_for_label }}">Meta Title</label>
+                                        {{ form.meta_title }}
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="{{ form.meta_description.id_for_label }}">Meta Description</label>
+                                        {{ form.meta_description }}
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="{{ form.meta_keywords.id_for_label }}">Meta Keywords</label>
+                                        {{ form.meta_keywords }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Submit Buttons -->
+                        <div class="form-group mt-4">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> {% if is_edit %}Update{% else %}Create{% endif %} Activity
+                            </button>
+                            <a href="{% url 'dashboard_activity_list' %}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gallery Management (Only for Edit) -->
+        {% if is_edit %}
+        <div class="col-lg-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold text-primary">Gallery Images</h6>
+                    <a href="{% url 'dashboard_add_activity_gallery_image' activity.pk %}" class="btn btn-success btn-sm">
+                        <i class="fas fa-plus"></i> Add Image
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if gallery_images %}
+                        {% for image in gallery_images %}
+                        <div class="mb-3 p-2 border rounded">
+                            <img src="{{ image.image.url }}" alt="{{ image.caption }}" class="img-fluid mb-2">
+                            {% if image.caption %}
+                            <p class="mb-1"><small>{{ image.caption }}</small></p>
+                            {% endif %}
+                            <p class="mb-2"><small class="text-muted">Order: {{ image.order }}</small></p>
+                            <form method="post" action="{% url 'dashboard_delete_activity_gallery_image' image.pk %}" style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Delete this image?')">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
+                            </form>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                    <p class="text-muted">No gallery images yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+

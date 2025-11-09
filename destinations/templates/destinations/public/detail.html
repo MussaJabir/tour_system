@@ -107,6 +107,41 @@
                     </div>
                 </div>
                 {% endif %}
+
+                <!-- Activities at this Destination -->
+                {% if activities %}
+                <div class="destination-details-content mt-50" data-aos="fade-up" data-aos-delay="300" data-aos-duration="1500" data-aos-offset="50">
+                    <div class="d-flex justify-content-between align-items-center mb-30">
+                        <h3>Activities Available</h3>
+                        <a href="{% url 'public_activity_by_destination' destination.slug %}" class="theme-btn style-two btn-sm">
+                            <span data-hover="View All">View All</span>
+                            <i class="fal fa-arrow-right"></i>
+                        </a>
+                    </div>
+                    <div class="row">
+                        {% for activity in activities %}
+                        <div class="col-md-4 mb-30">
+                            <div class="activity-card">
+                                {% if activity.featured_image %}
+                                <div class="activity-image">
+                                    <img src="{{ activity.featured_image.url }}" alt="{{ activity.name }}">
+                                    <span class="difficulty-badge {{ activity.difficulty }}">{{ activity.get_difficulty_display }}</span>
+                                </div>
+                                {% endif %}
+                                <div class="activity-content p-3">
+                                    <span class="category">{{ activity.get_category_display }}</span>
+                                    <h5><a href="{% url 'public_activity_detail' activity.slug %}">{{ activity.name }}</a></h5>
+                                    <ul class="activity-meta">
+                                        <li><i class="fal fa-clock"></i> {{ activity.duration_display }}</li>
+                                        <li><i class="fal fa-dollar-sign"></i> {{ activity.price_display }}</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
             </div>
 
             <!-- Sidebar -->

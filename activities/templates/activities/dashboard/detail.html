@@ -1,0 +1,148 @@
+{% extends 'backend/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">{{ page_title }}</h1>
+        <div>
+            <a href="{% url 'dashboard_activity_edit' activity.pk %}" class="btn btn-warning btn-sm">
+                <i class="fas fa-edit"></i> Edit
+            </a>
+            <a href="{% url 'dashboard_activity_list' %}" class="btn btn-secondary btn-sm">
+                <i class="fas fa-arrow-left"></i> Back
+            </a>
+        </div>
+    </div>
+
+    <!-- Activity Details -->
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Basic Information</h6>
+                </div>
+                <div class="card-body">
+                    {% if activity.featured_image %}
+                    <img src="{{ activity.featured_image.url }}" alt="{{ activity.name }}" class="img-fluid mb-4 rounded">
+                    {% endif %}
+
+                    <h4>{{ activity.name }}</h4>
+                    <p class="text-muted">{{ activity.destination.name }}</p>
+                    
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <p><strong>Category:</strong> {{ activity.get_category_display }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Difficulty:</strong> 
+                                <span class="badge {% if activity.difficulty == 'easy' %}badge-success{% elif activity.difficulty == 'moderate' %}badge-info{% elif activity.difficulty == 'challenging' %}badge-warning{% else %}badge-danger{% endif %}">
+                                    {{ activity.get_difficulty_display }}
+                                </span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Duration:</strong> {{ activity.duration_display }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Price:</strong> {{ activity.price_display }}</p>
+                        </div>
+                    </div>
+
+                    {% if activity.min_age %}
+                    <p><strong>Minimum Age:</strong> {{ activity.min_age }} years</p>
+                    {% endif %}
+
+                    {% if activity.max_group_size %}
+                    <p><strong>Maximum Group Size:</strong> {{ activity.max_group_size }} people</p>
+                    {% endif %}
+
+                    <hr>
+
+                    <h5>Description</h5>
+                    <p>{{ activity.description|linebreaks }}</p>
+
+                    {% if activity.requirements %}
+                    <hr>
+                    <h5>Requirements</h5>
+                    <p>{{ activity.requirements|linebreaks }}</p>
+                    {% endif %}
+
+                    {% if activity.included_items %}
+                    <hr>
+                    <h5>What's Included</h5>
+                    <p>{{ activity.included_items|linebreaks }}</p>
+                    {% endif %}
+
+                    {% if activity.excluded_items %}
+                    <hr>
+                    <h5>What's NOT Included</h5>
+                    <p>{{ activity.excluded_items|linebreaks }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Gallery -->
+            {% if gallery_images %}
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Gallery Images</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% for image in gallery_images %}
+                        <div class="col-md-4 mb-3">
+                            <img src="{{ image.image.url }}" alt="{{ image.caption }}" class="img-fluid rounded">
+                            {% if image.caption %}
+                            <p class="mt-2"><small>{{ image.caption }}</small></p>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Status & Stats</h6>
+                </div>
+                <div class="card-body">
+                    <p>
+                        <strong>Featured:</strong>
+                        {% if activity.is_featured %}
+                        <span class="badge badge-warning">Yes</span>
+                        {% else %}
+                        <span class="badge badge-secondary">No</span>
+                        {% endif %}
+                    </p>
+                    <p>
+                        <strong>Status:</strong>
+                        {% if activity.is_active %}
+                        <span class="badge badge-success">Active</span>
+                        {% else %}
+                        <span class="badge badge-secondary">Inactive</span>
+                        {% endif %}
+                    </p>
+                    <p><strong>Views:</strong> {{ activity.view_count }}</p>
+                    <p><strong>Display Order:</strong> {{ activity.order }}</p>
+                    <hr>
+                    <p><strong>Created:</strong> {{ activity.created_at|date:"M d, Y" }}</p>
+                    <p><strong>Updated:</strong> {{ activity.updated_at|date:"M d, Y" }}</p>
+                    {% if activity.created_by %}
+                    <p><strong>Created By:</strong> {{ activity.created_by.username }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

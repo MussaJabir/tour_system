@@ -1,0 +1,245 @@
+{% extends 'frontend/base.html' %}
+{% load static %}
+
+{% block title %}Activities | Tour System{% endblock %}
+
+{% block meta_description %}Explore exciting activities at amazing destinations. Find your perfect adventure!{% endblock %}
+
+{% block content %}
+<!-- Page Banner Start -->
+<section class="page-banner-area pt-245 rpt-150 pb-170 rpb-100 rel z-1 bgc-lighter text-center">
+    <div class="container">
+        <div class="banner-inner rpt-10">
+            <h1 class="page-title" data-aos="fade-up" data-aos-duration="1500" data-aos-offset="50">
+                {% if is_featured_page %}Featured {% endif %}{% if is_destination_filter %}{{ destination.name }} - {% endif %}Activities
+            </h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb justify-content-center" data-aos="fade-up" data-aos-delay="200" data-aos-duration="1500" data-aos-offset="50">
+                    <li class="breadcrumb-item"><a href="{% url 'public_home' %}">Home</a></li>
+                    {% if is_destination_filter %}
+                    <li class="breadcrumb-item"><a href="{% url 'public_destination_detail' destination.slug %}">{{ destination.name }}</a></li>
+                    {% endif %}
+                    <li class="breadcrumb-item active">Activities</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    <div class="wave-shapes">
+        <img class="shape one" src="{% static 'frontend/assets/images/shapes/page-banner-wave1.png' %}" alt="Wave Shape">
+        <img class="shape two" src="{% static 'frontend/assets/images/shapes/page-banner-wave2.png' %}" alt="Wave Shape">
+    </div>
+</section>
+<!-- Page Banner End -->
+
+<!-- Activities Section -->
+<section class="activities-area py-100">
+    <div class="container">
+        <!-- Filters -->
+        {% if not is_featured_page and not is_destination_filter %}
+        <div class="row mb-50">
+            <div class="col-lg-12">
+                <form method="get" class="filter-form">
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <input type="text" name="search" class="form-control" placeholder="Search activities..." value="{{ search_query }}">
+                        </div>
+                        <div class="col-md-2 mb-3">
+                            <select name="destination" class="form-control nice-select">
+                                <option value="">All Destinations</option>
+                                {% for dest in destinations %}
+                                <option value="{{ dest.slug }}" {% if selected_destination == dest.slug %}selected{% endif %}>{{ dest.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-2 mb-3">
+                            <select name="category" class="form-control nice-select">
+                                <option value="">All Categories</option>
+                                {% for value, label in categories %}
+                                <option value="{{ value }}" {% if selected_category == value %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-2 mb-3">
+                            <select name="difficulty" class="form-control nice-select">
+                                <option value="">All Difficulties</option>
+                                {% for value, label in difficulties %}
+                                <option value="{{ value }}" {% if selected_difficulty == value %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <button type="submit" class="theme-btn style-two w-100">
+                                <span data-hover="Search">Search</span>
+                                <i class="fal fa-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Activities Grid -->
+        {% if activities %}
+        <div class="row">
+            {% for activity in activities %}
+            <div class="col-xl-4 col-md-6" data-aos="fade-up" data-aos-duration="1500" data-aos-offset="50">
+                <div class="activity-item mb-30">
+                    <div class="image">
+                        {% if activity.featured_image %}
+                        <img src="{{ activity.featured_image.url }}" alt="{{ activity.name }}">
+                        {% else %}
+                        <img src="{% static 'frontend/assets/images/activities/default.jpg' %}" alt="{{ activity.name }}">
+                        {% endif %}
+                        {% if activity.is_featured %}
+                        <span class="badge">Featured</span>
+                        {% endif %}
+                        <span class="difficulty-badge {{ activity.difficulty }}">
+                            {{ activity.get_difficulty_display }}
+                        </span>
+                    </div>
+                    <div class="content">
+                        <span class="location">
+                            <i class="fal fa-map-marker-alt"></i> {{ activity.destination.name }}
+                        </span>
+                        <h5><a href="{% url 'public_activity_detail' activity.slug %}">{{ activity.name }}</a></h5>
+                        
+                        <ul class="activity-meta">
+                            <li><i class="fal fa-clock"></i> {{ activity.duration_display }}</li>
+                            <li><i class="fal fa-tag"></i> {{ activity.get_category_display }}</li>
+                        </ul>
+
+                        {% if activity.short_description %}
+                        <p>{{ activity.short_description|truncatewords:15 }}</p>
+                        {% endif %}
+
+                        <div class="activity-footer">
+                            <span class="price">{{ activity.price_display }}</span>
+                            <a href="{% url 'public_activity_detail' activity.slug %}" class="read-more">
+                                View Details <i class="fal fa-angle-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        {% if activities.has_other_pages %}
+        <div class="pagination-area pt-20" data-aos="fade-up" data-aos-duration="1500" data-aos-offset="50">
+            <ul class="pagination justify-content-center">
+                {% if activities.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ activities.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_destination %}&destination={{ selected_destination }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if selected_difficulty %}&difficulty={{ selected_difficulty }}{% endif %}">
+                        <i class="fas fa-angle-left"></i>
+                    </a>
+                </li>
+                {% endif %}
+
+                {% for num in activities.paginator.page_range %}
+                    {% if activities.number == num %}
+                    <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                    {% elif num > activities.number|add:'-3' and num < activities.number|add:'3' %}
+                    <li class="page-item"><a class="page-link" href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_destination %}&destination={{ selected_destination }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if selected_difficulty %}&difficulty={{ selected_difficulty }}{% endif %}">{{ num }}</a></li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if activities.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ activities.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_destination %}&destination={{ selected_destination }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if selected_difficulty %}&difficulty={{ selected_difficulty }}{% endif %}">
+                        <i class="fas fa-angle-right"></i>
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </div>
+        {% endif %}
+
+        {% else %}
+        <div class="row">
+            <div class="col-12">
+                <div class="alert alert-info text-center" role="alert">
+                    <h4>No activities found.</h4>
+                    <p>Try adjusting your search or filters.</p>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.activity-item {
+    border: 1px solid #e5e5e5;
+    border-radius: 10px;
+    overflow: hidden;
+    transition: all 0.3s;
+}
+.activity-item:hover {
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+.activity-item .image {
+    position: relative;
+    overflow: hidden;
+}
+.activity-item .image img {
+    width: 100%;
+    height: 250px;
+    object-fit: cover;
+}
+.activity-item .badge {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: #f7921e;
+    color: #fff;
+    padding: 5px 15px;
+    border-radius: 5px;
+}
+.difficulty-badge {
+    position: absolute;
+    bottom: 15px;
+    left: 15px;
+    padding: 5px 15px;
+    border-radius: 5px;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+}
+.difficulty-badge.easy { background: #28a745; }
+.difficulty-badge.moderate { background: #17a2b8; }
+.difficulty-badge.challenging { background: #ffc107; color: #333; }
+.difficulty-badge.extreme { background: #dc3545; }
+.activity-item .content {
+    padding: 20px;
+}
+.activity-meta {
+    list-style: none;
+    padding: 0;
+    margin: 10px 0;
+    display: flex;
+    gap: 15px;
+}
+.activity-meta li {
+    font-size: 14px;
+    color: #666;
+}
+.activity-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #e5e5e5;
+}
+.activity-footer .price {
+    font-size: 18px;
+    font-weight: 700;
+    color: #f7921e;
+}
+</style>
+{% endblock %}
+

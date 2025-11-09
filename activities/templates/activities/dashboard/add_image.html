@@ -1,0 +1,65 @@
+{% extends 'backend/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">{{ page_title }}</h1>
+        <a href="{% url 'dashboard_activity_edit' activity.pk %}" class="btn btn-secondary btn-sm">
+            <i class="fas fa-arrow-left"></i> Back to Activity
+        </a>
+    </div>
+
+    <!-- Add Image Form -->
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Add Gallery Image</h6>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-4">Activity: <strong>{{ activity.name }}</strong></p>
+
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        {% if form.errors %}
+                        <div class="alert alert-danger">
+                            <strong>Please correct the errors below:</strong>
+                            {{ form.errors }}
+                        </div>
+                        {% endif %}
+
+                        <div class="form-group">
+                            <label for="{{ form.image.id_for_label }}">Image *</label>
+                            {{ form.image }}
+                        </div>
+
+                        <div class="form-group">
+                            <label for="{{ form.caption.id_for_label }}">Caption</label>
+                            {{ form.caption }}
+                        </div>
+
+                        <div class="form-group">
+                            <label for="{{ form.order.id_for_label }}">Display Order</label>
+                            {{ form.order }}
+                            <small class="form-text text-muted">Lower numbers appear first</small>
+                        </div>
+
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-upload"></i> Upload Image
+                            </button>
+                            <a href="{% url 'dashboard_activity_edit' activity.pk %}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
