@@ -2,7 +2,7 @@
 Django==5.2.8
 djangorestframework==3.16.1
 django-cors-headers==4.9.0
-django-filter==25.0
+django-filter==25.2
 
 # Database
 psycopg2-binary==2.9.10
