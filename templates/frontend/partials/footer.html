@@ -1,0 +1,117 @@
+{% load static %}
+
+<!-- footer area start -->
+<footer class="main-footer footer-two bgc-gray  rel z-1">
+    <div class="footer-top-newsletter pt-80 pb-40">
+        <div class="container">
+            <div class="newsletter-wrap rel bgc-lighter">
+                <div class="row">
+                    <div class="col-md-6" data-aos="fade-right" data-aos-duration="1500" data-aos-offset="50">
+                        <div class="footer-newsletter-content">
+                            <h3>Get Updates & More</h3>
+                            <p>Signup for latest news & travel updates</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6" data-aos="fade-left" data-aos-duration="1500" data-aos-offset="50">
+                        <form action="#">
+                            <input type="email" placeholder="Your email" required>
+                            <button type="submit" class="theme-btn style-two">
+                                <span data-hover="Subscribe">Subscribe</span>
+                                <i class="fal fa-arrow-right"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="footer-widget-area pt-50 pb-20">
+        <div class="container">
+            <div class="row row-cols-xl-5 row-cols-lg-4 row-cols-md-3 row-cols-2 justify-content-xl-between justify-content-lg-center">
+                <div class="col col-lg-6" data-aos="fade-up" data-aos-duration="1500" data-aos-offset="50">
+                    <div class="footer-widget widget_about me-md-5">
+                        <div class="footer-logo mb-35">
+                            <a href="{% url 'public_home' %}"><img src="{% static 'frontend/assets/images/logos/logo-three.png' %}" alt="Logo"></a>
+                        </div>
+                        <div class="text mb-30">Explore the world with us. Discover amazing destinations and create unforgettable memories.</div>
+                        <div class="footer-social">
+                            <a href="#"><i class="fab fa-facebook-f"></i></a>
+                            <a href="#"><i class="fab fa-twitter"></i></a>
+                            <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                            <a href="#"><i class="fab fa-instagram"></i></a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col col-small" data-aos="fade-up" data-aos-delay="50" data-aos-duration="1500" data-aos-offset="50">
+                    <div class="footer-widget footer-links ms-md-5">
+                        <div class="footer-title">
+                            <h5>Services</h5>
+                        </div>
+                        <ul class="list-style-three">
+                            <li><a href="#">Best Tour Guide</a></li>
+                            <li><a href="#">Tour Booking</a></li>
+                            <li><a href="#">Hotel Booking</a></li>
+                            <li><a href="#">Ticket Booking</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col col-small" data-aos="fade-up" data-aos-delay="100" data-aos-duration="1500" data-aos-offset="50">
+                    <div class="footer-widget footer-links ms-md-4">
+                        <div class="footer-title">
+                            <h5>Company</h5>
+                        </div>
+                        <ul class="list-style-three">
+                            <li><a href="#">About Company</a></li>
+                            <li><a href="#">Community Blog</a></li>
+                            <li><a href="#">Jobs and Careers</a></li>
+                            <li><a href="#">Latest News</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col col-small" data-aos="fade-up" data-aos-delay="150" data-aos-duration="1500" data-aos-offset="50">
+                    <div class="footer-widget footer-links ms-lg-4">
+                        <div class="footer-title">
+                            <h5>Destinations</h5>
+                        </div>
+                        <ul class="list-style-three">
+                            <li><a href="{% url 'public_destination_list' %}">All Destinations</a></li>
+                            <li><a href="{% url 'public_destination_featured' %}">Featured</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col col-md-6 col-10 col-small" data-aos="fade-up" data-aos-delay="200" data-aos-duration="1500" data-aos-offset="50">
+                    <div class="footer-widget footer-contact">
+                        <div class="footer-title">
+                            <h5>Get In Touch</h5>
+                        </div>
+                        <ul class="list-style-one">
+                            <li><i class="fal fa-map-marked-alt"></i> Your Address Here</li>
+                            <li><i class="fal fa-envelope"></i> <a href="mailto:info@toursystem.com">info@toursystem.com</a></li>
+                            <li><i class="fal fa-phone-volume"></i> <a href="callto:+123456789">+1 (234) 567 89</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="footer-bottom bg-transparent pt-20 pb-5">
+        <div class="container">
+            <div class="row">
+               <div class="col-lg-5">
+                    <div class="copyright-text text-center text-lg-start">
+                        <p>&copy; {% now "Y" %} Tour System, All rights reserved</p>
+                    </div>
+               </div>
+               <div class="col-lg-7 text-center text-lg-end">
+                   <ul class="footer-bottom-nav">
+                       <li><a href="#">Terms</a></li>
+                       <li><a href="#">Privacy Policy</a></li>
+                       <li><a href="#">Legal Notice</a></li>
+                   </ul>
+               </div>
+            </div>
+        </div>
+    </div>
+</footer>
+<!-- footer area end -->
+

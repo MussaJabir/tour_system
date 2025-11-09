@@ -1,0 +1,77 @@
+{% load static %}
+<!-- ========== Left Sidebar ========== -->
+<div class="main-menu">
+    <!-- Brand Logo -->
+    <div class="logo-box">
+        <!-- Brand Logo Light -->
+        <a href="{% url 'dashboard_destination_list' %}" class="logo-light">
+            <img src="{% static 'backend/assets/images/logo-light.png' %}" alt="logo" class="logo-lg" height="32">
+            <img src="{% static 'backend/assets/images/logo-light-sm.png' %}" alt="small logo" class="logo-sm" height="32">
+        </a>
+
+        <!-- Brand Logo Dark -->
+        <a href="{% url 'dashboard_destination_list' %}" class="logo-dark">
+            <img src="{% static 'backend/assets/images/logo-dark.png' %}" alt="dark logo" class="logo-lg" height="32">
+            <img src="{% static 'backend/assets/images/logo-dark-sm.png' %}" alt="small logo" class="logo-sm" height="32">
+        </a>
+    </div>
+
+    <!--- Menu -->
+    <div data-simplebar>
+        <ul class="app-menu">
+
+            <li class="menu-title">Management</li>
+
+            <li class="menu-item">
+                <a href="{% url 'dashboard_destination_list' %}" class="menu-link waves-effect">
+                    <span class="menu-icon"><i data-lucide="map-pin"></i></span>
+                    <span class="menu-text"> Destinations </span>
+                </a>
+            </li>
+
+            <li class="menu-item">
+                <a href="#" class="menu-link waves-effect">
+                    <span class="menu-icon"><i data-lucide="home"></i></span>
+                    <span class="menu-text"> Accommodations </span>
+                    <span class="badge bg-secondary ms-auto">Soon</span>
+                </a>
+            </li>
+
+            <li class="menu-item">
+                <a href="#" class="menu-link waves-effect">
+                    <span class="menu-icon"><i data-lucide="package"></i></span>
+                    <span class="menu-text"> Packages </span>
+                    <span class="badge bg-secondary ms-auto">Soon</span>
+                </a>
+            </li>
+
+            <li class="menu-item">
+                <a href="#" class="menu-link waves-effect">
+                    <span class="menu-icon"><i data-lucide="activity"></i></span>
+                    <span class="menu-text"> Activities </span>
+                    <span class="badge bg-secondary ms-auto">Soon</span>
+                </a>
+            </li>
+
+            <li class="menu-item">
+                <a href="#" class="menu-link waves-effect">
+                    <span class="menu-icon"><i data-lucide="star"></i></span>
+                    <span class="menu-text"> Reviews </span>
+                    <span class="badge bg-secondary ms-auto">Soon</span>
+                </a>
+            </li>
+
+            <li class="menu-title">System</li>
+
+            <li class="menu-item">
+                <a href="/admin/" class="menu-link waves-effect" target="_blank">
+                    <span class="menu-icon"><i data-lucide="settings"></i></span>
+                    <span class="menu-text"> Django Admin </span>
+                </a>
+            </li>
+
+        </ul>
+    </div>
+</div>
+<!-- ========== End Left Sidebar ========== -->
+

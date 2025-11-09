@@ -1,0 +1,91 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light" data-menu-color="light" data-topbar-color="dark">
+
+<head>
+    <meta charset="utf-8" />
+    <title>{% block title %}Dashboard{% endblock %} | Tour Management System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta content="Tour Management System Dashboard" name="description" />
+    <meta content="Tour System" name="author" />
+
+    <!-- App favicon -->
+    <link rel="shortcut icon" href="{% static 'backend/assets/images/favicon.ico' %}">
+
+    {% block extra_css %}
+    <link href="{% static 'backend/assets/libs/morris.js/morris.css' %}" rel="stylesheet" type="text/css" />
+    {% endblock %}
+
+    <!-- App css -->
+    <link href="{% static 'backend/assets/css/style.min.css' %}" rel="stylesheet" type="text/css">
+    <link href="{% static 'backend/assets/css/icons.min.css' %}" rel="stylesheet" type="text/css">
+    <script src="{% static 'backend/assets/js/config.js' %}"></script>
+</head>
+
+<body>
+
+    <!-- Begin page -->
+    <div class="layout-wrapper">
+
+        <!-- Include Sidebar -->
+        {% include 'backend/partials/sidebar.html' %}
+
+        <!-- ========== Main Content ========== -->
+        <div class="page-content">
+
+            <!-- Include Topbar -->
+            {% include 'backend/partials/topbar.html' %}
+
+            <!-- Begin page content -->
+            <div class="container-fluid">
+
+                <!-- Page Title (optional) -->
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                <!-- Main Content Block -->
+                {% block content %}
+                {% endblock %}
+
+            </div> <!-- container -->
+
+            <!-- Footer Start -->
+            <footer class="footer">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div><script>document.write(new Date().getFullYear())</script> © Tour Management System</div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-none d-md-flex gap-4 align-item-center justify-content-md-end">
+                                <p class="mb-0">Powered by Django</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </footer>
+            <!-- end Footer -->
+
+        </div>
+        <!-- End Page content -->
+
+    </div>
+    <!-- END wrapper -->
+
+    <!-- App js -->
+    <script src="{% static 'backend/assets/js/vendor.min.js' %}"></script>
+    <script src="{% static 'backend/assets/js/app.js' %}"></script>
+
+    {% block extra_js %}
+    {% endblock %}
+
+</body>
+
+</html>
+

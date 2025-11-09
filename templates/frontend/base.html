@@ -1,0 +1,81 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="description" content="{% block meta_description %}Explore amazing destinations around the world{% endblock %}">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    {% block meta_tags %}{% endblock %}
+
+    <!-- Title -->
+    <title>{% block title %}Tour System{% endblock %}</title>
+    
+    <!-- Favicon Icon -->
+    <link rel="shortcut icon" href="{% static 'frontend/assets/images/logos/favicon.png' %}" type="image/x-icon">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Flaticon -->
+    <link rel="stylesheet" href="{% static 'frontend/assets/css/flaticon.min.css' %}">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="{% static 'frontend/assets/css/fontawesome-5.14.0.min.css' %}">
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="{% static 'frontend/assets/css/bootstrap.min.css' %}">
+    <!-- Magnific Popup -->
+    <link rel="stylesheet" href="{% static 'frontend/assets/css/magnific-popup.min.css' %}">
+    <!-- Nice Select -->
+    <link rel="stylesheet" href="{% static 'frontend/assets/css/nice-select.min.css' %}">
+    <!-- Animate -->
+    <link rel="stylesheet" href="{% static 'frontend/assets/css/aos.css' %}">
+    <!-- Slick -->
+    <link rel="stylesheet" href="{% static 'frontend/assets/css/slick.min.css' %}">
+    <!-- Main Style -->
+    <link rel="stylesheet" href="{% static 'frontend/assets/css/style.css' %}">
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <div class="page-wrapper">
+
+        <!-- Preloader -->
+        <div class="preloader"><div class="custom-loader"></div></div>
+
+        {% include 'frontend/partials/header.html' %}
+
+        {% block content %}{% endblock %}
+
+        {% include 'frontend/partials/footer.html' %}
+
+    </div>
+    <!--End pagewrapper-->
+   
+    <!-- Jquery -->
+    <script src="{% static 'frontend/assets/js/jquery-3.6.0.min.js' %}"></script>
+    <!-- Bootstrap -->
+    <script src="{% static 'frontend/assets/js/bootstrap.min.js' %}"></script>
+    <!-- Appear Js -->
+    <script src="{% static 'frontend/assets/js/appear.min.js' %}"></script>
+    <!-- Slick -->
+    <script src="{% static 'frontend/assets/js/slick.min.js' %}"></script>
+    <!-- Magnific Popup -->
+    <script src="{% static 'frontend/assets/js/jquery.magnific-popup.min.js' %}"></script>
+    <!-- Nice Select -->
+    <script src="{% static 'frontend/assets/js/jquery.nice-select.min.js' %}"></script>
+    <!-- Image Loader -->
+    <script src="{% static 'frontend/assets/js/imagesloaded.pkgd.min.js' %}"></script>
+    <!-- Skillbar -->
+    <script src="{% static 'frontend/assets/js/skill.bars.jquery.min.js' %}"></script>
+    <!-- Isotope -->
+    <script src="{% static 'frontend/assets/js/isotope.pkgd.min.js' %}"></script>
+    <!--  AOS Animation -->
+    <script src="{% static 'frontend/assets/js/aos.js' %}"></script>
+    <!-- Custom script -->
+    <script src="{% static 'frontend/assets/js/script.js' %}"></script>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
+

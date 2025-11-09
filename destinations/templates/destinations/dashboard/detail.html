@@ -1,0 +1,279 @@
+{% extends "backend/base.html" %}
+{% load static %}
+
+{% block title %}{{ destination.name }} - Details{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">
+                    <i class="mdi mdi-map-marker"></i> {{ destination.name }}
+                </h4>
+                <div>
+                    <a href="{% url 'dashboard_destination_edit' destination.pk %}" class="btn btn-primary">
+                        <i class="mdi mdi-pencil"></i> Edit
+                    </a>
+                    <a href="{% url 'dashboard_destination_list' %}" class="btn btn-secondary">
+                        <i class="mdi mdi-arrow-left"></i> Back to List
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Left Column - Main Info -->
+        <div class="col-lg-8">
+            
+            <!-- Featured Image -->
+            <div class="card">
+                <div class="card-body p-0">
+                    {% if destination.featured_image %}
+                        <img src="{{ destination.featured_image.url }}" class="img-fluid w-100" alt="{{ destination.name }}" style="max-height: 400px; object-fit: cover;">
+                    {% else %}
+                        <div class="bg-light text-center py-5">
+                            <i class="mdi mdi-image-off" style="font-size: 48px; color: #ccc;"></i>
+                            <p class="text-muted mt-2">No featured image</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Basic Information -->
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="mdi mdi-information"></i> About This Destination</h5>
+                    
+                    <div class="mb-3">
+                        <h6 class="text-muted">Short Description</h6>
+                        <p>{{ destination.short_description }}</p>
+                    </div>
+
+                    <div class="mb-3">
+                        <h6 class="text-muted">Full Description</h6>
+                        <p style="white-space: pre-line;">{{ destination.description }}</p>
+                    </div>
+
+                    {% if destination.video_url %}
+                        <div class="mb-3">
+                            <h6 class="text-muted">Video</h6>
+                            <a href="{{ destination.video_url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                <i class="mdi mdi-play-circle"></i> Watch Video
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Travel Information -->
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="mdi mdi-calendar-clock"></i> Travel Information</h5>
+                    
+                    {% if destination.best_time_to_visit %}
+                        <div class="mb-3">
+                            <h6 class="text-muted">Best Time to Visit</h6>
+                            <p><i class="mdi mdi-calendar-check text-success"></i> {{ destination.best_time_to_visit }}</p>
+                        </div>
+                    {% endif %}
+
+                    {% if destination.climate %}
+                        <div class="mb-3">
+                            <h6 class="text-muted">Climate</h6>
+                            <p style="white-space: pre-line;">{{ destination.climate }}</p>
+                        </div>
+                    {% endif %}
+
+                    {% if destination.wildlife %}
+                        <div class="mb-3">
+                            <h6 class="text-muted">Wildlife</h6>
+                            <p style="white-space: pre-line;">{{ destination.wildlife }}</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Gallery -->
+            {% if gallery_images %}
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="mdi mdi-view-grid"></i> Gallery ({{ gallery_images.count }} images)</h5>
+                        
+                        <div class="row">
+                            {% for image in gallery_images %}
+                                <div class="col-md-4 mb-3">
+                                    <div class="card border">
+                                        <img src="{{ image.image.url }}" class="card-img-top" alt="{{ image.caption }}" style="height: 200px; object-fit: cover;">
+                                        {% if image.caption %}
+                                            <div class="card-body py-2">
+                                                <p class="card-text small mb-0">{{ image.caption }}</p>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+
+        </div>
+
+        <!-- Right Column - Details & Stats -->
+        <div class="col-lg-4">
+            
+            <!-- Quick Stats -->
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="mdi mdi-chart-box"></i> Statistics</h5>
+                    
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="text-muted">Status:</span>
+                            {% if destination.is_active %}
+                                <span class="badge bg-success">Active</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Inactive</span>
+                            {% endif %}
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="text-muted">Featured:</span>
+                            {% if destination.is_featured %}
+                                <span class="badge bg-warning text-dark"><i class="mdi mdi-star"></i> Yes</span>
+                            {% else %}
+                                <span class="text-muted">No</span>
+                            {% endif %}
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="text-muted">Views:</span>
+                            <strong>{{ destination.view_count }}</strong>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-muted">Display Order:</span>
+                            <strong>{{ destination.order }}</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Location -->
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="mdi mdi-map-marker"></i> Location</h5>
+                    
+                    <div class="mb-2">
+                        <strong>Country:</strong><br>
+                        <span class="text-muted">{{ destination.country }}</span>
+                    </div>
+
+                    {% if destination.region %}
+                        <div class="mb-2">
+                            <strong>Region:</strong><br>
+                            <span class="text-muted">{{ destination.region }}</span>
+                        </div>
+                    {% endif %}
+
+                    <div class="mb-2">
+                        <strong>Coordinates:</strong><br>
+                        <span class="text-muted">
+                            {{ destination.latitude }}, {{ destination.longitude }}
+                        </span>
+                    </div>
+
+                    <div class="mt-3">
+                        <a href="https://www.google.com/maps/search/?api=1&query={{ destination.latitude }},{{ destination.longitude }}" 
+                           target="_blank" 
+                           class="btn btn-sm btn-outline-primary w-100">
+                            <i class="mdi mdi-map"></i> View on Google Maps
+                        </a>
+                        <a href="https://www.openstreetmap.org/?mlat={{ destination.latitude }}&mlon={{ destination.longitude }}#map=10/{{ destination.latitude }}/{{ destination.longitude }}" 
+                           target="_blank" 
+                           class="btn btn-sm btn-outline-secondary w-100 mt-2">
+                            <i class="mdi mdi-map-marker-circle"></i> View on OpenStreetMap
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SEO Information -->
+            {% if destination.meta_title or destination.meta_description or destination.meta_keywords %}
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="mdi mdi-search-web"></i> SEO</h5>
+                        
+                        {% if destination.meta_title %}
+                            <div class="mb-2">
+                                <strong>Meta Title:</strong><br>
+                                <span class="text-muted small">{{ destination.meta_title }}</span>
+                            </div>
+                        {% endif %}
+
+                        {% if destination.meta_description %}
+                            <div class="mb-2">
+                                <strong>Meta Description:</strong><br>
+                                <span class="text-muted small">{{ destination.meta_description }}</span>
+                            </div>
+                        {% endif %}
+
+                        {% if destination.meta_keywords %}
+                            <div class="mb-2">
+                                <strong>Keywords:</strong><br>
+                                <span class="text-muted small">{{ destination.meta_keywords }}</span>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- Metadata -->
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="mdi mdi-clock"></i> Metadata</h5>
+                    
+                    <div class="mb-2">
+                        <strong>Created:</strong><br>
+                        <span class="text-muted small">{{ destination.created_at|date:"F d, Y H:i" }}</span>
+                    </div>
+
+                    <div class="mb-2">
+                        <strong>Last Updated:</strong><br>
+                        <span class="text-muted small">{{ destination.updated_at|date:"F d, Y H:i" }}</span>
+                    </div>
+
+                    {% if destination.created_by %}
+                        <div class="mb-2">
+                            <strong>Created By:</strong><br>
+                            <span class="text-muted small">{{ destination.created_by.get_full_name|default:destination.created_by.username }}</span>
+                        </div>
+                    {% endif %}
+
+                    <div class="mb-2">
+                        <strong>Slug:</strong><br>
+                        <span class="text-muted small">{{ destination.slug }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="card border-danger">
+                <div class="card-body">
+                    <h5 class="card-title text-danger"><i class="mdi mdi-alert"></i> Danger Zone</h5>
+                    
+                    <a href="{% url 'dashboard_destination_delete' destination.pk %}" 
+                       class="btn btn-danger w-100">
+                        <i class="mdi mdi-delete"></i> Delete Destination
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}
+

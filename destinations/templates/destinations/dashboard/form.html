@@ -1,0 +1,362 @@
+{% extends "backend/base.html" %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-section {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+    }
+    .form-section h5 {
+        margin-bottom: 15px;
+        color: #495057;
+        font-weight: 600;
+    }
+    .image-preview {
+        max-width: 300px;
+        max-height: 200px;
+        border-radius: 5px;
+        margin-top: 10px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">{{ title }}</h4>
+                <a href="{% url 'dashboard_destination_list' %}" class="btn btn-secondary">
+                    <i class="mdi mdi-arrow-left"></i> Back to List
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        <div class="row">
+            <!-- Left Column -->
+            <div class="col-lg-8">
+                
+                <!-- Basic Information -->
+                <div class="card">
+                    <div class="card-body">
+                        <div class="form-section">
+                            <h5><i class="mdi mdi-information"></i> Basic Information</h5>
+                            
+                            <div class="mb-3">
+                                <label for="{{ form.name.id_for_label }}" class="form-label">
+                                    Destination Name <span class="text-danger">*</span>
+                                </label>
+                                {{ form.name }}
+                                {% if form.name.errors %}
+                                    <div class="text-danger">{{ form.name.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="{{ form.short_description.id_for_label }}" class="form-label">
+                                    Short Description <span class="text-danger">*</span>
+                                </label>
+                                {{ form.short_description }}
+                                {% if form.short_description.errors %}
+                                    <div class="text-danger">{{ form.short_description.errors }}</div>
+                                {% endif %}
+                                <small class="text-muted">Brief description for cards and previews (max 500 characters)</small>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="{{ form.description.id_for_label }}" class="form-label">
+                                    Full Description <span class="text-danger">*</span>
+                                </label>
+                                {{ form.description }}
+                                {% if form.description.errors %}
+                                    <div class="text-danger">{{ form.description.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Location -->
+                        <div class="form-section">
+                            <h5><i class="mdi mdi-map-marker"></i> Location Details</h5>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.country.id_for_label }}" class="form-label">
+                                        Country <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.country }}
+                                    {% if form.country.errors %}
+                                        <div class="text-danger">{{ form.country.errors }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.region.id_for_label }}" class="form-label">
+                                        Region/State
+                                    </label>
+                                    {{ form.region }}
+                                    {% if form.region.errors %}
+                                        <div class="text-danger">{{ form.region.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.latitude.id_for_label }}" class="form-label">
+                                        Latitude <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.latitude }}
+                                    {% if form.latitude.errors %}
+                                        <div class="text-danger">{{ form.latitude.errors }}</div>
+                                    {% endif %}
+                                    <small class="text-muted">Range: -90 to 90</small>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.longitude.id_for_label }}" class="form-label">
+                                        Longitude <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.longitude }}
+                                    {% if form.longitude.errors %}
+                                        <div class="text-danger">{{ form.longitude.errors }}</div>
+                                    {% endif %}
+                                    <small class="text-muted">Range: -180 to 180</small>
+                                </div>
+                            </div>
+
+                            <div class="alert alert-info">
+                                <i class="mdi mdi-information"></i>
+                                <strong>Tip:</strong> You can find coordinates on <a href="https://www.google.com/maps" target="_blank">Google Maps</a> or <a href="https://www.openstreetmap.org" target="_blank">OpenStreetMap</a>
+                            </div>
+                        </div>
+
+                        <!-- Travel Details -->
+                        <div class="form-section">
+                            <h5><i class="mdi mdi-calendar-clock"></i> Travel Information</h5>
+                            
+                            <div class="mb-3">
+                                <label for="{{ form.best_time_to_visit.id_for_label }}" class="form-label">
+                                    Best Time to Visit
+                                </label>
+                                {{ form.best_time_to_visit }}
+                                {% if form.best_time_to_visit.errors %}
+                                    <div class="text-danger">{{ form.best_time_to_visit.errors }}</div>
+                                {% endif %}
+                                <small class="text-muted">e.g., "June - October"</small>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="{{ form.climate.id_for_label }}" class="form-label">
+                                    Climate Information
+                                </label>
+                                {{ form.climate }}
+                                {% if form.climate.errors %}
+                                    <div class="text-danger">{{ form.climate.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="{{ form.wildlife.id_for_label }}" class="form-label">
+                                    Wildlife
+                                </label>
+                                {{ form.wildlife }}
+                                {% if form.wildlife.errors %}
+                                    <div class="text-danger">{{ form.wildlife.errors }}</div>
+                                {% endif %}
+                                <small class="text-muted">Animals commonly seen at this destination</small>
+                            </div>
+                        </div>
+
+                        <!-- SEO Section (Collapsible) -->
+                        <div class="form-section">
+                            <h5>
+                                <a data-bs-toggle="collapse" href="#seoSection" role="button" aria-expanded="false" aria-controls="seoSection">
+                                    <i class="mdi mdi-search-web"></i> SEO Settings (Optional) <i class="mdi mdi-chevron-down"></i>
+                                </a>
+                            </h5>
+                            
+                            <div class="collapse" id="seoSection">
+                                <div class="mb-3">
+                                    <label for="{{ form.meta_title.id_for_label }}" class="form-label">
+                                        Meta Title
+                                    </label>
+                                    {{ form.meta_title }}
+                                    <small class="text-muted">Leave empty to use destination name</small>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="{{ form.meta_description.id_for_label }}" class="form-label">
+                                        Meta Description
+                                    </label>
+                                    {{ form.meta_description }}
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="{{ form.meta_keywords.id_for_label }}" class="form-label">
+                                        Meta Keywords
+                                    </label>
+                                    {{ form.meta_keywords }}
+                                    <small class="text-muted">Comma-separated keywords</small>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Right Column -->
+            <div class="col-lg-4">
+                
+                <!-- Featured Image -->
+                <div class="card">
+                    <div class="card-body">
+                        <h5><i class="mdi mdi-image"></i> Featured Image</h5>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.featured_image.id_for_label }}" class="form-label">
+                                Upload Image <span class="text-danger">*</span>
+                            </label>
+                            {{ form.featured_image }}
+                            {% if form.featured_image.errors %}
+                                <div class="text-danger">{{ form.featured_image.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        {% if destination and destination.featured_image %}
+                            <div>
+                                <p class="text-muted mb-2">Current Image:</p>
+                                <img src="{{ destination.featured_image.url }}" class="img-fluid image-preview" alt="{{ destination.name }}">
+                            </div>
+                        {% endif %}
+
+                        <div class="mb-3 mt-3">
+                            <label for="{{ form.video_url.id_for_label }}" class="form-label">
+                                Video URL (Optional)
+                            </label>
+                            {{ form.video_url }}
+                            {% if form.video_url.errors %}
+                                <div class="text-danger">{{ form.video_url.errors }}</div>
+                            {% endif %}
+                            <small class="text-muted">YouTube or Vimeo URL</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Status & Visibility -->
+                <div class="card">
+                    <div class="card-body">
+                        <h5><i class="mdi mdi-eye"></i> Visibility Settings</h5>
+                        
+                        <div class="mb-3 form-check">
+                            {{ form.is_active }}
+                            <label class="form-check-label" for="{{ form.is_active.id_for_label }}">
+                                <strong>Active/Published</strong>
+                            </label>
+                            <small class="d-block text-muted">Make this destination visible to the public</small>
+                        </div>
+
+                        <div class="mb-3 form-check">
+                            {{ form.is_featured }}
+                            <label class="form-check-label" for="{{ form.is_featured.id_for_label }}">
+                                <strong>Featured</strong>
+                            </label>
+                            <small class="d-block text-muted">Show on homepage</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.order.id_for_label }}" class="form-label">
+                                Display Order
+                            </label>
+                            {{ form.order }}
+                            {% if form.order.errors %}
+                                <div class="text-danger">{{ form.order.errors }}</div>
+                            {% endif %}
+                            <small class="text-muted">Lower numbers appear first</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="card">
+                    <div class="card-body">
+                        <button type="submit" class="btn btn-primary w-100 mb-2">
+                            <i class="mdi mdi-content-save"></i> {{ action }} Destination
+                        </button>
+                        <a href="{% url 'dashboard_destination_list' %}" class="btn btn-secondary w-100">
+                            <i class="mdi mdi-close"></i> Cancel
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </form>
+
+    <!-- Gallery Section (Only show when editing) -->
+    {% if destination %}
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5><i class="mdi mdi-view-grid"></i> Gallery Images</h5>
+                        <a href="{% url 'dashboard_add_gallery_image' destination.pk %}" class="btn btn-sm btn-primary">
+                            <i class="mdi mdi-plus"></i> Add Image
+                        </a>
+                    </div>
+
+                    {% if gallery_images %}
+                        <div class="row">
+                            {% for image in gallery_images %}
+                                <div class="col-md-3 mb-3">
+                                    <div class="card">
+                                        <img src="{{ image.image.url }}" class="card-img-top" alt="{{ image.caption }}" style="height: 200px; object-fit: cover;">
+                                        <div class="card-body p-2">
+                                            <p class="card-text small mb-2">{{ image.caption|default:"No caption" }}</p>
+                                            <form method="post" action="{% url 'dashboard_delete_gallery_image' image.pk %}" class="d-inline">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-sm btn-danger w-100" onclick="return confirm('Delete this image?')">
+                                                    <i class="mdi mdi-delete"></i> Delete
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted text-center py-3">No gallery images yet. Click "Add Image" to upload.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Preview image before upload
+    document.getElementById('id_featured_image').addEventListener('change', function(e) {
+        if (e.target.files && e.target.files[0]) {
+            // Could add image preview here
+            console.log('Image selected:', e.target.files[0].name);
+        }
+    });
+</script>
+{% endblock %}
+
