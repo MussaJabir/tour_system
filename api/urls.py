@@ -12,9 +12,11 @@ urlpatterns = [
     # Activities API
     path('', include('activities.api_urls')),
     
+    # Accommodations API
+    path('', include('accommodations.api_urls')),
+    
     # Future app APIs will be added here:
     # path('', include('packages.api_urls')),
-    # path('', include('accommodations.api_urls')),
     # path('', include('reviews.api_urls')),
 ]
 

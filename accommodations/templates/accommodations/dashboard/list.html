@@ -1,0 +1,115 @@
+{% extends 'backend/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">{{ page_title }}</h1>
+        <a href="{% url 'dashboard_accommodation_create' %}" class="btn btn-primary btn-sm">
+            <i class="fas fa-plus"></i> Add New Accommodation
+        </a>
+    </div>
+
+    <!-- Filters -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Filter Accommodations</h6>
+        </div>
+        <div class="card-body">
+            <form method="get" class="form-inline">
+                <input type="text" name="search" class="form-control mr-2 mb-2" placeholder="Search..." value="{{ search_query }}">
+                <select name="destination" class="form-control mr-2 mb-2">
+                    <option value="">All Destinations</option>
+                    {% for destination in destinations %}
+                    <option value="{{ destination.slug }}" {% if filter_destination == destination.slug %}selected{% endif %}>{{ destination.name }}</option>
+                    {% endfor %}
+                </select>
+                <select name="type" class="form-control mr-2 mb-2">
+                    <option value="">All Types</option>
+                    {% for value, label in types %}
+                    <option value="{{ value }}" {% if filter_type == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+                <select name="rating" class="form-control mr-2 mb-2">
+                    <option value="">All Ratings</option>
+                    {% for value, label in ratings %}
+                    <option value="{{ value }}" {% if filter_rating == value|stringformat:"s" %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit" class="btn btn-primary mb-2"><i class="fas fa-search"></i> Filter</button>
+                <a href="{% url 'dashboard_accommodation_list' %}" class="btn btn-secondary ml-2 mb-2"><i class="fas fa-times"></i> Clear</a>
+            </form>
+        </div>
+    </div>
+
+    <!-- List -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Accommodations List</h6>
+        </div>
+        <div class="card-body">
+            {% if accommodations %}
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Destination</th>
+                            <th>Type</th>
+                            <th>Rating</th>
+                            <th>Price Range</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for accommodation in accommodations %}
+                        <tr>
+                            <td>
+                                <strong>{{ accommodation.name }}</strong>
+                                {% if accommodation.is_featured %}<span class="badge badge-warning ml-2">Featured</span>{% endif %}
+                            </td>
+                            <td>{{ accommodation.destination.name }}</td>
+                            <td>{{ accommodation.get_accommodation_type_display }}</td>
+                            <td>
+                                {% if accommodation.star_rating %}
+                                {% for i in "12345"|make_list %}{% if forloop.counter <= accommodation.star_rating %}⭐{% endif %}{% endfor %}
+                                {% else %}-{% endif %}
+                            </td>
+                            <td>{{ accommodation.price_range_display }}</td>
+                            <td>
+                                {% if accommodation.is_active %}<span class="badge badge-success">Active</span>
+                                {% else %}<span class="badge badge-secondary">Inactive</span>{% endif %}
+                            </td>
+                            <td>
+                                <a href="{% url 'dashboard_accommodation_detail' accommodation.pk %}" class="btn btn-info btn-sm"><i class="fas fa-eye"></i></a>
+                                <a href="{% url 'dashboard_accommodation_edit' accommodation.pk %}" class="btn btn-warning btn-sm"><i class="fas fa-edit"></i></a>
+                                <a href="{% url 'dashboard_accommodation_delete' accommodation.pk %}" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            {% if accommodations.has_other_pages %}
+            <nav>
+                <ul class="pagination justify-content-center">
+                    {% if accommodations.has_previous %}
+                    <li class="page-item"><a class="page-link" href="?page={{ accommodations.previous_page_number }}">Previous</a></li>
+                    {% endif %}
+                    <li class="page-item active"><span class="page-link">Page {{ accommodations.number }} of {{ accommodations.paginator.num_pages }}</span></li>
+                    {% if accommodations.has_next %}
+                    <li class="page-item"><a class="page-link" href="?page={{ accommodations.next_page_number }}">Next</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+            {% else %}
+            <div class="alert alert-info">No accommodations found. <a href="{% url 'dashboard_accommodation_create' %}">Create your first accommodation</a></div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+

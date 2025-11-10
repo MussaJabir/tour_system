@@ -283,6 +283,9 @@ def public_destination_detail(request, slug):
     # Get activities available at this destination
     activities = destination.activities.filter(is_active=True)[:6]
     
+    # Get accommodations at this destination
+    accommodations = destination.accommodations.filter(is_active=True)[:6]
+    
     # Get related destinations (same country)
     related_destinations = Destination.objects.filter(
         country=destination.country,
@@ -293,6 +296,7 @@ def public_destination_detail(request, slug):
         'destination': destination,
         'gallery_images': gallery_images,
         'activities': activities,
+        'accommodations': accommodations,
         'related_destinations': related_destinations
     }
     

@@ -28,6 +28,7 @@ urlpatterns = [
     # Web routes
     path('', include('destinations.urls')),
     path('', include('activities.urls')),
+    path('', include('accommodations.urls')),
 ]
 
 # Serve media files in development

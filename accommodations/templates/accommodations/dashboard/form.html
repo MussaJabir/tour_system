@@ -1,0 +1,56 @@
+{% extends 'backend/base.html' %}
+{% load static %}
+{% block content %}
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">{{ page_title }}</h1>
+        <a href="{% url 'dashboard_accommodation_list' %}" class="btn btn-secondary btn-sm"><i class="fas fa-arrow-left"></i> Back</a>
+    </div>
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow mb-4">
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        {% if form.errors %}<div class="alert alert-danger">Please correct the errors below.</div>{% endif %}
+                        {% for field in form %}
+                        <div class="form-group">
+                            <label>{{ field.label }}</label>
+                            {{ field }}
+                            {% if field.help_text %}<small class="form-text text-muted">{{ field.help_text }}</small>{% endif %}
+                        </div>
+                        {% endfor %}
+                        <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> {% if is_edit %}Update{% else %}Create{% endif %}</button>
+                        <a href="{% url 'dashboard_accommodation_list' %}" class="btn btn-secondary">Cancel</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% if is_edit %}
+        <div class="col-lg-4">
+            <div class="card shadow mb-4">
+                <div class="card-header"><h6 class="m-0 font-weight-bold text-primary">Gallery</h6></div>
+                <div class="card-body">
+                    <a href="{% url 'dashboard_add_accommodation_gallery_image' accommodation.pk %}" class="btn btn-success btn-sm mb-3">Add Image</a>
+                    {% for image in gallery_images %}
+                    <div class="mb-2"><img src="{{ image.image.url }}" class="img-fluid">
+                    <form method="post" action="{% url 'dashboard_delete_accommodation_gallery_image' image.pk %}" style="display:inline;">{% csrf_token %}<button class="btn btn-danger btn-sm">Delete</button></form></div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="card shadow">
+                <div class="card-header"><h6 class="m-0 font-weight-bold text-primary">Rooms</h6></div>
+                <div class="card-body">
+                    <a href="{% url 'dashboard_add_accommodation_room' accommodation.pk %}" class="btn btn-success btn-sm mb-3">Add Room</a>
+                    {% for room in rooms %}
+                    <div class="mb-2"><strong>{{ room.name }}</strong> - {{ room.price_display }}
+                    <a href="{% url 'dashboard_edit_accommodation_room' room.pk %}" class="btn btn-warning btn-sm">Edit</a>
+                    <form method="post" action="{% url 'dashboard_delete_accommodation_room' room.pk %}" style="display:inline;">{% csrf_token %}<button class="btn btn-danger btn-sm">Del</button></form></div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

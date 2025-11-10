@@ -1,0 +1,56 @@
+{% extends 'frontend/base.html' %}
+{% load static %}
+{% block title %}{{ accommodation.name }} | Tour System{% endblock %}
+{% block content %}
+<section class="page-banner-area pt-245 rpt-150 pb-170 rpb-100 rel z-1 bgc-lighter text-center">
+    <div class="container"><h1 class="page-title">{{ accommodation.name }}</h1></div>
+</section>
+<section class="accommodation-details py-100">
+    <div class="container"><div class="row">
+        <div class="col-lg-8">
+            {% if accommodation.featured_image %}<img src="{{ accommodation.featured_image.url }}" class="img-fluid mb-4">{% endif %}
+            <h3>About {{ accommodation.name }}</h3>
+            <p>{{ accommodation.description|linebreaks }}</p>
+            {% if rooms %}
+            <h4 class="mt-4">Available Rooms</h4>
+            {% for room in rooms %}
+            <div class="card mb-3"><div class="card-body">
+                <h5>{{ room.name }}</h5>
+                <p>{{ room.description }}</p>
+                <p><strong>{{ room.price_display }}</strong> per night | Max {{ room.max_occupancy }} guests</p>
+            </div></div>
+            {% endfor %}
+            {% endif %}
+        </div>
+        <div class="col-lg-4">
+            <div class="card"><div class="card-body">
+                <h5>Quick Info</h5>
+                <p><strong>Type:</strong> {{ accommodation.get_accommodation_type_display }}</p>
+                {% if accommodation.star_rating %}<p><strong>Rating:</strong> {% for i in "12345"|make_list %}{% if forloop.counter <= accommodation.star_rating %}⭐{% endif %}{% endfor %}</p>{% endif %}
+                <p><strong>Price Range:</strong> {{ accommodation.price_range_display }}</p>
+                {% if accommodation.phone %}<p><strong>Phone:</strong> {{ accommodation.phone }}</p>{% endif %}
+                {% if accommodation.email %}<p><strong>Email:</strong> {{ accommodation.email }}</p>{% endif %}
+                {% if accommodation.check_in_time %}<p><strong>Check-in:</strong> {{ accommodation.check_in_time }}</p>{% endif %}
+                {% if accommodation.check_out_time %}<p><strong>Check-out:</strong> {{ accommodation.check_out_time }}</p>{% endif %}
+            </div></div>
+            {% if accommodation.latitude and accommodation.longitude %}
+            <div class="card mt-3"><div class="card-body">
+                <h5>Location</h5>
+                <div id="map" style="height:300px;"></div>
+            </div></div>
+            {% endif %}
+        </div>
+    </div></div>
+</section>
+{% endblock %}
+{% block extra_js %}
+{% if accommodation.latitude and accommodation.longitude %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+var map = L.map('map').setView([{{ accommodation.latitude }}, {{ accommodation.longitude }}], 13);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+L.marker([{{ accommodation.latitude }}, {{ accommodation.longitude }}]).addTo(map).bindPopup('{{ accommodation.name }}').openPopup();
+</script>
+{% endif %}
+{% endblock %}

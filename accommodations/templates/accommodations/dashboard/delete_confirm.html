@@ -1,0 +1,14 @@
+{% extends 'backend/base.html' %}
+{% block content %}
+<div class="container-fluid">
+    <div class="card shadow border-danger"><div class="card-header bg-danger text-white"><h6 class="m-0">⚠️ Confirm Deletion</h6></div>
+    <div class="card-body">
+        <div class="alert alert-danger">Warning! This action cannot be undone.</div>
+        <h4>{{ accommodation.name }}</h4>
+        <form method="post">{% csrf_token %}
+            <button type="submit" class="btn btn-danger">Yes, Delete</button>
+            <a href="{% url 'dashboard_accommodation_list' %}" class="btn btn-secondary">Cancel</a>
+        </form>
+    </div></div>
+</div>
+{% endblock %}

@@ -1,0 +1,21 @@
+{% extends 'backend/base.html' %}
+{% block content %}
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">{{ page_title }}</h1>
+        <div>
+            <a href="{% url 'dashboard_accommodation_edit' accommodation.pk %}" class="btn btn-warning btn-sm">Edit</a>
+            <a href="{% url 'dashboard_accommodation_list' %}" class="btn btn-secondary btn-sm">Back</a>
+        </div>
+    </div>
+    <div class="card shadow"><div class="card-body">
+        {% if accommodation.featured_image %}<img src="{{ accommodation.featured_image.url }}" class="img-fluid mb-3">{% endif %}
+        <h4>{{ accommodation.name }}</h4>
+        <p>{{ accommodation.destination.name }} | {{ accommodation.get_accommodation_type_display }} | {{ accommodation.star_rating }} Stars</p>
+        <p>{{ accommodation.description }}</p>
+        <p><strong>Address:</strong> {{ accommodation.address }}</p>
+        <p><strong>Contact:</strong> {{ accommodation.phone }} | {{ accommodation.email }}</p>
+        <p><strong>Price Range:</strong> {{ accommodation.price_range_display }}</p>
+    </div></div>
+</div>
+{% endblock %}
