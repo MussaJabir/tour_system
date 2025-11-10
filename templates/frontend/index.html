@@ -114,7 +114,7 @@
         </div>
         <div class="destination-active">
             {% for destination in featured_destinations %}
-            <div class="destination-item style-two" data-aos="fade-up" {% cycle "" "data-aos-delay="50"" "data-aos-delay="100"" "data-aos-delay="150"" "data-aos-delay="200"" "data-aos-delay="250"" %} data-aos-duration="1500" data-aos-offset="50">
+            <div class="destination-item style-two" data-aos="fade-up" data-aos-delay="50" data-aos-duration="1500" data-aos-offset="50">
                 <div class="image">
                     {% if destination.featured_image %}
                         <img src="{{ destination.featured_image.url }}" alt="{{ destination.name }}">
@@ -188,7 +188,7 @@
         <div class="row justify-content-center">
             {% for activity in featured_activities %}
             <div class="col-xl-3 col-lg-4 col-md-6">
-                <div class="destination-item style-four no-border" data-aos="flip-left" {% cycle "" "data-aos-delay="50"" "data-aos-delay="100"" "data-aos-delay="150"" "data-aos-delay="200"" "data-aos-delay="250"" %} data-aos-duration="1500" data-aos-offset="50">
+                <div class="destination-item style-four no-border" data-aos="flip-left" data-aos-delay="50" data-aos-duration="1500" data-aos-offset="50">
                     <div class="image">
                         {% if activity.is_featured %}<span class="badge bgc-pink">Featured</span>{% endif %}
                         {% if activity.featured_image %}
