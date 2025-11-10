@@ -76,12 +76,13 @@
 
                             <div class="mb-3">
                                 <label for="{{ form.destination.id_for_label }}" class="form-label">
-                                    Destination <span class="text-danger">*</span>
+                                    Destination <small class="text-muted">(Optional)</small>
                                 </label>
                                 {{ form.destination }}
                                 {% if form.destination.errors %}
                                     <div class="text-danger">{{ form.destination.errors }}</div>
                                 {% endif %}
+                                <small class="text-muted">Link to a destination or leave blank for standalone accommodations</small>
                             </div>
 
                             <div class="mb-3">
@@ -138,14 +139,28 @@
                             <h5><i class="mdi mdi-check-all"></i> Amenities</h5>
                             
                             <div class="mb-3">
-                                <label for="{{ form.amenities.id_for_label }}" class="form-label">
-                                    Available Amenities
-                                </label>
-                                {{ form.amenities }}
-                                {% if form.amenities.errors %}
-                                    <div class="text-danger">{{ form.amenities.errors }}</div>
+                                <label class="form-label">Available Amenities</label>
+                                <div class="row">
+                                    {% for choice_value, choice_label in form.amenities_list.field.choices %}
+                                    <div class="col-md-6 col-lg-4">
+                                        <div class="form-check mb-2">
+                                            <input type="checkbox" 
+                                                   name="amenities_list" 
+                                                   value="{{ choice_value }}" 
+                                                   class="form-check-input" 
+                                                   id="amenity_{{ forloop.counter }}"
+                                                   {% if choice_value in form.amenities_list.value %}checked{% endif %}>
+                                            <label class="form-check-label" for="amenity_{{ forloop.counter }}">
+                                                {{ choice_label }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                {% if form.amenities_list.errors %}
+                                    <div class="text-danger">{{ form.amenities_list.errors }}</div>
                                 {% endif %}
-                                <small class="text-muted">Select all amenities available at this property (comma-separated values)</small>
+                                <small class="text-muted">Check all amenities available at this property</small>
                             </div>
                         </div>
 
@@ -194,12 +209,12 @@
 
                             <div class="row">
                                 <div class="col-md-4 mb-3">
-                                    <label for="{{ form.phone_number.id_for_label }}" class="form-label">
+                                    <label for="{{ form.phone.id_for_label }}" class="form-label">
                                         Phone Number
                                     </label>
-                                    {{ form.phone_number }}
-                                    {% if form.phone_number.errors %}
-                                        <div class="text-danger">{{ form.phone_number.errors }}</div>
+                                    {{ form.phone }}
+                                    {% if form.phone.errors %}
+                                        <div class="text-danger">{{ form.phone.errors }}</div>
                                     {% endif %}
                                 </div>
 
@@ -225,28 +240,78 @@
                             </div>
                         </div>
 
+                        <!-- Property Details -->
+                        <div class="form-section">
+                            <h5><i class="mdi mdi-home"></i> Property Details</h5>
+                            
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label for="{{ form.total_rooms.id_for_label }}" class="form-label">
+                                        Total Rooms
+                                    </label>
+                                    {{ form.total_rooms }}
+                                    {% if form.total_rooms.errors %}
+                                        <div class="text-danger">{{ form.total_rooms.errors }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="col-md-4 mb-3">
+                                    <label for="{{ form.check_in_time.id_for_label }}" class="form-label">
+                                        Check-in Time
+                                    </label>
+                                    {{ form.check_in_time }}
+                                    {% if form.check_in_time.errors %}
+                                        <div class="text-danger">{{ form.check_in_time.errors }}</div>
+                                    {% endif %}
+                                    <small class="text-muted">e.g., 2:00 PM</small>
+                                </div>
+
+                                <div class="col-md-4 mb-3">
+                                    <label for="{{ form.check_out_time.id_for_label }}" class="form-label">
+                                        Check-out Time
+                                    </label>
+                                    {{ form.check_out_time }}
+                                    {% if form.check_out_time.errors %}
+                                        <div class="text-danger">{{ form.check_out_time.errors }}</div>
+                                    {% endif %}
+                                    <small class="text-muted">e.g., 11:00 AM</small>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="{{ form.policies.id_for_label }}" class="form-label">
+                                    Policies & Rules
+                                </label>
+                                {{ form.policies }}
+                                {% if form.policies.errors %}
+                                    <div class="text-danger">{{ form.policies.errors }}</div>
+                                {% endif %}
+                                <small class="text-muted">Cancellation policy, house rules, etc.</small>
+                            </div>
+                        </div>
+
                         <!-- Pricing -->
                         <div class="form-section">
                             <h5><i class="mdi mdi-currency-usd"></i> Pricing Information</h5>
                             
                             <div class="row">
                                 <div class="col-md-5 mb-3">
-                                    <label for="{{ form.min_price_per_night.id_for_label }}" class="form-label">
+                                    <label for="{{ form.price_per_night_min.id_for_label }}" class="form-label">
                                         Min Price Per Night
                                     </label>
-                                    {{ form.min_price_per_night }}
-                                    {% if form.min_price_per_night.errors %}
-                                        <div class="text-danger">{{ form.min_price_per_night.errors }}</div>
+                                    {{ form.price_per_night_min }}
+                                    {% if form.price_per_night_min.errors %}
+                                        <div class="text-danger">{{ form.price_per_night_min.errors }}</div>
                                     {% endif %}
                                 </div>
 
                                 <div class="col-md-5 mb-3">
-                                    <label for="{{ form.max_price_per_night.id_for_label }}" class="form-label">
+                                    <label for="{{ form.price_per_night_max.id_for_label }}" class="form-label">
                                         Max Price Per Night
                                     </label>
-                                    {{ form.max_price_per_night }}
-                                    {% if form.max_price_per_night.errors %}
-                                        <div class="text-danger">{{ form.max_price_per_night.errors }}</div>
+                                    {{ form.price_per_night_max }}
+                                    {% if form.price_per_night_max.errors %}
+                                        <div class="text-danger">{{ form.price_per_night_max.errors }}</div>
                                     {% endif %}
                                 </div>
 

@@ -5,13 +5,41 @@ from .models import Accommodation, AccommodationImage, Room
 class AccommodationForm(forms.ModelForm):
     """Form for creating/editing accommodations"""
     
-    # Common amenities choices for easier selection
+    # Define amenities as multiple choice checkboxes
     AMENITIES_CHOICES = [
-        'WiFi', 'Pool', 'Restaurant', 'Bar', 'Gym', 'Spa', 'Parking',
-        'Airport Shuttle', 'Room Service', 'Laundry', 'Conference Room',
-        'Business Center', 'Pet Friendly', 'Air Conditioning', 'Heating',
-        'Garden', 'Terrace', 'Beach Access', 'Kids Club', 'Babysitting'
+        ('WiFi', 'WiFi'),
+        ('Swimming Pool', 'Swimming Pool'),
+        ('Restaurant', 'Restaurant'),
+        ('Bar/Lounge', 'Bar/Lounge'),
+        ('Gym/Fitness Center', 'Gym/Fitness Center'),
+        ('Spa & Wellness', 'Spa & Wellness'),
+        ('Parking', 'Free Parking'),
+        ('Airport Shuttle', 'Airport Shuttle'),
+        ('Room Service', 'Room Service'),
+        ('Laundry Service', 'Laundry Service'),
+        ('Conference Facilities', 'Conference Facilities'),
+        ('Business Center', 'Business Center'),
+        ('Pet Friendly', 'Pet Friendly'),
+        ('Air Conditioning', 'Air Conditioning'),
+        ('Heating', 'Heating'),
+        ('Garden', 'Garden'),
+        ('Terrace', 'Terrace/Balcony'),
+        ('Beach Access', 'Beach Access'),
+        ('Kids Club', 'Kids Club'),
+        ('Babysitting', 'Babysitting Service'),
+        ('24-Hour Front Desk', '24-Hour Front Desk'),
+        ('Concierge', 'Concierge Service'),
+        ('Currency Exchange', 'Currency Exchange'),
+        ('Free Breakfast', 'Free Breakfast'),
     ]
+    
+    # Custom field for amenities (will be converted to comma-separated)
+    amenities_list = forms.MultipleChoiceField(
+        choices=AMENITIES_CHOICES,
+        widget=forms.CheckboxSelectMultiple,
+        required=False,
+        label='Available Amenities'
+    )
     
     class Meta:
         model = Accommodation
@@ -20,7 +48,7 @@ class AccommodationForm(forms.ModelForm):
             'destination', 'accommodation_type', 'star_rating',
             'address', 'latitude', 'longitude',
             'phone', 'email', 'website',
-            'amenities', 'total_rooms',
+            'total_rooms',
             'price_per_night_min', 'price_per_night_max', 'currency',
             'check_in_time', 'check_out_time', 'policies',
             'featured_image', 'video_url',
@@ -28,19 +56,28 @@ class AccommodationForm(forms.ModelForm):
             'meta_title', 'meta_description', 'meta_keywords',
         ]
         widgets = {
-            'description': forms.Textarea(attrs={'rows': 5}),
-            'short_description': forms.Textarea(attrs={'rows': 2}),
-            'address': forms.Textarea(attrs={'rows': 2}),
-            'policies': forms.Textarea(attrs={'rows': 3}),
-            'amenities': forms.Textarea(attrs={'rows': 2, 'placeholder': 'Enter amenities separated by commas (e.g., WiFi, Pool, Restaurant)'}),
-            'meta_description': forms.Textarea(attrs={'rows': 2}),
+            'description': forms.Textarea(attrs={'rows': 5, 'class': 'form-control'}),
+            'short_description': forms.Textarea(attrs={'rows': 2, 'class': 'form-control'}),
+            'address': forms.Textarea(attrs={'rows': 2, 'class': 'form-control'}),
+            'policies': forms.Textarea(attrs={'rows': 3, 'class': 'form-control'}),
+            'meta_description': forms.Textarea(attrs={'rows': 2, 'class': 'form-control'}),
         }
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        
+        # Populate amenities_list from amenities field when editing
+        if self.instance and self.instance.pk and self.instance.amenities:
+            # Convert comma-separated string to list
+            amenities = [a.strip() for a in self.instance.amenities.split(',') if a.strip()]
+            self.initial['amenities_list'] = amenities
+        
         # Add Bootstrap classes to form fields
         for field_name, field in self.fields.items():
-            if isinstance(field.widget, (forms.TextInput, forms.Textarea, forms.Select, forms.URLInput, forms.NumberInput, forms.EmailInput)):
+            if field_name == 'amenities_list':
+                # Skip checkboxes, they have their own styling
+                continue
+            elif isinstance(field.widget, (forms.TextInput, forms.Textarea, forms.Select, forms.URLInput, forms.NumberInput, forms.EmailInput)):
                 field.widget.attrs.update({'class': 'form-control'})
             elif isinstance(field.widget, forms.CheckboxInput):
                 field.widget.attrs.update({'class': 'form-check-input'})
@@ -55,6 +92,20 @@ class AccommodationForm(forms.ModelForm):
         self.fields['check_out_time'].widget.attrs['placeholder'] = '11:00 AM'
         self.fields['price_per_night_min'].widget.attrs['placeholder'] = 'Min price'
         self.fields['price_per_night_max'].widget.attrs['placeholder'] = 'Max price'
+    
+    def save(self, commit=True):
+        """Convert amenities_list back to comma-separated string"""
+        instance = super().save(commit=False)
+        
+        # Convert amenities_list (checkboxes) to comma-separated string
+        if 'amenities_list' in self.cleaned_data:
+            amenities = self.cleaned_data['amenities_list']
+            instance.amenities = ', '.join(amenities) if amenities else ''
+        
+        if commit:
+            instance.save()
+        
+        return instance
 
 
 class AccommodationImageForm(forms.ModelForm):

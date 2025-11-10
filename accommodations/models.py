@@ -62,7 +62,9 @@ class Accommodation(models.Model):
         Destination,
         on_delete=models.CASCADE,
         related_name='accommodations',
-        help_text="Destination where this accommodation is located"
+        null=True,
+        blank=True,
+        help_text="Destination where this accommodation is located (optional)"
     )
     
     # Classification
@@ -240,7 +242,9 @@ class Accommodation(models.Model):
         ]
     
     def __str__(self):
-        return f"{self.name} - {self.destination.name}"
+        if self.destination:
+            return f"{self.name} - {self.destination.name}"
+        return self.name
     
     def save(self, *args, **kwargs):
         """Auto-generate slug and meta fields"""
