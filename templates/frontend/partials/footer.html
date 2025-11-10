@@ -1,81 +1,63 @@
 {% load static %}
-
 <!-- footer area start -->
-<footer class="main-footer footer-two bgc-gray  rel z-1">
-    <div class="footer-top-newsletter pt-80 pb-40">
+<footer class="main-footer footer-two bgp-bottom bgc-black rel z-15 pt-100 pb-115" style="background-image: url({% static 'frontend/assets/images/backgrounds/footer-two.png' %});">
+    <div class="widget-area">
         <div class="container">
-            <div class="newsletter-wrap rel bgc-lighter">
-                <div class="row">
-                    <div class="col-md-6" data-aos="fade-right" data-aos-duration="1500" data-aos-offset="50">
-                        <div class="footer-newsletter-content">
-                            <h3>Get Updates & More</h3>
-                            <p>Signup for latest news & travel updates</p>
+            <div class="row row-cols-xxl-5 row-cols-xl-4 row-cols-md-3 row-cols-2">
+                <div class="col col-small" data-aos="fade-up" data-aos-duration="1500" data-aos-offset="50">
+                    <div class="footer-widget footer-text">
+                        <div class="footer-logo mb-40">
+                            <a href="{% url 'public_home' %}">
+                                <img src="{% static 'frontend/assets/images/logos/logo.png' %}" alt="Logo">
+                            </a>
                         </div>
-                    </div>
-                    <div class="col-md-6" data-aos="fade-left" data-aos-duration="1500" data-aos-offset="50">
-                        <form action="#">
-                            <input type="email" placeholder="Your email" required>
-                            <button type="submit" class="theme-btn style-two">
-                                <span data-hover="Subscribe">Subscribe</span>
-                                <i class="fal fa-arrow-right"></i>
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="footer-widget-area pt-50 pb-20">
-        <div class="container">
-            <div class="row row-cols-xl-5 row-cols-lg-4 row-cols-md-3 row-cols-2 justify-content-xl-between justify-content-lg-center">
-                <div class="col col-lg-6" data-aos="fade-up" data-aos-duration="1500" data-aos-offset="50">
-                    <div class="footer-widget widget_about me-md-5">
-                        <div class="footer-logo mb-35">
-                            <a href="{% url 'public_home' %}"><img src="{% static 'frontend/assets/images/logos/logo-three.png' %}" alt="Logo"></a>
-                        </div>
-                        <div class="text mb-30">Explore the world with us. Discover amazing destinations and create unforgettable memories.</div>
-                        <div class="footer-social">
-                            <a href="#"><i class="fab fa-facebook-f"></i></a>
-                            <a href="#"><i class="fab fa-twitter"></i></a>
-                            <a href="#"><i class="fab fa-linkedin-in"></i></a>
-                            <a href="#"><i class="fab fa-instagram"></i></a>
+                        <div class="footer-map">
+                            <iframe src="https://www.google.com/maps/embed?pb=!1m10!1m8!1m3!1d96777.16150026117!2d-74.00840582560909!3d40.71171357405996!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sen!2sbd!4v1706508986625!5m2!1sen!2sbd" 
+                                    style="border:0; width: 100%;" 
+                                    allowfullscreen="" 
+                                    loading="lazy" 
+                                    referrerpolicy="no-referrer-when-downgrade">
+                            </iframe>
                         </div>
                     </div>
                 </div>
                 <div class="col col-small" data-aos="fade-up" data-aos-delay="50" data-aos-duration="1500" data-aos-offset="50">
-                    <div class="footer-widget footer-links ms-md-5">
+                    <div class="footer-widget footer-links ms-sm-5">
                         <div class="footer-title">
-                            <h5>Services</h5>
+                            <h5>Quick Links</h5>
                         </div>
                         <ul class="list-style-three">
-                            <li><a href="#">Best Tour Guide</a></li>
-                            <li><a href="#">Tour Booking</a></li>
-                            <li><a href="#">Hotel Booking</a></li>
-                            <li><a href="#">Ticket Booking</a></li>
+                            <li><a href="{% url 'public_destination_list' %}">All Destinations</a></li>
+                            <li><a href="{% url 'public_activity_list' %}">All Activities</a></li>
+                            <li><a href="{% url 'public_accommodation_list' %}">All Accommodations</a></li>
+                            <li><a href="{% url 'public_destination_featured' %}">Featured Tours</a></li>
                         </ul>
                     </div>
                 </div>
                 <div class="col col-small" data-aos="fade-up" data-aos-delay="100" data-aos-duration="1500" data-aos-offset="50">
                     <div class="footer-widget footer-links ms-md-4">
                         <div class="footer-title">
-                            <h5>Company</h5>
+                            <h5>Explore</h5>
                         </div>
                         <ul class="list-style-three">
-                            <li><a href="#">About Company</a></li>
-                            <li><a href="#">Community Blog</a></li>
-                            <li><a href="#">Jobs and Careers</a></li>
-                            <li><a href="#">Latest News</a></li>
+                            <li><a href="{% url 'public_home' %}">Home</a></li>
+                            <li><a href="{% url 'public_destination_list' %}">Destinations</a></li>
+                            <li><a href="{% url 'public_activity_list' %}">Activities</a></li>
+                            <li><a href="{% url 'public_accommodation_list' %}">Accommodations</a></li>
                         </ul>
                     </div>
                 </div>
                 <div class="col col-small" data-aos="fade-up" data-aos-delay="150" data-aos-duration="1500" data-aos-offset="50">
                     <div class="footer-widget footer-links ms-lg-4">
                         <div class="footer-title">
-                            <h5>Destinations</h5>
+                            <h5>Popular Destinations</h5>
                         </div>
                         <ul class="list-style-three">
-                            <li><a href="{% url 'public_destination_list' %}">All Destinations</a></li>
-                            <li><a href="{% url 'public_destination_featured' %}">Featured</a></li>
+                            {% for destination in footer_destinations %}
+                                <li><a href="{{ destination.get_absolute_url }}">{{ destination.name }}</a></li>
+                            {% empty %}
+                                <li><a href="{% url 'public_destination_list' %}">View All Destinations</a></li>
+                            {% endfor %}
                         </ul>
                     </div>
                 </div>
@@ -85,10 +67,16 @@
                             <h5>Get In Touch</h5>
                         </div>
                         <ul class="list-style-one">
-                            <li><i class="fal fa-map-marked-alt"></i> Your Address Here</li>
-                            <li><i class="fal fa-envelope"></i> <a href="mailto:info@toursystem.com">info@toursystem.com</a></li>
-                            <li><i class="fal fa-phone-volume"></i> <a href="callto:+123456789">+1 (234) 567 89</a></li>
+                            <li><i class="fal fa-map-marked-alt"></i> Your Office Address Here</li>
+                            <li><i class="fal fa-envelope"></i> <a href="mailto:info@example.com">info@example.com</a></li>
+                            <li><i class="fal fa-phone-volume"></i> <a href="tel:+1234567890">+1 (234) 567 890</a></li>
                         </ul>
+                        <div class="social-style-one mt-20">
+                            <a href="#" target="_blank"><i class="fab fa-twitter"></i></a>
+                            <a href="#" target="_blank"><i class="fab fa-facebook-f"></i></a>
+                            <a href="#" target="_blank"><i class="fab fa-instagram"></i></a>
+                            <a href="#" target="_blank"><i class="fab fa-pinterest-p"></i></a>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -99,14 +87,15 @@
             <div class="row">
                <div class="col-lg-5">
                     <div class="copyright-text text-center text-lg-start">
-                        <p>&copy; {% now "Y" %} Tour System, All rights reserved</p>
+                        <p>&copy; {% now "Y" %} <a href="{% url 'public_home' %}">Tour System</a>, All rights reserved</p>
                     </div>
                </div>
                <div class="col-lg-7 text-center text-lg-end">
                    <ul class="footer-bottom-nav">
-                       <li><a href="#">Terms</a></li>
+                       <li><a href="#">Terms & Conditions</a></li>
                        <li><a href="#">Privacy Policy</a></li>
                        <li><a href="#">Legal Notice</a></li>
+                       <li><a href="#">Accessibility</a></li>
                    </ul>
                </div>
             </div>
@@ -114,4 +103,3 @@
     </div>
 </footer>
 <!-- footer area end -->
-

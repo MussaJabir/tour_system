@@ -1,5 +1,4 @@
 {% load static %}
-
 <!-- main header -->
 <header class="main-header header-one">
     <!--Header-Upper-->
@@ -8,7 +7,11 @@
 
             <div class="header-inner rel d-flex align-items-center">
                 <div class="logo-outer">
-                    <div class="logo"><a href="{% url 'public_home' %}"><img src="{% static 'frontend/assets/images/logos/logo-two.png' %}" alt="Logo" title="Logo"></a></div>
+                    <div class="logo">
+                        <a href="{% url 'public_home' %}">
+                            <img src="{% static 'frontend/assets/images/logos/logo-two.png' %}" alt="Logo" title="Logo">
+                        </a>
+                    </div>
                 </div>
 
                 <div class="nav-outer mx-lg-auto ps-xxl-5 clearfix">
@@ -34,16 +37,27 @@
                                 <li class="{% if request.resolver_match.url_name == 'public_home' %}current{% endif %}">
                                     <a href="{% url 'public_home' %}">Home</a>
                                 </li>
-                                <li><a href="#">About</a></li>
-                                <li><a href="#">Tours</a></li>
-                                <li class="dropdown {% if 'destination' in request.resolver_match.url_name %}current{% endif %}">
-                                    <a href="#">Destinations</a>
+                                <li class="dropdown {% if 'destination' in request.path %}current{% endif %}">
+                                    <a href="{% url 'public_destination_list' %}">Destinations</a>
                                     <ul>
                                         <li><a href="{% url 'public_destination_list' %}">All Destinations</a></li>
                                         <li><a href="{% url 'public_destination_featured' %}">Featured Destinations</a></li>
                                     </ul>
                                 </li>
-                                <li><a href="#">Contact</a></li>
+                                <li class="dropdown {% if 'activit' in request.path %}current{% endif %}">
+                                    <a href="{% url 'public_activity_list' %}">Activities</a>
+                                    <ul>
+                                        <li><a href="{% url 'public_activity_list' %}">All Activities</a></li>
+                                        <li><a href="{% url 'public_activity_featured' %}">Featured Activities</a></li>
+                                    </ul>
+                                </li>
+                                <li class="dropdown {% if 'accommodation' in request.path %}current{% endif %}">
+                                    <a href="{% url 'public_accommodation_list' %}">Accommodations</a>
+                                    <ul>
+                                        <li><a href="{% url 'public_accommodation_list' %}">All Accommodations</a></li>
+                                        <li><a href="{% url 'public_accommodation_featured' %}">Featured Accommodations</a></li>
+                                    </ul>
+                                </li>
                             </ul>
                         </div>
 
@@ -87,17 +101,17 @@
         <div class="appointment-form">
             <form method="post" action="#">
                 <div class="form-group">
-                    <input type="text" name="text" value="" placeholder="Name" required>
+                    <input type="text" name="name" value="" placeholder="Your Name" required>
                 </div>
                 <div class="form-group">
                     <input type="email" name="email" value="" placeholder="Email Address" required>
                 </div>
                 <div class="form-group">
-                    <textarea placeholder="Message" rows="5"></textarea>
+                    <textarea name="message" placeholder="Your Message" rows="5"></textarea>
                 </div>
                 <div class="form-group">
                     <button type="submit" class="theme-btn style-two">
-                        <span data-hover="Submit now">Submit now</span>
+                        <span data-hover="Send Message">Send Message</span>
                         <i class="fal fa-arrow-right"></i>
                     </button>
                 </div>
@@ -106,12 +120,11 @@
 
         <!--Social Icons-->
         <div class="social-style-one">
-            <a href="#"><i class="fab fa-twitter"></i></a>
-            <a href="#"><i class="fab fa-facebook-f"></i></a>
-            <a href="#"><i class="fab fa-instagram"></i></a>
-            <a href="#"><i class="fab fa-pinterest-p"></i></a>
+            <a href="#" target="_blank"><i class="fab fa-twitter"></i></a>
+            <a href="#" target="_blank"><i class="fab fa-facebook-f"></i></a>
+            <a href="#" target="_blank"><i class="fab fa-instagram"></i></a>
+            <a href="#" target="_blank"><i class="fab fa-pinterest-p"></i></a>
         </div>
     </div>
 </section>
 <!--End Hidden Sidebar -->
-

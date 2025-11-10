@@ -12,48 +12,48 @@
     </div>
 
     <!-- Filters -->
-    <div class="card shadow mb-4">
-        <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">Filter Activities</h6>
-        </div>
-        <div class="card-body">
-            <form method="get" class="form-inline">
-                <div class="form-group mr-2 mb-2">
-                    <input type="text" name="search" class="form-control" placeholder="Search activities..." value="{{ search_query }}">
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <form method="get" class="row g-3">
+                        <div class="col-md-3">
+                            <input type="text" name="search" class="form-control" placeholder="Search activities..." value="{{ search_query }}">
+                        </div>
+                        <div class="col-md-3">
+                            <select name="destination" class="form-select">
+                                <option value="">All Destinations</option>
+                                {% for destination in destinations %}
+                                    <option value="{{ destination.slug }}" {% if filter_destination == destination.slug %}selected{% endif %}>
+                                        {{ destination.name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <select name="category" class="form-select">
+                                <option value="">All Categories</option>
+                                {% for value, label in categories %}
+                                    <option value="{{ value }}" {% if filter_category == value %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <select name="difficulty" class="form-select">
+                                <option value="">All Difficulties</option>
+                                {% for value, label in difficulties %}
+                                    <option value="{{ value }}" {% if filter_difficulty == value %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="mdi mdi-magnify"></i> Filter
+                            </button>
+                        </div>
+                    </form>
                 </div>
-                <div class="form-group mr-2 mb-2">
-                    <select name="destination" class="form-control">
-                        <option value="">All Destinations</option>
-                        {% for destination in destinations %}
-                        <option value="{{ destination.slug }}" {% if filter_destination == destination.slug %}selected{% endif %}>
-                            {{ destination.name }}
-                        </option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="form-group mr-2 mb-2">
-                    <select name="category" class="form-control">
-                        <option value="">All Categories</option>
-                        {% for value, label in categories %}
-                        <option value="{{ value }}" {% if filter_category == value %}selected{% endif %}>{{ label }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="form-group mr-2 mb-2">
-                    <select name="difficulty" class="form-control">
-                        <option value="">All Difficulties</option>
-                        {% for value, label in difficulties %}
-                        <option value="{{ value }}" {% if filter_difficulty == value %}selected{% endif %}>{{ label }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <button type="submit" class="btn btn-primary mb-2">
-                    <i class="fas fa-search"></i> Filter
-                </button>
-                <a href="{% url 'dashboard_activity_list' %}" class="btn btn-secondary ml-2 mb-2">
-                    <i class="fas fa-times"></i> Clear
-                </a>
-            </form>
+            </div>
         </div>
     </div>
 

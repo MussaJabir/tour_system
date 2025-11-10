@@ -4,13 +4,13 @@
 <head>
     <!-- Required meta tags -->
     <meta charset="utf-8">
-    <meta name="description" content="{% block meta_description %}Explore amazing destinations around the world{% endblock %}">
+    <meta name="description" content="{% block meta_description %}Explore amazing destinations, activities, and accommodations with our tour management system{% endblock %}">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    {% block meta_tags %}{% endblock %}
+    <meta name="keywords" content="{% block meta_keywords %}travel, tours, destinations, activities, accommodations{% endblock %}">
 
     <!-- Title -->
-    <title>{% block title %}Tour System{% endblock %}</title>
+    <title>{% block title %}Tour Management System{% endblock %}</title>
     
     <!-- Favicon Icon -->
     <link rel="shortcut icon" href="{% static 'frontend/assets/images/logos/favicon.png' %}" type="image/x-icon">
@@ -43,10 +43,13 @@
         <!-- Preloader -->
         <div class="preloader"><div class="custom-loader"></div></div>
 
+        <!-- Include Header -->
         {% include 'frontend/partials/header.html' %}
 
+        <!-- Page Content -->
         {% block content %}{% endblock %}
 
+        <!-- Include Footer -->
         {% include 'frontend/partials/footer.html' %}
 
     </div>
@@ -76,6 +79,6 @@
     <script src="{% static 'frontend/assets/js/script.js' %}"></script>
 
     {% block extra_js %}{% endblock %}
+
 </body>
 </html>
-

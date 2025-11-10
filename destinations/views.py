@@ -202,10 +202,34 @@ def public_home(request):
     """
     Public homepage
     """
+    from activities.models import Activity
+    from accommodations.models import Accommodation
+    
+    # Fetch featured destinations
     featured_destinations = Destination.objects.filter(is_active=True, is_featured=True)[:6]
     
+    # Fetch featured activities
+    featured_activities = Activity.objects.filter(is_active=True, is_featured=True)[:8]
+    
+    # Fetch featured accommodations  
+    featured_accommodations = Accommodation.objects.filter(is_active=True, is_featured=True)[:6]
+    
+    # Get counts for stats/counters
+    total_destinations = Destination.objects.filter(is_active=True).count()
+    total_activities = Activity.objects.filter(is_active=True).count()
+    total_accommodations = Accommodation.objects.filter(is_active=True).count()
+    
+    # Get footer destinations (for footer links)
+    footer_destinations = Destination.objects.filter(is_active=True, is_featured=True)[:4]
+    
     context = {
-        'featured_destinations': featured_destinations
+        'featured_destinations': featured_destinations,
+        'featured_activities': featured_activities,
+        'featured_accommodations': featured_accommodations,
+        'total_destinations': total_destinations,
+        'total_activities': total_activities,
+        'total_accommodations': total_accommodations,
+        'footer_destinations': footer_destinations,
     }
     
     return render(request, 'frontend/index.html', context)
