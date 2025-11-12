@@ -58,6 +58,12 @@
                                         <li><a href="{% url 'public_accommodation_featured' %}">Featured Accommodations</a></li>
                                     </ul>
                                 </li>
+                                <li class="{% if request.resolver_match.url_name == 'faq_page' %}current{% endif %}">
+                                    <a href="{% url 'faq_page' %}">FAQ</a>
+                                </li>
+                                <li class="{% if request.resolver_match.url_name == 'contact_page' %}current{% endif %}">
+                                    <a href="{% url 'contact_page' %}">Contact</a>
+                                </li>
                             </ul>
                         </div>
 

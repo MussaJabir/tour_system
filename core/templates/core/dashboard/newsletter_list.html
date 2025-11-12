@@ -1,0 +1,214 @@
+{% extends 'backend/base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-1">
+                <i class="mdi mdi-email-newsletter text-primary me-2"></i>
+                Newsletter Subscribers
+            </h1>
+            <p class="text-muted mb-0">Your email marketing list</p>
+        </div>
+        <a href="{% url 'dashboard_newsletter_export' %}" class="btn btn-success">
+            <i class="mdi mdi-download me-2"></i>Export to CSV
+        </a>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid #28a745 !important;">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-1 small">Active Subscribers</p>
+                            <h3 class="mb-0 fw-bold">{{ counts.active }}</h3>
+                        </div>
+                        <div class="bg-success bg-opacity-10 text-success rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                            <i class="mdi mdi-account-check fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid #dc3545 !important;">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-1 small">Unsubscribed</p>
+                            <h3 class="mb-0 fw-bold">{{ counts.inactive }}</h3>
+                        </div>
+                        <div class="bg-danger bg-opacity-10 text-danger rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                            <i class="mdi mdi-account-remove fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid #007bff !important;">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-1 small">Total Subscribers</p>
+                            <h3 class="mb-0 fw-bold">{{ counts.total }}</h3>
+                        </div>
+                        <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                            <i class="mdi mdi-account-multiple fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters and Search -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold small mb-1">
+                        <i class="mdi mdi-filter-variant me-1"></i>Filter by Status
+                    </label>
+                    <select name="status" class="form-select">
+                        <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Active Only</option>
+                        <option value="inactive" {% if status_filter == 'inactive' %}selected{% endif %}>Unsubscribed Only</option>
+                        <option value="">All Subscribers</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold small mb-1">
+                        <i class="mdi mdi-magnify me-1"></i>Search
+                    </label>
+                    <input type="text" name="search" class="form-control" placeholder="Search by email or name..." value="{{ search }}">
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="mdi mdi-filter me-1"></i>Apply
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Subscribers Table -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-0">
+            {% if subscribers %}
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light">
+                            <tr>
+                                <th class="px-3 py-3 text-muted small fw-semibold">EMAIL</th>
+                                <th class="px-3 py-3 text-muted small fw-semibold">NAME</th>
+                                <th class="px-3 py-3 text-muted small fw-semibold">STATUS</th>
+                                <th class="px-3 py-3 text-muted small fw-semibold">SUBSCRIBED DATE</th>
+                                <th class="px-3 py-3 text-muted small fw-semibold">IP ADDRESS</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for subscriber in subscribers %}
+                                <tr>
+                                    <td class="px-3 py-3">
+                                        <div class="d-flex align-items-center">
+                                            <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 35px; height: 35px; font-size: 14px;">
+                                                <i class="mdi mdi-email"></i>
+                                            </div>
+                                            <div>
+                                                <div class="fw-semibold">{{ subscriber.email }}</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-3 py-3">
+                                        {{ subscriber.name|default:"—" }}
+                                    </td>
+                                    <td class="px-3 py-3">
+                                        {% if subscriber.is_active %}
+                                            <span class="badge bg-success">
+                                                <i class="mdi mdi-check-circle me-1"></i>Active
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-danger">
+                                                <i class="mdi mdi-close-circle me-1"></i>Unsubscribed
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="px-3 py-3">
+                                        <small>{{ subscriber.created_at|date:"M d, Y" }}<br>{{ subscriber.created_at|date:"g:i A" }}</small>
+                                    </td>
+                                    <td class="px-3 py-3">
+                                        <small class="text-muted">{{ subscriber.ip_address|default:"—" }}</small>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                {% if subscribers.has_other_pages %}
+                    <div class="card-footer bg-white border-top">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-muted">
+                                Showing {{ subscribers.start_index }} to {{ subscribers.end_index }} of {{ subscribers.paginator.count }} subscribers
+                            </small>
+                            <nav>
+                                <ul class="pagination pagination-sm mb-0">
+                                    {% if subscribers.has_previous %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ subscribers.previous_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if search %}&search={{ search }}{% endif %}">Previous</a>
+                                        </li>
+                                    {% endif %}
+                                    
+                                    {% for num in subscribers.paginator.page_range %}
+                                        {% if subscribers.number == num %}
+                                            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                                        {% elif num > subscribers.number|add:'-3' and num < subscribers.number|add:'3' %}
+                                            <li class="page-item"><a class="page-link" href="?page={{ num }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if search %}&search={{ search }}{% endif %}">{{ num }}</a></li>
+                                        {% endif %}
+                                    {% endfor %}
+                                    
+                                    {% if subscribers.has_next %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ subscribers.next_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if search %}&search={{ search }}{% endif %}">Next</a>
+                                        </li>
+                                    {% endif %}
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                {% endif %}
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="mdi mdi-email-newsletter-outline display-1 text-muted mb-3"></i>
+                    <h5 class="text-muted">No Subscribers Found</h5>
+                    <p class="text-muted mb-0">You don't have any newsletter subscribers yet.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Email Marketing Tips -->
+    <div class="alert alert-info border-0 shadow-sm mt-4" role="alert">
+        <div class="d-flex align-items-start">
+            <i class="mdi mdi-lightbulb-outline fs-3 me-3"></i>
+            <div>
+                <h5 class="alert-heading mb-2">Email Marketing Tips</h5>
+                <ul class="mb-0 small">
+                    <li>Export your subscribers regularly and use them with email marketing tools like Mailchimp or SendGrid</li>
+                    <li>Segment your list based on customer interests and booking history</li>
+                    <li>Send newsletters weekly or bi-weekly with new destinations and special offers</li>
+                    <li>Always include an unsubscribe link to stay compliant with email laws</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

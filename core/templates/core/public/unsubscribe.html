@@ -1,0 +1,61 @@
+{% extends 'frontend/base.html' %}
+{% load static %}
+
+{% block title %}Unsubscribe from Newsletter - Tour Management{% endblock %}
+
+{% block content %}
+<!-- Unsubscribe Section -->
+<section class="py-5" style="min-height: 70vh; display: flex; align-items: center;">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6" data-aos="fade-up">
+                <div class="card border-0 shadow-lg">
+                    <div class="card-body text-center p-5">
+                        <div class="mb-4">
+                            <i class="mdi mdi-email-remove-outline display-1 text-warning"></i>
+                        </div>
+                        
+                        <h1 class="h3 mb-3">Unsubscribe from Newsletter</h1>
+                        
+                        {% if subscriber %}
+                            <p class="text-muted mb-4">
+                                We're sorry to see you go, <strong>{{ subscriber.email }}</strong>
+                            </p>
+                            
+                            <div class="alert alert-info text-start mb-4">
+                                <p class="mb-2"><strong>You'll no longer receive:</strong></p>
+                                <ul class="mb-0">
+                                    <li>Exclusive travel deals</li>
+                                    <li>New destination announcements</li>
+                                    <li>Travel tips and guides</li>
+                                    <li>Special promotions</li>
+                                </ul>
+                            </div>
+                            
+                            <form method="post">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger btn-lg px-5 mb-3">
+                                    <i class="mdi mdi-check me-2"></i>Confirm Unsubscribe
+                                </button>
+                            </form>
+                            
+                            <a href="{% url 'public_home' %}" class="btn btn-outline-secondary">
+                                <i class="mdi mdi-arrow-left me-2"></i>Nevermind, Take Me Back
+                            </a>
+                        {% else %}
+                            <div class="alert alert-warning">
+                                <i class="mdi mdi-alert-outline me-2"></i>
+                                Invalid unsubscribe link.
+                            </div>
+                            <a href="{% url 'public_home' %}" class="btn btn-primary">
+                                <i class="mdi mdi-home me-2"></i>Back to Homepage
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+

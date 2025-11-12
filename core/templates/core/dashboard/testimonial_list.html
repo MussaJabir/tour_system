@@ -1,0 +1,221 @@
+{% extends 'backend/base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-1">
+                <i class="mdi mdi-message-circle-outline text-primary me-2"></i>
+                Testimonials Management
+            </h1>
+            <p class="text-muted mb-0">Manage customer testimonials and reviews</p>
+        </div>
+        <a href="{% url 'dashboard_testimonial_create' %}" class="btn btn-primary">
+            <i class="mdi mdi-plus me-2"></i>Add Testimonial
+        </a>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid #28a745 !important;">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-1 small">Active Testimonials</p>
+                            <h3 class="mb-0 fw-bold">{{ counts.active }}</h3>
+                        </div>
+                        <div class="bg-success bg-opacity-10 text-success rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                            <i class="mdi mdi-check-circle fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid #ffc107 !important;">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-1 small">Featured</p>
+                            <h3 class="mb-0 fw-bold">{{ counts.featured }}</h3>
+                        </div>
+                        <div class="bg-warning bg-opacity-10 text-warning rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                            <i class="mdi mdi-star fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid #007bff !important;">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-1 small">Total</p>
+                            <h3 class="mb-0 fw-bold">{{ counts.total }}</h3>
+                        </div>
+                        <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                            <i class="mdi mdi-view-list fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold small mb-1">
+                        <i class="mdi mdi-star me-1"></i>Rating
+                    </label>
+                    <select name="rating" class="form-select">
+                        <option value="">All Ratings</option>
+                        <option value="5" {% if rating_filter == '5' %}selected{% endif %}>⭐⭐⭐⭐⭐ 5 Stars</option>
+                        <option value="4" {% if rating_filter == '4' %}selected{% endif %}>⭐⭐⭐⭐ 4 Stars</option>
+                        <option value="3" {% if rating_filter == '3' %}selected{% endif %}>⭐⭐⭐ 3 Stars</option>
+                        <option value="2" {% if rating_filter == '2' %}selected{% endif %}>⭐⭐ 2 Stars</option>
+                        <option value="1" {% if rating_filter == '1' %}selected{% endif %}>⭐ 1 Star</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold small mb-1">
+                        <i class="mdi mdi-eye-outline me-1"></i>Status
+                    </label>
+                    <select name="status" class="form-select">
+                        <option value="">All Statuses</option>
+                        <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Active</option>
+                        <option value="draft" {% if status_filter == 'draft' %}selected{% endif %}>Draft</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold small mb-1">
+                        <i class="mdi mdi-magnify me-1"></i>Search
+                    </label>
+                    <input type="text" name="search" class="form-control" placeholder="Search by name or location..." value="{{ search }}">
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="mdi mdi-filter me-1"></i>Apply
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Testimonials Table -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-0">
+            {% if testimonials %}
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light">
+                            <tr>
+                                <th class="px-3 py-3 text-muted small fw-semibold">CUSTOMER</th>
+                                <th class="px-3 py-3 text-muted small fw-semibold">TESTIMONIAL</th>
+                                <th class="px-3 py-3 text-muted small fw-semibold">RATING</th>
+                                <th class="px-3 py-3 text-muted small fw-semibold">STATUS</th>
+                                <th class="px-3 py-3 text-muted small fw-semibold text-end">ACTIONS</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for testimonial in testimonials %}
+                                <tr>
+                                    <td class="px-3 py-3">
+                                        <div class="d-flex align-items-center">
+                                            {% if testimonial.customer_image %}
+                                                <img src="{{ testimonial.customer_image.url }}" alt="{{ testimonial.customer_name }}" class="rounded-circle me-2" style="width: 40px; height: 40px; object-fit: cover;">
+                                            {% else %}
+                                                <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 40px; height: 40px; font-size: 18px; font-weight: bold;">
+                                                    {{ testimonial.customer_name|slice:":1"|upper }}
+                                                </div>
+                                            {% endif %}
+                                            <div>
+                                                <div class="fw-semibold">{{ testimonial.customer_name }}</div>
+                                                <small class="text-muted">{{ testimonial.customer_location }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-3 py-3">
+                                        <small>{{ testimonial.quote|truncatewords:15 }}</small>
+                                    </td>
+                                    <td class="px-3 py-3">
+                                        <span style="color: #ffc107; font-size: 16px;">{% for i in "12345" %}{% if forloop.counter <= testimonial.rating %}⭐{% else %}☆{% endif %}{% endfor %}</span>
+                                    </td>
+                                    <td class="px-3 py-3">
+                                        {% if testimonial.is_active %}
+                                            <span class="badge bg-success">Active</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Draft</span>
+                                        {% endif %}
+                                        {% if testimonial.is_featured %}
+                                            <span class="badge bg-warning text-dark ms-1">⭐ Featured</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="px-3 py-3 text-end">
+                                        <div class="btn-group" role="group">
+                                            <a href="{% url 'dashboard_testimonial_edit' testimonial.pk %}" class="btn btn-sm btn-outline-primary" title="Edit">
+                                                <i class="mdi mdi-pencil"></i>
+                                            </a>
+                                            <form method="post" action="{% url 'dashboard_testimonial_delete' testimonial.pk %}" style="display: inline;" onsubmit="return confirm('Delete this testimonial?');">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete">
+                                                    <i class="mdi mdi-delete"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                {% if testimonials.has_other_pages %}
+                    <div class="card-footer bg-white border-top">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-muted">
+                                Showing {{ testimonials.start_index }} to {{ testimonials.end_index }} of {{ testimonials.paginator.count }} testimonials
+                            </small>
+                            <nav>
+                                <ul class="pagination pagination-sm mb-0">
+                                    {% if testimonials.has_previous %}
+                                        <li class="page-item"><a class="page-link" href="?page={{ testimonials.previous_page_number }}{% if rating_filter %}&rating={{ rating_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">Previous</a></li>
+                                    {% endif %}
+                                    {% for num in testimonials.paginator.page_range %}
+                                        {% if testimonials.number == num %}
+                                            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                                        {% elif num > testimonials.number|add:'-3' and num < testimonials.number|add:'3' %}
+                                            <li class="page-item"><a class="page-link" href="?page={{ num }}{% if rating_filter %}&rating={{ rating_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">{{ num }}</a></li>
+                                        {% endif %}
+                                    {% endfor %}
+                                    {% if testimonials.has_next %}
+                                        <li class="page-item"><a class="page-link" href="?page={{ testimonials.next_page_number }}{% if rating_filter %}&rating={{ rating_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">Next</a></li>
+                                    {% endif %}
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                {% endif %}
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="mdi mdi-message-circle-outline display-1 text-muted mb-3"></i>
+                    <h5 class="text-muted">No Testimonials Found</h5>
+                    <p class="text-muted mb-3">Start by adding your first testimonial.</p>
+                    <a href="{% url 'dashboard_testimonial_create' %}" class="btn btn-primary">
+                        <i class="mdi mdi-plus me-2"></i>Add First Testimonial
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

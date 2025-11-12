@@ -1,0 +1,162 @@
+{% extends 'backend/base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Back Button and Header -->
+    <div class="mb-4">
+        <a href="{% url 'dashboard_faq_list' %}" class="btn btn-outline-secondary btn-sm mb-3">
+            <i class="mdi mdi-arrow-left me-1"></i>Back to FAQs
+        </a>
+        <h1 class="h3 mb-1">
+            <i class="mdi mdi-help-circle-outline text-primary me-2"></i>
+            {{ page_title }}
+        </h1>
+        <p class="text-muted mb-0">{{ form_action }} a frequently asked question</p>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <!-- Category & Order Row -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-8">
+                                <label for="{{ form.category.id_for_label }}" class="form-label fw-semibold">
+                                    <i class="mdi mdi-tag-outline text-muted me-1"></i>
+                                    {{ form.category.label }}
+                                </label>
+                                {{ form.category }}
+                                {% if form.category.errors %}
+                                    <div class="invalid-feedback d-block">{{ form.category.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4">
+                                <label for="{{ form.order.id_for_label }}" class="form-label fw-semibold">
+                                    <i class="mdi mdi-sort-numeric-variant text-muted me-1"></i>
+                                    {{ form.order.label }}
+                                </label>
+                                {{ form.order }}
+                                <small class="text-muted d-block">{{ form.order.help_text }}</small>
+                                {% if form.order.errors %}
+                                    <div class="invalid-feedback d-block">{{ form.order.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Question -->
+                        <div class="mb-4">
+                            <label for="{{ form.question.id_for_label }}" class="form-label fw-semibold">
+                                <i class="mdi mdi-help-circle text-muted me-1"></i>
+                                {{ form.question.label }} <span class="text-danger">*</span>
+                            </label>
+                            {{ form.question }}
+                            {% if form.question.errors %}
+                                <div class="invalid-feedback d-block">{{ form.question.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Answer -->
+                        <div class="mb-4">
+                            <label for="{{ form.answer.id_for_label }}" class="form-label fw-semibold">
+                                <i class="mdi mdi-message-text text-muted me-1"></i>
+                                {{ form.answer.label }} <span class="text-danger">*</span>
+                            </label>
+                            {{ form.answer }}
+                            {% if form.answer.errors %}
+                                <div class="invalid-feedback d-block">{{ form.answer.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Publishing Options -->
+                        <div class="card bg-light border-0 mb-4">
+                            <div class="card-body">
+                                <h6 class="fw-semibold mb-3">
+                                    <i class="mdi mdi-eye-outline text-muted me-1"></i>
+                                    Publishing Options
+                                </h6>
+                                <div class="form-check mb-2">
+                                    {{ form.is_active }}
+                                    <label class="form-check-label" for="{{ form.is_active.id_for_label }}">
+                                        {{ form.is_active.label }}
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    {{ form.is_featured }}
+                                    <label class="form-check-label" for="{{ form.is_featured.id_for_label }}">
+                                        {{ form.is_featured.label }}
+                                    </label>
+                                    <small class="text-muted d-block mt-1">{{ form.is_featured.help_text }}</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary px-4">
+                                <i class="mdi mdi-content-save me-2"></i>{{ form_action }} FAQ
+                            </button>
+                            <a href="{% url 'dashboard_faq_list' %}" class="btn btn-outline-secondary px-4">
+                                <i class="mdi mdi-close me-2"></i>Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar Help -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h6 class="fw-semibold mb-3">
+                        <i class="mdi mdi-information-outline text-primary me-1"></i>
+                        Tips for Great FAQs
+                    </h6>
+                    <ul class="small mb-0">
+                        <li class="mb-2"><strong>Be specific:</strong> Write clear, concise questions that match what customers ask.</li>
+                        <li class="mb-2"><strong>Keep answers brief:</strong> Aim for 2-3 paragraphs maximum.</li>
+                        <li class="mb-2"><strong>Use simple language:</strong> Avoid jargon and technical terms.</li>
+                        <li class="mb-2"><strong>Add context:</strong> Include examples where helpful.</li>
+                        <li class="mb-2"><strong>Update regularly:</strong> Review and update FAQs based on customer feedback.</li>
+                        <li><strong>Feature important ones:</strong> Mark critical FAQs as featured to show them first.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm mt-3">
+                <div class="card-body">
+                    <h6 class="fw-semibold mb-3">
+                        <i class="mdi mdi-tag-multiple-outline text-primary me-1"></i>
+                        Categories
+                    </h6>
+                    <div class="small text-muted">
+                        <p class="mb-2"><strong>General:</strong> Basic questions about your service</p>
+                        <p class="mb-2"><strong>Booking:</strong> Reservation and booking process</p>
+                        <p class="mb-2"><strong>Payment:</strong> Payment methods and billing</p>
+                        <p class="mb-2"><strong>Destinations:</strong> Location-specific questions</p>
+                        <p class="mb-2"><strong>Travel:</strong> Travel tips and requirements</p>
+                        <p class="mb-2"><strong>Safety:</strong> Safety and health concerns</p>
+                        <p class="mb-0"><strong>Cancellation:</strong> Cancellation and refund policies</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
