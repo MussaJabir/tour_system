@@ -1,0 +1,123 @@
+{% extends "packages/emails/base.html" %}
+
+{% block title %}Your Custom Package is Ready - {{ inquiry.reference }}{% endblock %}
+
+{% block header_title %}🎉 Your Custom Package is Ready!{% endblock %}
+
+{% block content %}
+<div class="success-box">
+    <strong>✓ Great News!</strong><br>
+    We've created a personalized travel package just for you!
+</div>
+
+<p>Dear {{ inquiry.full_name }},</p>
+
+<p>
+    Thank you for your patience! We're excited to present your customized travel package 
+    based on your preferences and requirements.
+</p>
+
+<h2>Package Overview</h2>
+
+<div class="info-box">
+    <div class="info-row">
+        <span class="info-label">Package Name:</span>
+        <span class="info-value"><strong>{{ custom_package.name }}</strong></span>
+    </div>
+    
+    <div class="info-row">
+        <span class="info-label">Duration:</span>
+        <span class="info-value">{{ custom_package.duration_days }} Days / {{ custom_package.duration_nights }} Nights</span>
+    </div>
+    
+    <div class="info-row">
+        <span class="info-label">Total Price:</span>
+        <span class="info-value"><strong style="color: #28a745; font-size: 18px;">{{ custom_package.currency }} {{ custom_package.total_price|floatformat:2 }}</strong></span>
+    </div>
+    
+    {% if custom_package.valid_until %}
+    <div class="info-row">
+        <span class="info-label">Valid Until:</span>
+        <span class="info-value">{{ custom_package.valid_until|date:"M d, Y" }}</span>
+    </div>
+    {% endif %}
+</div>
+
+{% if custom_package.description %}
+<h2>Package Highlights</h2>
+<div class="info-box">
+    <p>{{ custom_package.description|linebreaks }}</p>
+</div>
+{% endif %}
+
+{% if custom_package.staff_message %}
+<h2>Personal Message from Our Team</h2>
+<div class="info-box">
+    <p>{{ custom_package.staff_message|linebreaks }}</p>
+</div>
+{% endif %}
+
+<div style="text-align: center; margin: 30px 0;">
+    <a href="{{ view_url }}" class="button" style="font-size: 16px; padding: 15px 40px;">
+        🔍 View Your Complete Package
+    </a>
+</div>
+
+<h2>What You'll Find in Your Package</h2>
+
+<p><strong>✓ Detailed Day-by-Day Itinerary</strong></p>
+<p style="margin-left: 20px;">Complete breakdown of activities, accommodations, and experiences for each day.</p>
+
+<p><strong>✓ Transparent Pricing</strong></p>
+<p style="margin-left: 20px;">Clear pricing breakdown including all inclusions and exclusions.</p>
+
+<p><strong>✓ Customization Options</strong></p>
+<p style="margin-left: 20px;">You can approve, request changes, or provide feedback directly through the secure link.</p>
+
+<p><strong>✓ Flexible Booking</strong></p>
+<p style="margin-left: 20px;">Take your time to review - this quote is valid until {{ custom_package.valid_until|date:"M d, Y" }}.</p>
+
+{% if custom_package.valid_until %}
+<div class="warning-box">
+    <strong>⏰ Important:</strong> This custom package will expire on <strong>{{ custom_package.valid_until|date:"F d, Y" }}</strong>. 
+    Please review and take action before this date to secure your booking.
+</div>
+{% endif %}
+
+<hr>
+
+<h2>Next Steps</h2>
+
+<p><strong>1. Review Your Package</strong></p>
+<p style="margin-left: 20px;">Click the button above to view your complete custom package with full details.</p>
+
+<p><strong>2. Take Action</strong></p>
+<p style="margin-left: 20px;">You can approve the package, request modifications, or decline if it doesn't meet your needs.</p>
+
+<p><strong>3. Secure Your Booking</strong></p>
+<p style="margin-left: 20px;">Once you approve, our team will contact you to finalize the booking and payment details.</p>
+
+<hr>
+
+<p>
+    <strong>Questions?</strong><br>
+    If you have any questions or need clarification, please don't hesitate to reach out to us.
+</p>
+
+<p>
+    We're excited to help make your travel dreams a reality!
+</p>
+
+<p>
+    Best regards,<br>
+    <strong>{{ site_name }} Team</strong>
+</p>
+
+<div style="margin-top: 30px; padding: 15px; background-color: #f8f9fa; border-radius: 5px; text-align: center; font-size: 14px;">
+    <p style="margin: 0; color: #666;">
+        <strong>Secure Link:</strong><br>
+        <a href="{{ view_url }}" style="color: #4a81d4; word-break: break-all;">{{ view_url }}</a>
+    </p>
+</div>
+{% endblock %}
+

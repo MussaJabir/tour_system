@@ -1,0 +1,631 @@
+{
+	"info": {
+		"_postman_id": "tour-system-api-v1",
+		"name": "Tour System API",
+		"description": "Complete API collection for Tour Management System",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost/api/v1",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "Destinations",
+			"item": [
+				{
+					"name": "List All Destinations",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/destinations/",
+							"host": ["{{base_url}}"],
+							"path": ["destinations", ""]
+						}
+					}
+				},
+				{
+					"name": "Get Single Destination",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/destinations/:slug/",
+							"host": ["{{base_url}}"],
+							"path": ["destinations", ":slug", ""],
+							"variable": [
+								{
+									"key": "slug",
+									"value": "serengeti-national-park"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Featured Destinations",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/destinations/featured/",
+							"host": ["{{base_url}}"],
+							"path": ["destinations", "featured", ""]
+						}
+					}
+				},
+				{
+					"name": "Search Destinations",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/destinations/?search=serengeti",
+							"host": ["{{base_url}}"],
+							"path": ["destinations", ""],
+							"query": [
+								{
+									"key": "search",
+									"value": "serengeti"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Filter by Country",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/destinations/?country=Tanzania",
+							"host": ["{{base_url}}"],
+							"path": ["destinations", ""],
+							"query": [
+								{
+									"key": "country",
+									"value": "Tanzania"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Filter Featured",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/destinations/?is_featured=true",
+							"host": ["{{base_url}}"],
+							"path": ["destinations", ""],
+							"query": [
+								{
+									"key": "is_featured",
+									"value": "true"
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Activities",
+			"item": [
+				{
+					"name": "List All Activities",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/activities/",
+							"host": ["{{base_url}}"],
+							"path": ["activities", ""]
+						}
+					}
+				},
+				{
+					"name": "Get Single Activity",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/activities/:slug/",
+							"host": ["{{base_url}}"],
+							"path": ["activities", ":slug", ""],
+							"variable": [
+								{
+									"key": "slug",
+									"value": "game-drive"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Filter by Type",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/activities/?activity_type=wildlife",
+							"host": ["{{base_url}}"],
+							"path": ["activities", ""],
+							"query": [
+								{
+									"key": "activity_type",
+									"value": "wildlife"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Filter by Difficulty",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/activities/?difficulty_level=easy",
+							"host": ["{{base_url}}"],
+							"path": ["activities", ""],
+							"query": [
+								{
+									"key": "difficulty_level",
+									"value": "easy"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Filter by Destination",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/activities/?destination=1",
+							"host": ["{{base_url}}"],
+							"path": ["activities", ""],
+							"query": [
+								{
+									"key": "destination",
+									"value": "1"
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Accommodations",
+			"item": [
+				{
+					"name": "List All Accommodations",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/accommodations/",
+							"host": ["{{base_url}}"],
+							"path": ["accommodations", ""]
+						}
+					}
+				},
+				{
+					"name": "Get Single Accommodation",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/accommodations/:slug/",
+							"host": ["{{base_url}}"],
+							"path": ["accommodations", ":slug", ""],
+							"variable": [
+								{
+									"key": "slug",
+									"value": "serena-safari-lodge"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Filter by Type",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/accommodations/?accommodation_type=lodge",
+							"host": ["{{base_url}}"],
+							"path": ["accommodations", ""],
+							"query": [
+								{
+									"key": "accommodation_type",
+									"value": "lodge"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Filter by Star Rating",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/accommodations/?star_rating=5",
+							"host": ["{{base_url}}"],
+							"path": ["accommodations", ""],
+							"query": [
+								{
+									"key": "star_rating",
+									"value": "5"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Filter by Price Range",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/accommodations/?min_price=200&max_price=500",
+							"host": ["{{base_url}}"],
+							"path": ["accommodations", ""],
+							"query": [
+								{
+									"key": "min_price",
+									"value": "200"
+								},
+								{
+									"key": "max_price",
+									"value": "500"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "List Rooms",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/rooms/?accommodation=1",
+							"host": ["{{base_url}}"],
+							"path": ["rooms", ""],
+							"query": [
+								{
+									"key": "accommodation",
+									"value": "1"
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Packages",
+			"item": [
+				{
+					"name": "List All Packages",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/packages/",
+							"host": ["{{base_url}}"],
+							"path": ["packages", ""]
+						}
+					}
+				},
+				{
+					"name": "Get Single Package",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/packages/:slug/",
+							"host": ["{{base_url}}"],
+							"path": ["packages", ":slug", ""],
+							"variable": [
+								{
+									"key": "slug",
+									"value": "5-day-serengeti-safari"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Filter by Category",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/packages/?package_category=wildlife",
+							"host": ["{{base_url}}"],
+							"path": ["packages", ""],
+							"query": [
+								{
+									"key": "package_category",
+									"value": "wildlife"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Filter by Price Range",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/packages/?min_price=2000&max_price=3000",
+							"host": ["{{base_url}}"],
+							"path": ["packages", ""],
+							"query": [
+								{
+									"key": "min_price",
+									"value": "2000"
+								},
+								{
+									"key": "max_price",
+									"value": "3000"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Filter by Duration",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/packages/?duration_days=5",
+							"host": ["{{base_url}}"],
+							"path": ["packages", ""],
+							"query": [
+								{
+									"key": "duration_days",
+									"value": "5"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Filter Customizable",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/packages/?is_customizable=true",
+							"host": ["{{base_url}}"],
+							"path": ["packages", ""],
+							"query": [
+								{
+									"key": "is_customizable",
+									"value": "true"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Package Itineraries",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/package-itineraries/?package=1",
+							"host": ["{{base_url}}"],
+							"path": ["package-itineraries", ""],
+							"query": [
+								{
+									"key": "package",
+									"value": "1"
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Booking Inquiry",
+			"item": [
+				{
+					"name": "Submit Booking Inquiry",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"base_package\": 1,\n  \"first_name\": \"John\",\n  \"last_name\": \"Doe\",\n  \"email\": \"john.doe@example.com\",\n  \"phone\": \"+1234567890\",\n  \"country\": \"USA\",\n  \"number_of_adults\": 2,\n  \"number_of_children\": 1,\n  \"preferred_start_date\": \"2025-12-15\",\n  \"message\": \"Looking forward to this amazing trip!\",\n  \"special_requirements\": \"Vegetarian meals please\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/booking-inquiry/",
+							"host": ["{{base_url}}"],
+							"path": ["booking-inquiry", ""]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Pagination Examples",
+			"item": [
+				{
+					"name": "Get Page 2",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/destinations/?page=2",
+							"host": ["{{base_url}}"],
+							"path": ["destinations", ""],
+							"query": [
+								{
+									"key": "page",
+									"value": "2"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Custom Page Size",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/destinations/?page_size=50",
+							"host": ["{{base_url}}"],
+							"path": ["destinations", ""],
+							"query": [
+								{
+									"key": "page_size",
+									"value": "50"
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Ordering Examples",
+			"item": [
+				{
+					"name": "Order by Name (Ascending)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/destinations/?ordering=name",
+							"host": ["{{base_url}}"],
+							"path": ["destinations", ""],
+							"query": [
+								{
+									"key": "ordering",
+									"value": "name"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Order by View Count (Descending)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/destinations/?ordering=-view_count",
+							"host": ["{{base_url}}"],
+							"path": ["destinations", ""],
+							"query": [
+								{
+									"key": "ordering",
+									"value": "-view_count"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Order Packages by Price",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/packages/?ordering=price_per_person",
+							"host": ["{{base_url}}"],
+							"path": ["packages", ""],
+							"query": [
+								{
+									"key": "ordering",
+									"value": "price_per_person"
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Complex Filter Examples",
+			"item": [
+				{
+					"name": "Wildlife Packages in Tanzania",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/packages/?package_category=wildlife&search=tanzania&is_featured=true",
+							"host": ["{{base_url}}"],
+							"path": ["packages", ""],
+							"query": [
+								{
+									"key": "package_category",
+									"value": "wildlife"
+								},
+								{
+									"key": "search",
+									"value": "tanzania"
+								},
+								{
+									"key": "is_featured",
+									"value": "true"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Budget Lodges (5-Star)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/accommodations/?accommodation_type=lodge&star_rating=5&max_price=400",
+							"host": ["{{base_url}}"],
+							"path": ["accommodations", ""],
+							"query": [
+								{
+									"key": "accommodation_type",
+									"value": "lodge"
+								},
+								{
+									"key": "star_rating",
+									"value": "5"
+								},
+								{
+									"key": "max_price",
+									"value": "400"
+								}
+							]
+						}
+					}
+				}
+			]
+		}
+	]
+}
+

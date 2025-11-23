@@ -36,6 +36,15 @@ class Accommodation(models.Model):
         (5, '5 Stars'),
     ]
     
+    # Currency Choices (consistent with packages)
+    CURRENCY_CHOICES = [
+        ('USD', 'US Dollar'),
+        ('EUR', 'Euro'),
+        ('GBP', 'British Pound'),
+        ('KES', 'Kenyan Shilling'),
+        ('TZS', 'Tanzanian Shilling'),
+    ]
+    
     # Basic Information
     name = models.CharField(
         max_length=200,
@@ -144,6 +153,7 @@ class Accommodation(models.Model):
     )
     currency = models.CharField(
         max_length=3,
+        choices=CURRENCY_CHOICES,
         default='USD',
         help_text="Currency code (default: USD)"
     )

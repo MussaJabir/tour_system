@@ -1,0 +1,325 @@
+{% extends "backend/base.html" %}
+{% load static %}
+
+{% block title %}Create Custom Quote for {{ inquiry.inquiry_reference }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-section {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+    }
+    .form-section h5 {
+        margin-bottom: 15px;
+        color: #495057;
+        font-weight: 600;
+    }
+    .inquiry-info-box {
+        background: #e7f3ff;
+        border-left: 4px solid #0d6efd;
+        padding: 15px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h4 class="mb-1">Create Custom Quote</h4>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb mb-0">
+                            <li class="breadcrumb-item"><a href="{% url 'packages:dashboard_inquiry_list' %}">Inquiries</a></li>
+                            <li class="breadcrumb-item"><a href="{% url 'packages:dashboard_inquiry_detail' inquiry.pk %}">{{ inquiry.inquiry_reference }}</a></li>
+                            <li class="breadcrumb-item active">Create Quote</li>
+                        </ol>
+                    </nav>
+                </div>
+                <a href="{% url 'packages:dashboard_inquiry_detail' inquiry.pk %}" class="btn btn-secondary">
+                    <i class="mdi mdi-arrow-left"></i> Back to Inquiry
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Inquiry Info Box -->
+    <div class="inquiry-info-box">
+        <div class="row">
+            <div class="col-md-6">
+                <strong>Customer:</strong> {{ inquiry.customer_name }}<br>
+                <strong>Package:</strong> {{ inquiry.base_package.name|default:"Not specified" }}<br>
+                <strong>Travelers:</strong> {{ inquiry.total_travelers }} ({{ inquiry.number_of_adults }}A, {{ inquiry.number_of_children }}C{% if inquiry.number_of_infants > 0 %}, {{ inquiry.number_of_infants }}I{% endif %})
+            </div>
+            <div class="col-md-6">
+                <strong>Budget:</strong> {{ inquiry.get_budget_display_text }}<br>
+                <strong>Accommodation:</strong> {{ inquiry.get_accommodation_preference_display|default:"Not specified" }}<br>
+                {% if inquiry.preferred_travel_date %}
+                    <strong>Travel Date:</strong> {{ inquiry.preferred_travel_date|date:"F d, Y" }}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Error Display -->
+    {% if form.errors %}
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="mdi mdi-alert-circle-outline me-2"></i>
+            <strong>Please fix the following errors:</strong>
+            <ul class="mb-0 mt-2">
+                {% for field in form %}
+                    {% if field.errors %}
+                        {% for error in field.errors %}
+                            <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+                        {% endfor %}
+                    {% endif %}
+                {% endfor %}
+                {% if form.non_field_errors %}
+                    {% for error in form.non_field_errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                {% endif %}
+            </ul>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    {% endif %}
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        <div class="row">
+            <!-- Left Column -->
+            <div class="col-lg-8">
+                
+                <!-- Basic Information -->
+                <div class="card">
+                    <div class="card-body">
+                        <div class="form-section">
+                            <h5><i class="mdi mdi-information"></i> Basic Information</h5>
+                            
+                            {{ form.inquiry }}
+                            {{ form.base_package }}
+                            
+                            <div class="mb-3">
+                                <label for="{{ form.name.id_for_label }}" class="form-label required-field">Custom Package Name</label>
+                                {{ form.name }}
+                                {% if form.name.errors %}
+                                    <div class="text-danger">{{ form.name.errors }}</div>
+                                {% endif %}
+                                <small class="text-muted">e.g., "7-Day Serengeti Safari - Custom for John Doe"</small>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="{{ form.short_description.id_for_label }}" class="form-label">Short Description</label>
+                                {{ form.short_description }}
+                                {% if form.short_description.errors %}
+                                    <div class="text-danger">{{ form.short_description.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="{{ form.description.id_for_label }}" class="form-label">Full Description</label>
+                                {{ form.description }}
+                                {% if form.description.errors %}
+                                    <div class="text-danger">{{ form.description.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Duration -->
+                        <div class="form-section">
+                            <h5><i class="mdi mdi-clock-outline"></i> Duration</h5>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.duration_days.id_for_label }}" class="form-label">Days</label>
+                                    {{ form.duration_days }}
+                                    {% if form.duration_days.errors %}
+                                        <div class="text-danger">{{ form.duration_days.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.duration_nights.id_for_label }}" class="form-label">Nights</label>
+                                    {{ form.duration_nights }}
+                                    {% if form.duration_nights.errors %}
+                                        <div class="text-danger">{{ form.duration_nights.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Pricing -->
+                        <div class="form-section">
+                            <h5><i class="mdi mdi-currency-usd"></i> Pricing</h5>
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label for="{{ form.original_price.id_for_label }}" class="form-label">Original Price (per person)</label>
+                                    {{ form.original_price }}
+                                    {% if form.original_price.errors %}
+                                        <div class="text-danger">{{ form.original_price.errors }}</div>
+                                    {% endif %}
+                                    <small class="text-muted">From base package</small>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label for="{{ form.adjusted_price.id_for_label }}" class="form-label required-field">Custom Price (per person)</label>
+                                    {{ form.adjusted_price }}
+                                    {% if form.adjusted_price.errors %}
+                                        <div class="text-danger">{{ form.adjusted_price.errors }}</div>
+                                    {% endif %}
+                                    <small class="text-muted">Final price for client</small>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label for="{{ form.currency.id_for_label }}" class="form-label">Currency</label>
+                                    {{ form.currency }}
+                                    {% if form.currency.errors %}
+                                        <div class="text-danger">{{ form.currency.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="alert alert-info">
+                                <strong>Total Price Calculation:</strong><br>
+                                Adults: {{ inquiry.number_of_adults }} × <span id="adjustedPriceDisplay">0</span> = <span id="adultTotal">0</span><br>
+                                Children: {{ inquiry.number_of_children }} × (<span id="adjustedPriceDisplay2">0</span> × 0.5) = <span id="childTotal">0</span><br>
+                                <strong>Grand Total: <span id="grandTotal">0</span></strong>
+                            </div>
+                        </div>
+
+                        <!-- Modifications -->
+                        <div class="form-section">
+                            <h5><i class="mdi mdi-pencil"></i> Modifications Made</h5>
+                            <div class="mb-3">
+                                <label for="{{ form.modifications_made.id_for_label }}" class="form-label">Modifications Summary</label>
+                                {{ form.modifications_made }}
+                                {% if form.modifications_made.errors %}
+                                    <div class="text-danger">{{ form.modifications_made.errors }}</div>
+                                {% endif %}
+                                <small class="text-muted">List all changes made to the base package (visible to client)</small>
+                            </div>
+                        </div>
+
+                        <!-- Messages -->
+                        <div class="form-section">
+                            <h5><i class="mdi mdi-message-text"></i> Messages</h5>
+                            <div class="mb-3">
+                                <label for="{{ form.staff_notes_to_client.id_for_label }}" class="form-label">Message to Client</label>
+                                {{ form.staff_notes_to_client }}
+                                {% if form.staff_notes_to_client.errors %}
+                                    <div class="text-danger">{{ form.staff_notes_to_client.errors }}</div>
+                                {% endif %}
+                                <small class="text-muted">This message will be visible to the client</small>
+                            </div>
+                            <div class="mb-3">
+                                <label for="{{ form.staff_internal_notes.id_for_label }}" class="form-label">Internal Notes</label>
+                                {{ form.staff_internal_notes }}
+                                {% if form.staff_internal_notes.errors %}
+                                    <div class="text-danger">{{ form.staff_internal_notes.errors }}</div>
+                                {% endif %}
+                                <small class="text-muted">These notes are only visible to staff</small>
+                            </div>
+                        </div>
+
+                        <!-- Status & Expiry -->
+                        <div class="form-section">
+                            <h5><i class="mdi mdi-cog"></i> Status & Settings</h5>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.status.id_for_label }}" class="form-label">Status</label>
+                                    {{ form.status }}
+                                    {% if form.status.errors %}
+                                        <div class="text-danger">{{ form.status.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.expires_at.id_for_label }}" class="form-label">Quote Expires At</label>
+                                    {{ form.expires_at }}
+                                    {% if form.expires_at.errors %}
+                                        <div class="text-danger">{{ form.expires_at.errors }}</div>
+                                    {% endif %}
+                                    <small class="text-muted">Typically 7 days from now</small>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="{{ form.featured_image.id_for_label }}" class="form-label">Custom Package Image</label>
+                                {{ form.featured_image }}
+                                {% if form.featured_image.errors %}
+                                    <div class="text-danger">{{ form.featured_image.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="d-flex justify-content-between pt-3 border-top">
+                            <a href="{% url 'packages:dashboard_inquiry_detail' inquiry.pk %}" class="btn btn-light">
+                                <i class="mdi mdi-cancel"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="mdi mdi-content-save"></i> Save Custom Package
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column - Sidebar -->
+            <div class="col-lg-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Quick Tips</h5>
+                        <ul class="list-unstyled">
+                            <li class="mb-2">
+                                <i class="mdi mdi-information text-primary"></i>
+                                <strong>Base Package:</strong> Select the template package to clone from
+                            </li>
+                            <li class="mb-2">
+                                <i class="mdi mdi-currency-usd text-success"></i>
+                                <strong>Pricing:</strong> Original price is auto-filled. Adjust the custom price based on modifications.
+                            </li>
+                            <li class="mb-2">
+                                <i class="mdi mdi-pencil text-warning"></i>
+                                <strong>Modifications:</strong> Clearly list all changes so the client understands what's customized.
+                            </li>
+                            <li class="mb-2">
+                                <i class="mdi mdi-clock text-info"></i>
+                                <strong>Expiry:</strong> Quotes typically expire in 7 days. Set accordingly.
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Calculate total price dynamically
+    document.addEventListener('DOMContentLoaded', function() {
+        const adjustedPriceInput = document.getElementById('{{ form.adjusted_price.id_for_label }}');
+        const adults = {{ inquiry.number_of_adults }};
+        const children = {{ inquiry.number_of_children }};
+        
+        function calculateTotal() {
+            const price = parseFloat(adjustedPriceInput.value) || 0;
+            const adultTotal = price * adults;
+            const childTotal = (price * 0.5) * children;
+            const grandTotal = adultTotal + childTotal;
+            
+            document.getElementById('adjustedPriceDisplay').textContent = price.toFixed(2);
+            document.getElementById('adjustedPriceDisplay2').textContent = price.toFixed(2);
+            document.getElementById('adultTotal').textContent = adultTotal.toFixed(2);
+            document.getElementById('childTotal').textContent = childTotal.toFixed(2);
+            document.getElementById('grandTotal').textContent = grandTotal.toFixed(2);
+        }
+        
+        adjustedPriceInput.addEventListener('input', calculateTotal);
+        calculateTotal(); // Initial calculation
+    });
+</script>
+{% endblock %}
+

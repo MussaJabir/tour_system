@@ -28,6 +28,103 @@ from .forms import (
     TestimonialForm
 )
 
+# Import models from other apps for dashboard stats
+from destinations.models import Destination
+from activities.models import Activity
+from accommodations.models import Accommodation
+from packages.models import Package, BookingInquiry, CustomPackage
+from datetime import timedelta
+
+
+# ==================== DASHBOARD HOME ====================
+
+@login_required
+def dashboard_home(request):
+    """
+    Main dashboard homepage with overview statistics and charts.
+    """
+    # Get date range for last 30 days
+    today = timezone.now()
+    last_30_days = today - timedelta(days=30)
+    last_7_days = today - timedelta(days=7)
+    
+    # Calculate key statistics
+    stats = {
+        # Content stats
+        'total_packages': Package.objects.filter(is_active=True).count(),
+        'total_destinations': Destination.objects.filter(is_active=True).count(),
+        'total_accommodations': Accommodation.objects.filter(is_active=True).count(),
+        'total_activities': Activity.objects.filter(is_active=True).count(),
+        
+        # New this week
+        'new_packages_week': Package.objects.filter(created_at__gte=last_7_days).count(),
+        'new_destinations_week': Destination.objects.filter(created_at__gte=last_7_days).count(),
+        'new_accommodations_week': Accommodation.objects.filter(created_at__gte=last_7_days).count(),
+        'new_activities_week': Activity.objects.filter(created_at__gte=last_7_days).count(),
+        
+        # Inquiries
+        'pending_inquiries': BookingInquiry.objects.filter(status='pending').count(),
+        'total_inquiries': BookingInquiry.objects.count(),
+        'new_inquiries_week': BookingInquiry.objects.filter(created_at__gte=last_7_days).count(),
+        
+        # Custom packages
+        'custom_packages_pending': CustomPackage.objects.filter(status='pending').count(),
+        'custom_packages_total': CustomPackage.objects.count(),
+        'custom_packages_approved': CustomPackage.objects.filter(status='approved').count(),
+        
+        # Contact messages
+        'new_contact_messages': ContactMessage.objects.filter(status='new').count(),
+    }
+    
+    # Recent inquiries (last 5)
+    recent_inquiries = BookingInquiry.objects.select_related('base_package').order_by('-created_at')[:5]
+    
+    # Most viewed content
+    top_destinations = Destination.objects.filter(is_active=True).order_by('-view_count')[:5]
+    top_packages = Package.objects.filter(is_active=True).order_by('-view_count')[:5]
+    top_accommodations = Accommodation.objects.filter(is_active=True).order_by('-view_count')[:5]
+    
+    # Featured content
+    featured_packages = Package.objects.filter(is_featured=True, is_active=True)[:4]
+    
+    # Package category distribution (for pie chart)
+    package_categories = Package.objects.filter(is_active=True).values('category').annotate(
+        count=Count('id')
+    ).order_by('-count')
+    
+    # Inquiries by status (for chart)
+    inquiry_status_counts = BookingInquiry.objects.values('status').annotate(
+        count=Count('id')
+    ).order_by('status')
+    
+    # Inquiries trend (last 7 days) for line chart
+    inquiry_trend = []
+    for i in range(6, -1, -1):
+        date = (today - timedelta(days=i)).date()
+        count = BookingInquiry.objects.filter(
+            created_at__date=date
+        ).count()
+        inquiry_trend.append({
+            'date': date.strftime('%b %d'),
+            'count': count
+        })
+    
+    context = {
+        'stats': stats,
+        'recent_inquiries': recent_inquiries,
+        'top_destinations': top_destinations,
+        'top_packages': top_packages,
+        'top_accommodations': top_accommodations,
+        'featured_packages': featured_packages,
+        'package_categories': package_categories,
+        'inquiry_status_counts': inquiry_status_counts,
+        'inquiry_trend': inquiry_trend,
+        'page_title': 'Dashboard Overview',
+        'active_menu': 'dashboard',
+    }
+    
+    return render(request, 'core/dashboard/index.html', context)
+
 
 # ==================== PUBLIC VIEWS ====================
 

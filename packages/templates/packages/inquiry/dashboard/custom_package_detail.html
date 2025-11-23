@@ -1,0 +1,481 @@
+{% extends "backend/base.html" %}
+{% load static %}
+
+{% block title %}Custom Package: {{ custom_package.custom_reference }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h4 class="mb-0">Custom Package: {{ custom_package.custom_reference }}</h4>
+                    <small class="text-muted">
+                        For Inquiry: <a href="{% url 'packages:dashboard_inquiry_detail' custom_package.inquiry.pk %}">{{ custom_package.inquiry.inquiry_reference }}</a>
+                    </small>
+                </div>
+                <div>
+                    <a href="{% url 'packages:dashboard_inquiry_list' %}" class="btn btn-outline-secondary btn-sm">
+                        <i class="bi bi-arrow-left"></i> Back to Inquiries
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Status & Quick Info Cards -->
+    <div class="row mb-3">
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h6 class="mb-1">Status</h6>
+                    <span class="badge bg-{{ custom_package.status|yesno:'success,warning,danger' }}">
+                        {{ custom_package.get_status_display }}
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h6 class="mb-1">Price</h6>
+                    <h5 class="mb-0">{{ custom_package.currency }} {{ custom_package.adjusted_price|floatformat:2 }}</h5>
+                    <small class="text-muted">per person</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h6 class="mb-1">Client Views</h6>
+                    <h5 class="mb-0">{{ custom_package.client_view_count|default:0 }}</h5>
+                    {% if custom_package.last_viewed_by_client %}
+                        <small class="text-muted">Last: {{ custom_package.last_viewed_by_client|timesince }} ago</small>
+                    {% else %}
+                        <small class="text-muted">Not viewed yet</small>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h6 class="mb-1">Expires</h6>
+                    {% if custom_package.expires_at %}
+                        <h5 class="mb-0">{{ custom_package.days_until_expiry }} days</h5>
+                        <small class="text-muted">{{ custom_package.expires_at|date:"M d, Y" }}</small>
+                    {% else %}
+                        <h5 class="mb-0">Never</h5>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Secure Link Section -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Secure Client Link</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">Share this unique link with the client to view and respond to the custom package:</p>
+                    <div class="input-group mb-3">
+                        <input type="text" class="form-control" id="secureLink" value="{{ secure_link }}" readonly>
+                        <button class="btn btn-outline-secondary" type="button" onclick="copyLink()">
+                            <i class="bi bi-clipboard"></i> Copy
+                        </button>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <a href="{{ secure_link }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-eye"></i> Preview Link
+                        </a>
+                        <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#sendLinkModal">
+                            <i class="bi bi-envelope"></i> Send Link to Client
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Left Column: Package Details -->
+        <div class="col-md-8">
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5 class="mb-0">Package Details</h5>
+                </div>
+                <div class="card-body">
+                    {% if custom_package.featured_image %}
+                        <img src="{{ custom_package.featured_image.url }}" alt="{{ custom_package.name }}" class="img-fluid mb-3" style="max-height: 300px; width: 100%; object-fit: cover;">
+                    {% endif %}
+                    
+                    <h4>{{ custom_package.name }}</h4>
+                    
+                    <div class="mb-3">
+                        <strong>Duration:</strong> {{ custom_package.duration_days }} days / {{ custom_package.duration_nights }} nights
+                    </div>
+                    
+                    <div class="mb-3">
+                        <strong>Base Package:</strong> 
+                        <a href="{% url 'packages:public_package_detail' custom_package.base_package.slug %}" target="_blank">
+                            {{ custom_package.base_package.name }}
+                        </a>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <strong>Short Description:</strong>
+                        <p>{{ custom_package.short_description }}</p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <strong>Full Description:</strong>
+                        <div>{{ custom_package.description|linebreaks }}</div>
+                    </div>
+                    
+                    {% if custom_package.modifications_made %}
+                        <div class="mb-3">
+                            <strong>Modifications Made:</strong>
+                            <div class="alert alert-info">{{ custom_package.modifications_made|linebreaks }}</div>
+                        </div>
+                    {% endif %}
+                    
+                    {% if custom_package.staff_notes_to_client %}
+                        <div class="mb-3">
+                            <strong>Message to Client (Visible):</strong>
+                            <div class="alert alert-success">{{ custom_package.staff_notes_to_client|linebreaks }}</div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Edit Form -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Edit Custom Package</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {{ form.non_field_errors }}
+                            </div>
+                        {% endif %}
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.name.id_for_label }}" class="form-label">Package Name</label>
+                                {{ form.name }}
+                                {% if form.name.errors %}
+                                    <div class="text-danger">{{ form.name.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="{{ form.duration_days.id_for_label }}" class="form-label">Duration (Days)</label>
+                                {{ form.duration_days }}
+                                {% if form.duration_days.errors %}
+                                    <div class="text-danger">{{ form.duration_days.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="{{ form.duration_nights.id_for_label }}" class="form-label">Duration (Nights)</label>
+                                {{ form.duration_nights }}
+                                {% if form.duration_nights.errors %}
+                                    <div class="text-danger">{{ form.duration_nights.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.short_description.id_for_label }}" class="form-label">Short Description</label>
+                            {{ form.short_description }}
+                            {% if form.short_description.errors %}
+                                <div class="text-danger">{{ form.short_description.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.description.id_for_label }}" class="form-label">Full Description</label>
+                            {{ form.description }}
+                            {% if form.description.errors %}
+                                <div class="text-danger">{{ form.description.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.original_price.id_for_label }}" class="form-label">Original Price</label>
+                                {{ form.original_price }}
+                                {% if form.original_price.errors %}
+                                    <div class="text-danger">{{ form.original_price.errors }}</div>
+                                {% endif %}
+                                <small class="text-muted">Base package price</small>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.adjusted_price.id_for_label }}" class="form-label">Custom Price</label>
+                                {{ form.adjusted_price }}
+                                {% if form.adjusted_price.errors %}
+                                    <div class="text-danger">{{ form.adjusted_price.errors }}</div>
+                                {% endif %}
+                                <small class="text-muted">Final price for client</small>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.currency.id_for_label }}" class="form-label">Currency</label>
+                                {{ form.currency }}
+                                {% if form.currency.errors %}
+                                    <div class="text-danger">{{ form.currency.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.modifications_made.id_for_label }}" class="form-label">Modifications Summary</label>
+                            {{ form.modifications_made }}
+                            {% if form.modifications_made.errors %}
+                                <div class="text-danger">{{ form.modifications_made.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.staff_notes_to_client.id_for_label }}" class="form-label">Message to Client (Visible)</label>
+                            {{ form.staff_notes_to_client }}
+                            {% if form.staff_notes_to_client.errors %}
+                                <div class="text-danger">{{ form.staff_notes_to_client.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.staff_internal_notes.id_for_label }}" class="form-label">Internal Notes (Hidden)</label>
+                            {{ form.staff_internal_notes }}
+                            {% if form.staff_internal_notes.errors %}
+                                <div class="text-danger">{{ form.staff_internal_notes.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.status.id_for_label }}" class="form-label">Status</label>
+                                {{ form.status }}
+                                {% if form.status.errors %}
+                                    <div class="text-danger">{{ form.status.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.expires_at.id_for_label }}" class="form-label">Quote Expires At</label>
+                                {{ form.expires_at }}
+                                {% if form.expires_at.errors %}
+                                    <div class="text-danger">{{ form.expires_at.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.featured_image.id_for_label }}" class="form-label">Custom Package Image</label>
+                            {{ form.featured_image }}
+                            {% if form.featured_image.errors %}
+                                <div class="text-danger">{{ form.featured_image.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Hidden fields -->
+                        {{ form.inquiry }}
+                        {{ form.base_package }}
+
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save"></i> Save Changes
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Inquiry & Tracking Info -->
+        <div class="col-md-4">
+            <!-- Associated Inquiry -->
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5 class="mb-0">Associated Inquiry</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Reference:</strong> {{ custom_package.inquiry.inquiry_reference }}</p>
+                    <p><strong>Customer:</strong> {{ custom_package.inquiry.customer_name }}</p>
+                    <p><strong>Email:</strong> {{ custom_package.inquiry.customer_email }}</p>
+                    <p><strong>Phone:</strong> {{ custom_package.inquiry.customer_phone|default:"N/A" }}</p>
+                    <p><strong>Travel Dates:</strong><br>
+                        {{ custom_package.inquiry.preferred_travel_date|date:"M d, Y" }} - 
+                        {{ custom_package.inquiry.preferred_end_date|date:"M d, Y" }}
+                    </p>
+                    <p><strong>Travelers:</strong> 
+                        {{ custom_package.inquiry.number_of_adults }} adults
+                        {% if custom_package.inquiry.number_of_children %}
+                            + {{ custom_package.inquiry.number_of_children }} children
+                        {% endif %}
+                    </p>
+                    <a href="{% url 'packages:dashboard_inquiry_detail' custom_package.inquiry.pk %}" class="btn btn-sm btn-outline-primary w-100">
+                        <i class="bi bi-eye"></i> View Full Inquiry
+                    </a>
+                </div>
+            </div>
+
+            <!-- Tracking Information -->
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5 class="mb-0">Tracking Information</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Created:</strong> {{ custom_package.created_at|date:"M d, Y H:i" }}</p>
+                    <p><strong>Created By:</strong> {{ custom_package.created_by.get_full_name|default:custom_package.created_by.username }}</p>
+                    <p><strong>Last Modified:</strong> {{ custom_package.updated_at|date:"M d, Y H:i" }}</p>
+                    {% if custom_package.last_modified_by %}
+                        <p><strong>Modified By:</strong> {{ custom_package.last_modified_by.get_full_name|default:custom_package.last_modified_by.username }}</p>
+                    {% endif %}
+                    <p><strong>Revision:</strong> #{{ custom_package.revision_number }}</p>
+                </div>
+            </div>
+
+            <!-- Client Interaction -->
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5 class="mb-0">Client Interaction</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Link Sent:</strong> 
+                        {% if custom_package.sent_to_client_at %}
+                            <span class="text-success">Yes</span><br>
+                            <small>{{ custom_package.sent_to_client_at|date:"M d, Y H:i" }}</small>
+                        {% else %}
+                            <span class="text-muted">Not yet</span>
+                        {% endif %}
+                    </p>
+                    <p><strong>Views:</strong> {{ custom_package.client_view_count|default:0 }}</p>
+                    <p><strong>Last Viewed:</strong><br>
+                        {% if custom_package.last_viewed_by_client %}
+                            {{ custom_package.last_viewed_by_client|date:"M d, Y H:i" }}
+                        {% else %}
+                            <span class="text-muted">Never</span>
+                        {% endif %}
+                    </p>
+                    <p><strong>Client Action:</strong><br>
+                        {% if custom_package.client_action %}
+                            <span class="badge bg-{{ custom_package.client_action|yesno:'success,warning,danger' }}">
+                                {{ custom_package.get_client_action_display }}
+                            </span>
+                            {% if custom_package.client_action_at %}
+                                <br><small>{{ custom_package.client_action_at|date:"M d, Y H:i" }}</small>
+                            {% endif %}
+                        {% else %}
+                            <span class="text-muted">Pending</span>
+                        {% endif %}
+                    </p>
+                    {% if custom_package.client_feedback %}
+                        <p><strong>Client Feedback:</strong><br>
+                            <small class="text-muted">{{ custom_package.client_feedback }}</small>
+                        </p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Custom Itinerary -->
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Custom Itinerary</h5>
+                    <a href="{% url 'packages:dashboard_custom_itinerary_add' custom_package_pk=custom_package.pk %}" class="btn btn-sm btn-primary">
+                        <i class="bi bi-plus"></i> Add Day
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if custom_package.itinerary_days.exists %}
+                        <div class="list-group list-group-flush">
+                            {% for day in custom_package.itinerary_days.all %}
+                                <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                    <div>
+                                        <strong>{{ day.day_display }}:</strong> {{ day.title }}
+                                        {% if not day.is_active %}
+                                            <span class="badge bg-secondary">Inactive</span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="{% url 'packages:dashboard_custom_itinerary_edit' day.pk %}" class="btn btn-outline-primary btn-sm">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <a href="{% url 'packages:dashboard_custom_itinerary_delete' day.pk %}" class="btn btn-outline-danger btn-sm" onclick="return confirm('Delete this itinerary day?')">
+                                            <i class="bi bi-trash"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        <div class="mt-2">
+                            <small class="text-muted">
+                                {{ custom_package.itinerary_days.count }} day(s) configured
+                            </small>
+                        </div>
+                    {% else %}
+                        <p class="text-muted mb-2">No custom itinerary added yet.</p>
+                        <p class="mb-0"><small>Tip: Copy from base package or create custom days</small></p>
+                        <a href="{% url 'packages:dashboard_custom_itinerary_copy' custom_package_pk=custom_package.pk %}" class="btn btn-sm btn-outline-secondary mt-2">
+                            <i class="bi bi-clipboard"></i> Copy from Base Package
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Send Link Modal -->
+<div class="modal fade" id="sendLinkModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Send Link to Client</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Send the custom package link to <strong>{{ custom_package.inquiry.customer_email }}</strong>?</p>
+                <p class="text-muted">This will send an email with the secure link to view and respond to the custom package.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form method="post" action="{% url 'packages:dashboard_custom_package_send' custom_package.pk %}" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-send"></i> Send Email
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function copyLink() {
+    const linkInput = document.getElementById('secureLink');
+    linkInput.select();
+    linkInput.setSelectionRange(0, 99999); // For mobile devices
+    
+    navigator.clipboard.writeText(linkInput.value).then(() => {
+        // Show success feedback
+        const btn = event.target;
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="bi bi-check"></i> Copied!';
+        btn.classList.remove('btn-outline-secondary');
+        btn.classList.add('btn-success');
+        
+        setTimeout(() => {
+            btn.innerHTML = originalText;
+            btn.classList.remove('btn-success');
+            btn.classList.add('btn-outline-secondary');
+        }, 2000);
+    }).catch(err => {
+        alert('Failed to copy link');
+    });
+}
+</script>
+{% endblock %}
+

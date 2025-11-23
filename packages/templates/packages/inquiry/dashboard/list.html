@@ -1,0 +1,274 @@
+{% extends "backend/base.html" %}
+{% load static %}
+
+{% block title %}Manage Inquiries{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">Booking Inquiries</h4>
+            </div>
+        </div>
+    </div>
+
+    <!-- Status Summary Cards -->
+    <div class="row mb-3">
+        <div class="col-md-2">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="mb-1">{{ status_counts.pending|default:0 }}</h5>
+                    <p class="text-muted mb-0"><small>Pending</small></p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="mb-1">{{ status_counts.reviewing|default:0 }}</h5>
+                    <p class="text-muted mb-0"><small>Reviewing</small></p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="mb-1">{{ status_counts.quote_sent|default:0 }}</h5>
+                    <p class="text-muted mb-0"><small>Quote Sent</small></p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="mb-1">{{ status_counts.approved|default:0 }}</h5>
+                    <p class="text-muted mb-0"><small>Approved</small></p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="mb-1">{{ status_counts.converted|default:0 }}</h5>
+                    <p class="text-muted mb-0"><small>Converted</small></p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="mb-1">{{ total_count }}</h5>
+                    <p class="text-muted mb-0"><small>Total</small></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <form method="get" class="row g-3">
+                        <div class="col-md-3">
+                            <input type="text" name="search" class="form-control" placeholder="Search inquiries..." value="{{ filter_form.search.value|default:'' }}">
+                        </div>
+                        <div class="col-md-2">
+                            <select name="status" class="form-select">
+                                <option value="">All Status</option>
+                                {% for value, label in filter_form.status.field.choices %}
+                                    {% if value %}
+                                        <option value="{{ value }}" {% if filter_form.status.value == value %}selected{% endif %}>{{ label }}</option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <select name="priority" class="form-select">
+                                <option value="">All Priority</option>
+                                {% for value, label in filter_form.priority.field.choices %}
+                                    {% if value %}
+                                        <option value="{{ value }}" {% if filter_form.priority.value == value %}selected{% endif %}>{{ label }}</option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <select name="staff_assigned" class="form-select">
+                                <option value="">All Staff</option>
+                                {% for user in filter_form.staff_assigned.field.queryset %}
+                                    <option value="{{ user.pk }}" {% if filter_form.staff_assigned.value == user.pk|stringformat:"s" %}selected{% endif %}>{{ user.get_full_name|default:user.username }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <input type="date" name="date_from" class="form-control" placeholder="From Date" value="{{ filter_form.date_from.value|default:'' }}">
+                        </div>
+                        <div class="col-md-1">
+                            <button type="submit" class="btn btn-primary w-100">Filter</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Inquiries Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    {% if inquiries %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Reference</th>
+                                        <th>Customer</th>
+                                        <th>Package</th>
+                                        <th>Travelers</th>
+                                        <th>Travel Date</th>
+                                        <th>Budget</th>
+                                        <th>Status</th>
+                                        <th>Priority</th>
+                                        <th>Staff</th>
+                                        <th>Created</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for inquiry in inquiries %}
+                                        <tr>
+                                            <td>
+                                                <strong>{{ inquiry.inquiry_reference }}</strong>
+                                                {% if not inquiry.viewed_by_staff %}
+                                                    <span class="badge bg-danger">New</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <strong>{{ inquiry.customer_name }}</strong>
+                                                <br><small class="text-muted">{{ inquiry.customer_email }}</small>
+                                                <br><small class="text-muted">{{ inquiry.customer_phone }}</small>
+                                            </td>
+                                            <td>
+                                                {% if inquiry.base_package %}
+                                                    <a href="{% url 'packages:public_package_detail' inquiry.base_package.slug %}" target="_blank">
+                                                        {{ inquiry.base_package.name|truncatewords:5 }}
+                                                    </a>
+                                                {% else %}
+                                                    <span class="text-muted">-</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {{ inquiry.number_of_adults }}A
+                                                {% if inquiry.number_of_children > 0 %}{{ inquiry.number_of_children }}C{% endif %}
+                                                {% if inquiry.number_of_infants > 0 %}{{ inquiry.number_of_infants }}I{% endif %}
+                                            </td>
+                                            <td>
+                                                {% if inquiry.preferred_travel_date %}
+                                                    {{ inquiry.preferred_travel_date|date:"M d, Y" }}
+                                                {% else %}
+                                                    <span class="text-muted">Flexible</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {{ inquiry.get_budget_display_text|truncatewords:3 }}
+                                            </td>
+                                            <td>
+                                                {% if inquiry.status == 'pending' %}
+                                                    <span class="badge bg-warning text-dark">Pending</span>
+                                                {% elif inquiry.status == 'reviewing' %}
+                                                    <span class="badge bg-info">Reviewing</span>
+                                                {% elif inquiry.status == 'quote_sent' %}
+                                                    <span class="badge bg-primary">Quote Sent</span>
+                                                {% elif inquiry.status == 'approved' %}
+                                                    <span class="badge bg-success">Approved</span>
+                                                {% elif inquiry.status == 'converted' %}
+                                                    <span class="badge bg-success">Converted</span>
+                                                {% elif inquiry.status == 'declined' %}
+                                                    <span class="badge bg-danger">Declined</span>
+                                                {% else %}
+                                                    <span class="badge bg-secondary">{{ inquiry.get_status_display }}</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if inquiry.priority == 'urgent' %}
+                                                    <span class="badge bg-danger">Urgent</span>
+                                                {% elif inquiry.priority == 'high' %}
+                                                    <span class="badge bg-warning text-dark">High</span>
+                                                {% else %}
+                                                    <span class="badge bg-secondary">Normal</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if inquiry.staff_assigned %}
+                                                    {{ inquiry.staff_assigned.get_full_name|default:inquiry.staff_assigned.username }}
+                                                {% else %}
+                                                    <span class="text-muted">Unassigned</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {{ inquiry.created_at|date:"M d, Y" }}
+                                                <br><small class="text-muted">{{ inquiry.created_at|timesince }} ago</small>
+                                            </td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <a href="{% url 'packages:dashboard_inquiry_detail' inquiry.pk %}" class="btn btn-sm btn-info" title="View Details">
+                                                        <i class="mdi mdi-eye"></i>
+                                                    </a>
+                                                    {% if not inquiry.custom_package %}
+                                                        <a href="{% url 'packages:dashboard_custom_package_builder' inquiry.pk %}" class="btn btn-sm btn-success" title="Create Quote">
+                                                            <i class="mdi mdi-file-document-edit"></i>
+                                                        </a>
+                                                    {% else %}
+                                                        <a href="{% url 'packages:dashboard_custom_package_detail' inquiry.custom_package.pk %}" class="btn btn-sm btn-primary" title="View Quote">
+                                                            <i class="mdi mdi-file-check"></i>
+                                                        </a>
+                                                    {% endif %}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Pagination -->
+                        {% if page_obj.has_other_pages %}
+                            <nav aria-label="Page navigation">
+                                <ul class="pagination justify-content-center mt-3">
+                                    {% if page_obj.has_previous %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.priority %}&priority={{ request.GET.priority }}{% endif %}">Previous</a>
+                                        </li>
+                                    {% endif %}
+                                    
+                                    {% for num in page_obj.paginator.page_range %}
+                                        <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                                            <a class="page-link" href="?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.priority %}&priority={{ request.GET.priority }}{% endif %}">{{ num }}</a>
+                                        </li>
+                                    {% endfor %}
+                                    
+                                    {% if page_obj.has_next %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.priority %}&priority={{ request.GET.priority }}{% endif %}">Next</a>
+                                        </li>
+                                    {% endif %}
+                                </ul>
+                            </nav>
+                        {% endif %}
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="mdi mdi-inbox" style="font-size: 48px; color: #ccc;"></i>
+                            <p class="mt-3 text-muted">No inquiries found.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

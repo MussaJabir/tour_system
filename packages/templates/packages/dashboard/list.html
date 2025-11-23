@@ -1,0 +1,205 @@
+{% extends "backend/base.html" %}
+{% load static %}
+
+{% block title %}Manage Packages{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">Packages</h4>
+                <a href="{% url 'packages:dashboard_package_create' %}" class="btn btn-primary">
+                    <i class="mdi mdi-plus"></i> Add New Package
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <form method="get" class="row g-3">
+                        <div class="col-md-3">
+                            <input type="text" name="search" class="form-control" placeholder="Search packages..." value="{{ search_query }}">
+                        </div>
+                        <div class="col-md-2">
+                            <select name="category" class="form-select">
+                                <option value="">All Categories</option>
+                                {% for value, label in categories %}
+                                    <option value="{{ value }}" {% if category_filter == value %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <select name="availability" class="form-select">
+                                <option value="">All Availability</option>
+                                {% for value, label in availability_statuses %}
+                                    <option value="{{ value }}" {% if availability_filter == value %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <select name="status" class="form-select">
+                                <option value="">All Status</option>
+                                <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Active</option>
+                                <option value="inactive" {% if status_filter == 'inactive' %}selected{% endif %}>Inactive</option>
+                                <option value="featured" {% if status_filter == 'featured' %}selected{% endif %}>Featured</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <select name="sort" class="form-select">
+                                <option value="-created_at" {% if sort_by == '-created_at' %}selected{% endif %}>Newest First</option>
+                                <option value="name" {% if sort_by == 'name' %}selected{% endif %}>Name A-Z</option>
+                                <option value="-name" {% if sort_by == '-name' %}selected{% endif %}>Name Z-A</option>
+                                <option value="price_per_person" {% if sort_by == 'price_per_person' %}selected{% endif %}>Price Low-High</option>
+                                <option value="-price_per_person" {% if sort_by == '-price_per_person' %}selected{% endif %}>Price High-Low</option>
+                            </select>
+                        </div>
+                        <div class="col-md-1">
+                            <button type="submit" class="btn btn-primary w-100">Filter</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Packages Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    {% if packages %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Image</th>
+                                        <th>Name</th>
+                                        <th>Category</th>
+                                        <th>Duration</th>
+                                        <th>Price</th>
+                                        <th>Itinerary</th>
+                                        <th>Status</th>
+                                        <th>Featured</th>
+                                        <th>Views</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for package in packages %}
+                                        <tr>
+                                            <td>
+                                                {% if package.featured_image %}
+                                                    <img src="{{ package.featured_image.url }}" alt="{{ package.name }}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 5px;">
+                                                {% else %}
+                                                    <div style="width: 50px; height: 50px; background: #e9ecef; border-radius: 5px;"></div>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <strong>{{ package.name }}</strong>
+                                                <br><small class="text-muted">{{ package.get_difficulty_level_display }}</small>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-info">{{ package.get_category_display }}</span>
+                                            </td>
+                                            <td>{{ package.duration_days }}D/{{ package.duration_nights }}N</td>
+                                            <td>
+                                                <strong>{{ package.currency }} {{ package.price_per_person }}</strong>
+                                                {% if package.discount_percentage > 0 %}
+                                                    <br><span class="badge bg-success">-{{ package.discount_percentage }}%</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if package.itineraries.count > 0 %}
+                                                    <span class="badge bg-primary">{{ package.total_itinerary_days }}/{{ package.duration_days }} days</span>
+                                                {% else %}
+                                                    <span class="badge bg-warning text-dark">Not set</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if package.is_active %}
+                                                    <span class="badge bg-success">Active</span>
+                                                {% else %}
+                                                    <span class="badge bg-secondary">Inactive</span>
+                                                {% endif %}
+                                                <br>
+                                                {% if package.availability_status == 'available' %}
+                                                    <small class="text-success">Available</small>
+                                                {% elif package.availability_status == 'sold_out' %}
+                                                    <small class="text-danger">Sold Out</small>
+                                                {% elif package.availability_status == 'coming_soon' %}
+                                                    <small class="text-warning">Coming Soon</small>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if package.is_featured %}
+                                                    <i class="mdi mdi-star text-warning"></i>
+                                                {% else %}
+                                                    -
+                                                {% endif %}
+                                            </td>
+                                            <td>{{ package.view_count }}</td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <a href="{% url 'packages:public_package_detail' package.slug %}" class="btn btn-sm btn-info" title="View" target="_blank">
+                                                        <i class="mdi mdi-eye"></i>
+                                                    </a>
+                                                    <a href="{% url 'packages:dashboard_package_edit' package.pk %}" class="btn btn-sm btn-primary" title="Edit">
+                                                        <i class="mdi mdi-pencil"></i>
+                                                    </a>
+                                                    <a href="{% url 'packages:dashboard_package_itinerary_add' package.pk %}" class="btn btn-sm btn-success" title="Add Itinerary">
+                                                        <i class="mdi mdi-calendar-plus"></i>
+                                                    </a>
+                                                    <a href="{% url 'packages:dashboard_package_delete' package.pk %}" class="btn btn-sm btn-danger" title="Delete">
+                                                        <i class="mdi mdi-delete"></i>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Pagination -->
+                        {% if page_obj.has_other_pages %}
+                            <nav aria-label="Page navigation">
+                                <ul class="pagination justify-content-center mt-3">
+                                    {% if page_obj.has_previous %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if category_filter %}&category={{ category_filter }}{% endif %}{% if availability_filter %}&availability={{ availability_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}">Previous</a>
+                                        </li>
+                                    {% endif %}
+                                    
+                                    {% for num in page_obj.paginator.page_range %}
+                                        <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                                            <a class="page-link" href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}{% if category_filter %}&category={{ category_filter }}{% endif %}{% if availability_filter %}&availability={{ availability_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}">{{ num }}</a>
+                                        </li>
+                                    {% endfor %}
+                                    
+                                    {% if page_obj.has_next %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if category_filter %}&category={{ category_filter }}{% endif %}{% if availability_filter %}&availability={{ availability_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}">Next</a>
+                                        </li>
+                                    {% endif %}
+                                </ul>
+                            </nav>
+                        {% endif %}
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="mdi mdi-package-variant" style="font-size: 48px; color: #ccc;"></i>
+                            <p class="mt-3 text-muted">No packages found.</p>
+                            <a href="{% url 'packages:dashboard_package_create' %}" class="btn btn-primary">Create Your First Package</a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

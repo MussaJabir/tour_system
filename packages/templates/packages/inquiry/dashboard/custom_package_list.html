@@ -1,0 +1,220 @@
+{% extends "backend/base.html" %}
+{% load static %}
+
+{% block title %}Custom Packages{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">Custom Packages</h4>
+            </div>
+        </div>
+    </div>
+
+    <!-- Status Summary Cards -->
+    <div class="row mb-3">
+        <div class="col-md-2">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="mb-1">{{ status_counts.draft|default:0 }}</h5>
+                    <p class="text-muted mb-0"><small>Draft</small></p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="mb-1">{{ status_counts.pending_approval|default:0 }}</h5>
+                    <p class="text-muted mb-0"><small>Pending</small></p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="mb-1">{{ status_counts.approved|default:0 }}</h5>
+                    <p class="text-muted mb-0"><small>Approved</small></p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="mb-1">{{ status_counts.rejected|default:0 }}</h5>
+                    <p class="text-muted mb-0"><small>Rejected</small></p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="mb-1">{{ status_counts.expired|default:0 }}</h5>
+                    <p class="text-muted mb-0"><small>Expired</small></p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="mb-1">{{ page_obj.paginator.count }}</h5>
+                    <p class="text-muted mb-0"><small>Total</small></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters & Search -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <form method="get" class="row g-3">
+                        <div class="col-md-4">
+                            <input type="text" name="search" class="form-control" placeholder="Search by reference, name, customer..." value="{{ search_query }}">
+                        </div>
+                        <div class="col-md-3">
+                            <select name="status" class="form-select">
+                                <option value="">All Statuses</option>
+                                <option value="draft" {% if status_filter == 'draft' %}selected{% endif %}>Draft</option>
+                                <option value="pending_approval" {% if status_filter == 'pending_approval' %}selected{% endif %}>Pending Approval</option>
+                                <option value="approved" {% if status_filter == 'approved' %}selected{% endif %}>Approved</option>
+                                <option value="rejected" {% if status_filter == 'rejected' %}selected{% endif %}>Rejected</option>
+                                <option value="expired" {% if status_filter == 'expired' %}selected{% endif %}>Expired</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-search"></i> Filter
+                            </button>
+                            <a href="{% url 'packages:dashboard_custom_package_list' %}" class="btn btn-outline-secondary">
+                                <i class="bi bi-x"></i> Clear
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Packages Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    {% if page_obj %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Reference</th>
+                                        <th>Package Name</th>
+                                        <th>Inquiry</th>
+                                        <th>Customer</th>
+                                        <th>Price</th>
+                                        <th>Status</th>
+                                        <th>Views</th>
+                                        <th>Created</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for package in page_obj %}
+                                        <tr>
+                                            <td>
+                                                <strong>{{ package.custom_reference }}</strong>
+                                            </td>
+                                            <td>
+                                                {{ package.name|truncatewords:5 }}
+                                                {% if package.is_expired %}
+                                                    <span class="badge bg-danger ms-1">Expired</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <a href="{% url 'packages:dashboard_inquiry_detail' package.inquiry.pk %}">
+                                                    {{ package.inquiry.inquiry_reference }}
+                                                </a>
+                                            </td>
+                                            <td>{{ package.inquiry.customer_name }}</td>
+                                            <td>
+                                                <strong>{{ package.currency }} {{ package.adjusted_price|floatformat:2 }}</strong>
+                                                {% if package.price_difference %}
+                                                    <br>
+                                                    <small class="{% if package.price_difference > 0 %}text-success{% else %}text-danger{% endif %}">
+                                                        {% if package.price_difference > 0 %}+{% endif %}{{ package.currency }} {{ package.price_difference|floatformat:2 }}
+                                                    </small>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-{% if package.status == 'approved' %}success{% elif package.status == 'pending_approval' %}warning{% elif package.status == 'rejected' %}danger{% else %}secondary{% endif %}">
+                                                    {{ package.get_status_display }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                {{ package.client_view_count|default:0 }}
+                                                {% if package.last_viewed_by_client %}
+                                                    <br><small class="text-muted">{{ package.last_viewed_by_client|timesince }} ago</small>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {{ package.created_at|date:"M d, Y" }}<br>
+                                                <small class="text-muted">{{ package.created_by.get_full_name|default:package.created_by.username }}</small>
+                                            </td>
+                                            <td>
+                                                <div class="btn-group btn-group-sm">
+                                                    <a href="{% url 'packages:dashboard_custom_package_detail' package.pk %}" class="btn btn-outline-primary" title="View/Edit">
+                                                        <i class="bi bi-eye"></i>
+                                                    </a>
+                                                    <a href="{% url 'packages:dashboard_inquiry_detail' package.inquiry.pk %}" class="btn btn-outline-secondary" title="View Inquiry">
+                                                        <i class="bi bi-file-text"></i>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Pagination -->
+                        {% if page_obj.has_other_pages %}
+                            <nav>
+                                <ul class="pagination justify-content-center">
+                                    {% if page_obj.has_previous %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">First</a>
+                                        </li>
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">Previous</a>
+                                        </li>
+                                    {% endif %}
+
+                                    <li class="page-item active">
+                                        <span class="page-link">
+                                            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                                        </span>
+                                    </li>
+
+                                    {% if page_obj.has_next %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">Next</a>
+                                        </li>
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">Last</a>
+                                        </li>
+                                    {% endif %}
+                                </ul>
+                            </nav>
+                        {% endif %}
+                    {% else %}
+                        <p class="text-muted text-center py-5">No custom packages found.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

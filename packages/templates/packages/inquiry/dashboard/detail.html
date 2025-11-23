@@ -1,0 +1,349 @@
+{% extends "backend/base.html" %}
+{% load static %}
+
+{% block title %}Inquiry #{{ inquiry.inquiry_reference }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h4 class="mb-1">Inquiry #{{ inquiry.inquiry_reference }}</h4>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb mb-0">
+                            <li class="breadcrumb-item"><a href="{% url 'packages:dashboard_inquiry_list' %}">Inquiries</a></li>
+                            <li class="breadcrumb-item active">{{ inquiry.inquiry_reference }}</li>
+                        </ol>
+                    </nav>
+                </div>
+                <a href="{% url 'packages:dashboard_inquiry_list' %}" class="btn btn-secondary">
+                    <i class="mdi mdi-arrow-left"></i> Back to List
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Status Alert -->
+    {% if not inquiry.viewed_by_staff %}
+        <div class="alert alert-info">
+            <i class="mdi mdi-information"></i> This is a new inquiry that hasn't been viewed yet.
+        </div>
+    {% endif %}
+
+    <div class="row">
+        <!-- Left Column - Main Content -->
+        <div class="col-lg-8">
+            
+            <!-- Customer Information -->
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title mb-3"><i class="mdi mdi-account"></i> Customer Information</h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Name:</strong> {{ inquiry.customer_name }}</p>
+                            <p><strong>Email:</strong> <a href="mailto:{{ inquiry.customer_email }}">{{ inquiry.customer_email }}</a></p>
+                            <p><strong>Phone:</strong> <a href="tel:{{ inquiry.customer_phone }}">{{ inquiry.customer_phone }}</a></p>
+                            {% if inquiry.country %}
+                                <p><strong>Country:</strong> {{ inquiry.country }}</p>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Preferred Contact:</strong>
+                                {% if inquiry.prefer_email %}<span class="badge bg-primary">Email</span>{% endif %}
+                                {% if inquiry.prefer_phone %}<span class="badge bg-success">Phone</span>{% endif %}
+                                {% if inquiry.prefer_whatsapp %}<span class="badge bg-info">WhatsApp</span>{% endif %}
+                            </p>
+                            {% if inquiry.source %}
+                                <p><strong>Source:</strong> {{ inquiry.get_source_display }}</p>
+                            {% endif %}
+                            <p><strong>IP Address:</strong> <code>{{ inquiry.ip_address|default:"N/A" }}</code></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Package & Travel Details -->
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title mb-3"><i class="mdi mdi-package-variant"></i> Package & Travel Details</h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Package:</strong> 
+                                {% if inquiry.base_package %}
+                                    <a href="{% url 'packages:public_package_detail' inquiry.base_package.slug %}" target="_blank">
+                                        {{ inquiry.base_package.name }}
+                                    </a>
+                                {% else %}
+                                    <span class="text-muted">Not specified</span>
+                                {% endif %}
+                            </p>
+                            <p><strong>Travelers:</strong>
+                                {{ inquiry.number_of_adults }} Adult{{ inquiry.number_of_adults|pluralize }},
+                                {{ inquiry.number_of_children }} Child{{ inquiry.number_of_children|pluralize }}{% if inquiry.number_of_infants > 0 %},
+                                {{ inquiry.number_of_infants }} Infant{{ inquiry.number_of_infants|pluralize }}{% endif %}
+                            </p>
+                            <p><strong>Total Travelers:</strong> {{ inquiry.total_travelers }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            {% if inquiry.preferred_travel_date %}
+                                <p><strong>Preferred Date:</strong> {{ inquiry.preferred_travel_date|date:"F d, Y" }}</p>
+                            {% else %}
+                                <p><strong>Preferred Date:</strong> <span class="text-muted">Flexible</span></p>
+                            {% endif %}
+                            {% if inquiry.flexible_dates %}
+                                <p><span class="badge bg-info">Dates are flexible (±3 days)</span></p>
+                            {% endif %}
+                            {% if inquiry.alternative_date_1 %}
+                                <p><strong>Alternative Date 1:</strong> {{ inquiry.alternative_date_1|date:"F d, Y" }}</p>
+                            {% endif %}
+                            {% if inquiry.alternative_date_2 %}
+                                <p><strong>Alternative Date 2:</strong> {{ inquiry.alternative_date_2|date:"F d, Y" }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Budget & Preferences -->
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title mb-3"><i class="mdi mdi-currency-usd"></i> Budget & Preferences</h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Budget:</strong> {{ inquiry.get_budget_display_text }}</p>
+                            {% if inquiry.accommodation_preference %}
+                                <p><strong>Accommodation:</strong> {{ inquiry.get_accommodation_preference_display }}</p>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            {% if inquiry.dietary_requirements %}
+                                <p><strong>Dietary Requirements:</strong><br>{{ inquiry.dietary_requirements }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% if inquiry.special_requests %}
+                        <div class="mt-2">
+                            <p><strong>Special Requests:</strong></p>
+                            <div class="bg-light p-3 rounded">{{ inquiry.special_requests|linebreaks }}</div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Management Form -->
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title mb-3"><i class="mdi mdi-cog"></i> Manage Inquiry</h5>
+                    <form method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="update_inquiry" value="1">
+                        <div class="row">
+                            <div class="col-md-3 mb-3">
+                                <label for="{{ management_form.status.id_for_label }}" class="form-label">Status</label>
+                                {{ management_form.status }}
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="{{ management_form.priority.id_for_label }}" class="form-label">Priority</label>
+                                {{ management_form.priority }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ management_form.staff_assigned.id_for_label }}" class="form-label">Assign to Staff</label>
+                                {{ management_form.staff_assigned }}
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="{{ management_form.staff_notes.id_for_label }}" class="form-label">Internal Notes</label>
+                            {{ management_form.staff_notes }}
+                            <small class="text-muted">These notes are only visible to staff members.</small>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="mdi mdi-content-save"></i> Update Inquiry
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Messages -->
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title mb-3"><i class="mdi mdi-message-text"></i> Messages & Notes</h5>
+                    
+                    <!-- Message List -->
+                    {% if inquiry_messages %}
+                        <div class="mb-3">
+                            {% for message in inquiry_messages %}
+                                <div class="border rounded p-3 mb-2 {% if message.is_internal %}bg-light{% endif %}">
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <strong>
+                                            {% if message.sender_staff %}
+                                                {{ message.sender_staff.get_full_name|default:message.sender_staff.username }}
+                                            {% else %}
+                                                System
+                                            {% endif %}
+                                        </strong>
+                                        <small class="text-muted">{{ message.created_at|date:"M d, Y g:i A" }}</small>
+                                    </div>
+                                    <div>{{ message.message|linebreaks }}</div>
+                                    {% if message.is_internal %}
+                                        <span class="badge bg-secondary">Internal</span>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    
+                    <!-- Send Message Form -->
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <input type="hidden" name="send_message" value="1">
+                        <div class="mb-3">
+                            <label for="{{ message_form.subject.id_for_label }}" class="form-label">Subject (Optional)</label>
+                            {{ message_form.subject }}
+                            {% if message_form.subject.errors %}
+                                <div class="text-danger">{{ message_form.subject.errors }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="mb-3">
+                            <label for="{{ message_form.message.id_for_label }}" class="form-label">Message</label>
+                            {{ message_form.message }}
+                            {% if message_form.message.errors %}
+                                <div class="text-danger">{{ message_form.message.errors }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="mb-3">
+                            <label for="{{ message_form.attachment.id_for_label }}" class="form-label">Attachment (Optional)</label>
+                            {{ message_form.attachment }}
+                            {% if message_form.attachment.errors %}
+                                <div class="text-danger">{{ message_form.attachment.errors }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="form-check mb-3">
+                            {{ message_form.is_internal }}
+                            <label class="form-check-label" for="{{ message_form.is_internal.id_for_label }}">
+                                Internal note (not visible to client)
+                            </label>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="mdi mdi-send"></i> Send Message
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Right Column - Sidebar -->
+        <div class="col-lg-4">
+            
+            <!-- Quick Actions -->
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">Quick Actions</h5>
+                    {% if not inquiry.custom_package %}
+                        <a href="{% url 'packages:dashboard_custom_package_builder' inquiry.pk %}" class="btn btn-success w-100 mb-2">
+                            <i class="mdi mdi-file-document-edit"></i> Create Custom Quote
+                        </a>
+                    {% else %}
+                        <a href="{% url 'packages:dashboard_custom_package_detail' inquiry.custom_package.pk %}" class="btn btn-primary w-100 mb-2">
+                            <i class="mdi mdi-file-check"></i> View Custom Quote
+                        </a>
+                    {% endif %}
+                    <a href="mailto:{{ inquiry.customer_email }}?subject=Re: Inquiry {{ inquiry.inquiry_reference }}" class="btn btn-outline-primary w-100 mb-2">
+                        <i class="mdi mdi-email"></i> Email Customer
+                    </a>
+                    <a href="tel:{{ inquiry.customer_phone }}" class="btn btn-outline-success w-100">
+                        <i class="mdi mdi-phone"></i> Call Customer
+                    </a>
+                </div>
+            </div>
+
+            <!-- Inquiry Status -->
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">Inquiry Status</h5>
+                    <div class="mb-2">
+                        <strong>Status:</strong><br>
+                        {% if inquiry.status == 'pending' %}
+                            <span class="badge bg-warning text-dark">Pending</span>
+                        {% elif inquiry.status == 'reviewing' %}
+                            <span class="badge bg-info">Reviewing</span>
+                        {% elif inquiry.status == 'quote_sent' %}
+                            <span class="badge bg-primary">Quote Sent</span>
+                        {% elif inquiry.status == 'approved' %}
+                            <span class="badge bg-success">Approved</span>
+                        {% else %}
+                            <span class="badge bg-secondary">{{ inquiry.get_status_display }}</span>
+                        {% endif %}
+                    </div>
+                    <div class="mb-2">
+                        <strong>Priority:</strong><br>
+                        {% if inquiry.priority == 'urgent' %}
+                            <span class="badge bg-danger">Urgent</span>
+                        {% elif inquiry.priority == 'high' %}
+                            <span class="badge bg-warning text-dark">High</span>
+                        {% else %}
+                            <span class="badge bg-secondary">Normal</span>
+                        {% endif %}
+                    </div>
+                    {% if inquiry.staff_assigned %}
+                        <div class="mb-2">
+                            <strong>Assigned to:</strong><br>
+                            {{ inquiry.staff_assigned.get_full_name|default:inquiry.staff_assigned.username }}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Timeline -->
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">Timeline</h5>
+                    <div class="mb-2">
+                        <small class="text-muted">Created:</small><br>
+                        {{ inquiry.created_at|date:"M d, Y g:i A" }}<br>
+                        <small>({{ inquiry.created_at|timesince }} ago)</small>
+                    </div>
+                    {% if inquiry.first_viewed_at %}
+                        <div class="mb-2">
+                            <small class="text-muted">First Viewed:</small><br>
+                            {{ inquiry.first_viewed_at|date:"M d, Y g:i A" }}
+                        </div>
+                    {% endif %}
+                    <div class="mb-2">
+                        <small class="text-muted">Last Activity:</small><br>
+                        {{ inquiry.last_activity_at|date:"M d, Y g:i A" }}
+                    </div>
+                    {% if inquiry.days_since_inquiry > 0 %}
+                        <div class="mb-2">
+                            <small class="text-muted">Days Since Inquiry:</small><br>
+                            <strong>{{ inquiry.days_since_inquiry }} day{{ inquiry.days_since_inquiry|pluralize }}</strong>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Custom Packages -->
+            {% if custom_packages %}
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">Custom Packages</h5>
+                        {% for custom in custom_packages %}
+                            <div class="border rounded p-2 mb-2">
+                                <strong>{{ custom.custom_reference }}</strong><br>
+                                <small class="text-muted">Status: {{ custom.get_status_display }}</small><br>
+                                <a href="{% url 'packages:dashboard_custom_package_detail' custom.pk %}" class="btn btn-sm btn-primary mt-1">
+                                    View
+                                </a>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+
+        </div>
+    </div>
+</div>
+{% endblock %}
+

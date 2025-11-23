@@ -1,0 +1,121 @@
+{% extends "packages/emails/base.html" %}
+
+{% block title %}New Inquiry: {{ inquiry.reference }}{% endblock %}
+
+{% block header_title %}🔔 New Inquiry Received{% endblock %}
+
+{% block content %}
+<div class="info-box">
+    <strong>📋 New Travel Inquiry</strong><br>
+    A new inquiry has been submitted and requires your attention.
+</div>
+
+<h2>Inquiry Summary</h2>
+
+<div class="info-box">
+    <div class="info-row">
+        <span class="info-label">Reference:</span>
+        <span class="info-value"><strong>{{ inquiry.reference }}</strong></span>
+    </div>
+    
+    <div class="info-row">
+        <span class="info-label">Customer:</span>
+        <span class="info-value">{{ inquiry.full_name }}</span>
+    </div>
+    
+    <div class="info-row">
+        <span class="info-label">Email:</span>
+        <span class="info-value">{{ inquiry.email }}</span>
+    </div>
+    
+    <div class="info-row">
+        <span class="info-label">Phone:</span>
+        <span class="info-value">{{ inquiry.phone }}</span>
+    </div>
+    
+    <div class="info-row">
+        <span class="info-label">Status:</span>
+        <span class="info-value">{{ inquiry.get_status_display }}</span>
+    </div>
+    
+    <div class="info-row">
+        <span class="info-label">Priority:</span>
+        <span class="info-value">{{ inquiry.get_priority_display }}</span>
+    </div>
+</div>
+
+<h2>Travel Details</h2>
+
+<div class="info-box">
+    <div class="info-row">
+        <span class="info-label">Package/Destination:</span>
+        <span class="info-value">
+            {% if inquiry.base_package %}
+                {{ inquiry.base_package.name }}
+            {% elif inquiry.destination %}
+                {{ inquiry.destination.name }}
+            {% else %}
+                General Inquiry
+            {% endif %}
+        </span>
+    </div>
+    
+    <div class="info-row">
+        <span class="info-label">Travel Dates:</span>
+        <span class="info-value">{{ inquiry.start_date|date:"M d, Y" }} - {{ inquiry.end_date|date:"M d, Y" }}</span>
+    </div>
+    
+    <div class="info-row">
+        <span class="info-label">Travelers:</span>
+        <span class="info-value">
+            {% if inquiry.number_of_adults > 0 %}{{ inquiry.number_of_adults }} Adult{{ inquiry.number_of_adults|pluralize }}{% endif %}
+            {% if inquiry.number_of_children > 0 %}, {{ inquiry.number_of_children }} Child{{ inquiry.number_of_children|pluralize }}{% endif %}
+        </span>
+    </div>
+    
+    {% if inquiry.budget %}
+    <div class="info-row">
+        <span class="info-label">Budget:</span>
+        <span class="info-value">${{ inquiry.budget }}</span>
+    </div>
+    {% endif %}
+    
+    {% if inquiry.accommodation_preference %}
+    <div class="info-row">
+        <span class="info-label">Accommodation:</span>
+        <span class="info-value">{{ inquiry.get_accommodation_preference_display }}</span>
+    </div>
+    {% endif %}
+</div>
+
+{% if inquiry.message %}
+<h2>Customer Message</h2>
+<div class="info-box">
+    <p>{{ inquiry.message|linebreaks }}</p>
+</div>
+{% endif %}
+
+{% if inquiry.special_requests %}
+<h2>Special Requests</h2>
+<div class="info-box">
+    <p>{{ inquiry.special_requests|linebreaks }}</p>
+</div>
+{% endif %}
+
+<div style="text-align: center; margin: 30px 0;">
+    <a href="{{ dashboard_url }}" class="button">
+        📊 View in Dashboard
+    </a>
+</div>
+
+<hr>
+
+<p style="color: #666; font-size: 14px;">
+    <strong>Next Steps:</strong><br>
+    1. Review the inquiry in the dashboard<br>
+    2. Create a custom package tailored to their needs<br>
+    3. Send the package to the client for review<br>
+    4. Follow up within 24-48 hours
+</p>
+{% endblock %}
+

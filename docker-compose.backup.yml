@@ -1,0 +1,46 @@
+services:
+  # Automated Backup Service
+  backup:
+    image: postgres:16-alpine
+    container_name: tour_backup
+    volumes:
+      - ./backups:/backups
+      - ./scripts:/scripts
+    env_file:
+      - .env
+    environment:
+      - PGPASSWORD=${DB_PASSWORD:-changeme}
+      - DB_HOST=postgres
+      - DB_PORT=5432
+    networks:
+      - tour_network
+    depends_on:
+      - postgres
+    # Run backup daily at 2 AM
+    entrypoint: >
+      sh -c "
+        echo '🔄 Backup service started';
+        echo 'Next backup: 2:00 AM daily';
+        while true; do
+          CURRENT_HOUR=$$(date +%H);
+          CURRENT_MINUTE=$$(date +%M);
+          if [ \"$$CURRENT_HOUR\" = \"02\" ] && [ \"$$CURRENT_MINUTE\" = \"00\" ]; then
+            echo \"⏰ Starting scheduled backup: $$(date)\";
+            BACKUP_FILE=\"/backups/auto_backup_$$(date +%Y%m%d_%H%M%S).sql\";
+            pg_dump -h $$DB_HOST -U $${DB_USER:-tour_admin} -d $${DB_NAME:-tour_system} > $$BACKUP_FILE;
+            if [ -s $$BACKUP_FILE ]; then
+              gzip $$BACKUP_FILE;
+              echo \"✅ Backup completed: $$BACKUP_FILE.gz\";
+              find /backups -name 'auto_backup_*.sql.gz' -mtime +30 -delete;
+              echo \"🧹 Cleaned up backups older than 30 days\";
+            else
+              echo \"❌ Backup failed\";
+              rm -f $$BACKUP_FILE;
+            fi;
+            sleep 60;
+          fi;
+          sleep 30;
+        done
+      "
+    restart: unless-stopped
+

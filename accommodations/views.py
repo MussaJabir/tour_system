@@ -321,8 +321,8 @@ def public_accommodation_detail(request, slug):
     """Public accommodation detail page"""
     accommodation = get_object_or_404(Accommodation, slug=slug, is_active=True)
     
-    if not (request.user.is_authenticated and request.user.is_staff):
-        accommodation.increment_view_count()
+    # Increment view count
+    accommodation.increment_view_count()
     
     gallery_images = accommodation.gallery_images.all()
     rooms = accommodation.rooms.filter(is_available=True)

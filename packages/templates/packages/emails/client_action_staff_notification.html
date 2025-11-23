@@ -1,0 +1,134 @@
+{% extends "packages/emails/base.html" %}
+
+{% block title %}Client Action: {{ action_label }} - {{ inquiry.reference }}{% endblock %}
+
+{% block header_title %}
+    {% if action == 'approved' %}
+        ✅ Package Approved!
+    {% elif action == 'declined' %}
+        ❌ Package Declined
+    {% else %}
+        🔄 Changes Requested
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+{% if action == 'approved' %}
+<div class="success-box">
+    <strong>🎉 Great News!</strong><br>
+    The client has approved the custom package and is ready to proceed with booking!
+</div>
+{% elif action == 'declined' %}
+<div class="danger-box">
+    <strong>❌ Package Declined</strong><br>
+    The client has declined the custom package. Review their feedback below.
+</div>
+{% else %}
+<div class="warning-box">
+    <strong>🔄 Changes Requested</strong><br>
+    The client has requested modifications to the custom package. Review their feedback and update accordingly.
+</div>
+{% endif %}
+
+<h2>Client Information</h2>
+
+<div class="info-box">
+    <div class="info-row">
+        <span class="info-label">Reference:</span>
+        <span class="info-value"><strong>{{ inquiry.reference }}</strong></span>
+    </div>
+    
+    <div class="info-row">
+        <span class="info-label">Customer:</span>
+        <span class="info-value">{{ inquiry.full_name }}</span>
+    </div>
+    
+    <div class="info-row">
+        <span class="info-label">Email:</span>
+        <span class="info-value">{{ inquiry.email }}</span>
+    </div>
+    
+    <div class="info-row">
+        <span class="info-label">Phone:</span>
+        <span class="info-value">{{ inquiry.phone }}</span>
+    </div>
+    
+    <div class="info-row">
+        <span class="info-label">Action Taken:</span>
+        <span class="info-value"><strong>{{ action_label }}</strong></span>
+    </div>
+    
+    <div class="info-row">
+        <span class="info-label">Action Date:</span>
+        <span class="info-value">{{ custom_package.client_action_at|date:"M d, Y g:i A" }}</span>
+    </div>
+</div>
+
+<h2>Package Details</h2>
+
+<div class="info-box">
+    <div class="info-row">
+        <span class="info-label">Package Name:</span>
+        <span class="info-value">{{ custom_package.name }}</span>
+    </div>
+    
+    <div class="info-row">
+        <span class="info-label">Duration:</span>
+        <span class="info-value">{{ custom_package.duration_days }} Days / {{ custom_package.duration_nights }} Nights</span>
+    </div>
+    
+    <div class="info-row">
+        <span class="info-label">Total Price:</span>
+        <span class="info-value"><strong>{{ custom_package.currency }} {{ custom_package.total_price|floatformat:2 }}</strong></span>
+    </div>
+</div>
+
+{% if custom_package.client_feedback %}
+<h2>Client Feedback</h2>
+<div class="info-box">
+    <p>{{ custom_package.client_feedback|linebreaks }}</p>
+</div>
+{% endif %}
+
+<div style="text-align: center; margin: 30px 0;">
+    <a href="{{ dashboard_url }}" class="button">
+        📊 View in Dashboard
+    </a>
+</div>
+
+<hr>
+
+<h2>Recommended Actions</h2>
+
+{% if action == 'approved' %}
+<p><strong>✓ Contact the Client</strong></p>
+<p style="margin-left: 20px;">Reach out to finalize booking details and payment arrangements.</p>
+
+<p><strong>✓ Prepare Booking</strong></p>
+<p style="margin-left: 20px;">Start the booking process and reserve accommodations/activities.</p>
+
+<p><strong>✓ Send Booking Confirmation</strong></p>
+<p style="margin-left: 20px;">Once payment is confirmed, send final booking details and itinerary.</p>
+
+{% elif action == 'declined' %}
+<p><strong>1. Review Feedback</strong></p>
+<p style="margin-left: 20px;">Understand why the client declined and learn for future packages.</p>
+
+<p><strong>2. Follow Up (Optional)</strong></p>
+<p style="margin-left: 20px;">Consider reaching out to see if alternative options might interest them.</p>
+
+<p><strong>3. Update Status</strong></p>
+<p style="margin-left: 20px;">Mark the inquiry as completed or cancelled in the system.</p>
+
+{% else %}
+<p><strong>1. Review Changes Requested</strong></p>
+<p style="margin-left: 20px;">Carefully read the client's feedback and understand what modifications they want.</p>
+
+<p><strong>2. Update the Package</strong></p>
+<p style="margin-left: 20px;">Make the necessary changes to the custom package itinerary, pricing, or accommodations.</p>
+
+<p><strong>3. Resend to Client</strong></p>
+<p style="margin-left: 20px;">Once updated, send the revised package back to the client for review.</p>
+{% endif %}
+{% endblock %}
+

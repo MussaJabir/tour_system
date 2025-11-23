@@ -17,6 +17,9 @@ urlpatterns = [
     path('faq/', views.faq_page, name='faq_page'),
     
     # ==================== DASHBOARD URLS ====================
+    # Dashboard Home
+    path('dashboard/', views.dashboard_home, name='dashboard_home'),
+    
     # Contact Messages Dashboard
     path('dashboard/contacts/', views.dashboard_contact_list, name='dashboard_contact_list'),
     path('dashboard/contacts/<int:pk>/', views.dashboard_contact_detail, name='dashboard_contact_detail'),

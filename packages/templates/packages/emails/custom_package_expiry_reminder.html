@@ -1,0 +1,95 @@
+{% extends "packages/emails/base.html" %}
+
+{% block title %}Reminder: Your Package Quote Expires Soon - {{ inquiry.reference }}{% endblock %}
+
+{% block header_title %}⏰ Your Package Quote Expires Soon{% endblock %}
+
+{% block content %}
+<div class="warning-box">
+    <strong>⏰ Time-Sensitive Reminder</strong><br>
+    Your custom travel package will expire soon. Please review and take action before it's too late!
+</div>
+
+<p>Dear {{ inquiry.full_name }},</p>
+
+<p>
+    We wanted to remind you that the custom travel package we prepared for you is about to expire. 
+    We'd hate for you to miss out on this amazing opportunity!
+</p>
+
+<h2>Package Summary</h2>
+
+<div class="info-box">
+    <div class="info-row">
+        <span class="info-label">Package Name:</span>
+        <span class="info-value"><strong>{{ custom_package.name }}</strong></span>
+    </div>
+    
+    <div class="info-row">
+        <span class="info-label">Duration:</span>
+        <span class="info-value">{{ custom_package.duration_days }} Days / {{ custom_package.duration_nights }} Nights</span>
+    </div>
+    
+    <div class="info-row">
+        <span class="info-label">Total Price:</span>
+        <span class="info-value"><strong style="color: #28a745; font-size: 18px;">{{ custom_package.currency }} {{ custom_package.total_price|floatformat:2 }}</strong></span>
+    </div>
+    
+    <div class="info-row">
+        <span class="info-label">Expires On:</span>
+        <span class="info-value"><strong style="color: #dc3545;">{{ custom_package.valid_until|date:"F d, Y" }}</strong></span>
+    </div>
+</div>
+
+<div style="text-align: center; margin: 30px 0;">
+    <a href="{{ view_url }}" class="button" style="font-size: 16px; padding: 15px 40px; background-color: #dc3545;">
+        🔍 Review Package Now
+    </a>
+</div>
+
+<h2>Why Act Now?</h2>
+
+<p><strong>🔒 Price Guarantee</strong></p>
+<p style="margin-left: 20px;">The quoted price is locked in only until the expiry date. Prices may change after this date.</p>
+
+<p><strong>📅 Availability</strong></p>
+<p style="margin-left: 20px;">Popular accommodations and activities have limited availability. Secure your spot today!</p>
+
+<p><strong>✨ Personalized Experience</strong></p>
+<p style="margin-left: 20px;">This package was carefully crafted based on your preferences. Don't miss out!</p>
+
+<h2>Your Options</h2>
+
+<p><strong>✓ Approve the Package</strong></p>
+<p style="margin-left: 20px;">Love it? Approve the package and we'll finalize your booking immediately.</p>
+
+<p><strong>🔄 Request Changes</strong></p>
+<p style="margin-left: 20px;">Need modifications? Let us know and we'll adjust the package to better suit your needs.</p>
+
+<p><strong>❌ Not Interested</strong></p>
+<p style="margin-left: 20px;">If it's not the right fit, you can decline the package. No obligations whatsoever!</p>
+
+<hr>
+
+<p>
+    <strong>Questions or Need More Time?</strong><br>
+    If you need an extension or have any questions, please reach out to us. We're here to help!
+</p>
+
+<p>
+    Don't let this opportunity slip away - we're excited to make your travel dreams come true!
+</p>
+
+<p>
+    Best regards,<br>
+    <strong>{{ site_name }} Team</strong>
+</p>
+
+<div style="margin-top: 30px; padding: 15px; background-color: #fff3cd; border-radius: 5px; border-left: 4px solid #ffc107; text-align: center; font-size: 14px;">
+    <p style="margin: 0; color: #856404;">
+        <strong>⏰ Expires:</strong> {{ custom_package.valid_until|date:"F d, Y" }}<br>
+        <a href="{{ view_url }}" style="color: #4a81d4; word-break: break-all;">{{ view_url }}</a>
+    </p>
+</div>
+{% endblock %}
+

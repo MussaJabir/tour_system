@@ -1,0 +1,173 @@
+{% extends "backend/base.html" %}
+{% load static %}
+
+{% block title %}Send Custom Package - {{ custom_package.custom_reference }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h4 class="mb-0">Send Custom Package to Client</h4>
+                    <small class="text-muted">{{ custom_package.custom_reference }}</small>
+                </div>
+                <div>
+                    <a href="{% url 'packages:dashboard_custom_package_detail' custom_package.pk %}" class="btn btn-outline-secondary btn-sm">
+                        <i class="bi bi-arrow-left"></i> Back
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <!-- Package Summary -->
+                    <div class="alert alert-info mb-4">
+                        <i class="bi bi-info-circle"></i>
+                        <strong>Ready to Send!</strong> This will notify the client and allow them to view their custom package.
+                    </div>
+
+                    <h5 class="mb-3">Package Summary</h5>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <p class="mb-2"><strong>Package Name:</strong><br>{{ custom_package.name }}</p>
+                            <p class="mb-2"><strong>Duration:</strong><br>{{ custom_package.duration_days }} Days / {{ custom_package.duration_nights }} Nights</p>
+                            <p class="mb-2"><strong>Price:</strong><br>{{ custom_package.currency }} {{ custom_package.adjusted_price|floatformat:2 }} per person</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-2"><strong>Customer:</strong><br>{{ custom_package.inquiry.customer_name }}</p>
+                            <p class="mb-2"><strong>Email:</strong><br>{{ custom_package.inquiry.customer_email }}</p>
+                            <p class="mb-2"><strong>Status:</strong><br>
+                                <span class="badge bg-{{ custom_package.status|yesno:'success,warning,secondary' }}">
+                                    {{ custom_package.get_status_display }}
+                                </span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <!-- Secure Link Preview -->
+                    <h5 class="mb-3">Secure Access Link</h5>
+                    <p class="text-muted mb-2">The client will receive this unique link:</p>
+                    <div class="input-group mb-3">
+                        <input type="text" class="form-control" id="secureLink" value="{{ request.scheme }}://{{ request.get_host }}{% url 'packages:custom_package_view' custom_package.access_token %}" readonly>
+                        <button class="btn btn-outline-secondary" type="button" onclick="copyLink()">
+                            <i class="bi bi-clipboard"></i> Copy
+                        </button>
+                    </div>
+
+                    <!-- Expiry Warning -->
+                    {% if custom_package.expires_at %}
+                        <div class="alert alert-warning mb-4">
+                            <i class="bi bi-clock"></i>
+                            <strong>Expiry Date:</strong> This quote will expire on {{ custom_package.expires_at|date:"F d, Y" }} ({{ custom_package.days_until_expiry }} days from now)
+                        </div>
+                    {% endif %}
+
+                    <!-- Itinerary Check -->
+                    {% if custom_package.itinerary_days.exists %}
+                        <div class="alert alert-success mb-4">
+                            <i class="bi bi-check-circle"></i>
+                            <strong>Itinerary Complete:</strong> {{ custom_package.itinerary_days.count }} day(s) configured
+                        </div>
+                    {% else %}
+                        <div class="alert alert-warning mb-4">
+                            <i class="bi bi-exclamation-triangle"></i>
+                            <strong>No Itinerary:</strong> Consider adding itinerary days before sending to client.
+                            <a href="{% url 'packages:dashboard_custom_itinerary_add' custom_package_pk=custom_package.pk %}" class="alert-link">Add Now</a>
+                        </div>
+                    {% endif %}
+
+                    <!-- Staff Notes Preview -->
+                    {% if custom_package.staff_notes_to_client %}
+                        <h5 class="mb-3">Message to Client</h5>
+                        <div class="alert alert-light mb-4">
+                            {{ custom_package.staff_notes_to_client|linebreaks }}
+                        </div>
+                    {% else %}
+                        <div class="alert alert-warning mb-4">
+                            <i class="bi bi-chat-left-text"></i>
+                            <strong>No Message:</strong> You haven't added a personal message to the client. 
+                            <a href="{% url 'packages:dashboard_custom_package_detail' custom_package.pk %}" class="alert-link">Add Message</a>
+                        </div>
+                    {% endif %}
+
+                    <!-- Send Confirmation -->
+                    <form method="post">
+                        {% csrf_token %}
+                        <h5 class="mb-3">Confirmation</h5>
+                        <p>By clicking "Send to Client", the following will happen:</p>
+                        <ul class="mb-4">
+                            <li>An email will be sent to <strong>{{ custom_package.inquiry.customer_email }}</strong></li>
+                            <li>The email will contain the secure access link</li>
+                            <li>The client can view, accept, decline, or request changes</li>
+                            <li>You'll be notified of any client actions</li>
+                        </ul>
+
+                        <div class="form-check mb-4">
+                            <input class="form-check-input" type="checkbox" id="confirmSend" required>
+                            <label class="form-check-label" for="confirmSend">
+                                I confirm that the package details are correct and ready to send
+                            </label>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'packages:dashboard_custom_package_detail' custom_package.pk %}" class="btn btn-secondary">
+                                <i class="bi bi-x"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-send"></i> Send to Client
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Help Card -->
+            <div class="card mt-3">
+                <div class="card-body">
+                    <h6 class="mb-2"><i class="bi bi-lightbulb"></i> Tips</h6>
+                    <ul class="mb-0 small">
+                        <li>Review all package details before sending</li>
+                        <li>Ensure itinerary is complete for better client experience</li>
+                        <li>Add a personal message to make it more engaging</li>
+                        <li>Set an appropriate expiry date to create urgency</li>
+                        <li>You can track client interactions from the package detail page</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function copyLink() {
+    const linkInput = document.getElementById('secureLink');
+    linkInput.select();
+    linkInput.setSelectionRange(0, 99999);
+    
+    navigator.clipboard.writeText(linkInput.value).then(() => {
+        const btn = event.target.closest('button');
+        const originalHTML = btn.innerHTML;
+        btn.innerHTML = '<i class="bi bi-check"></i> Copied!';
+        btn.classList.remove('btn-outline-secondary');
+        btn.classList.add('btn-success');
+        
+        setTimeout(() => {
+            btn.innerHTML = originalHTML;
+            btn.classList.remove('btn-success');
+            btn.classList.add('btn-outline-secondary');
+        }, 2000);
+    }).catch(err => {
+        alert('Failed to copy link');
+    });
+}
+</script>
+{% endblock %}
+

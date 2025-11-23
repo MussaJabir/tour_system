@@ -61,6 +61,7 @@ class AccommodationForm(forms.ModelForm):
             'address': forms.Textarea(attrs={'rows': 2, 'class': 'form-control'}),
             'policies': forms.Textarea(attrs={'rows': 3, 'class': 'form-control'}),
             'meta_description': forms.Textarea(attrs={'rows': 2, 'class': 'form-control'}),
+            'currency': forms.Select(attrs={'class': 'form-select'}),
         }
     
     def __init__(self, *args, **kwargs):

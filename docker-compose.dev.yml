@@ -1,0 +1,30 @@
+services:
+  # Override Django service for development with auto-reload
+  django:
+    command: >
+      sh -c "
+        echo 'Waiting for PostgreSQL...' &&
+        while ! nc -z $$DB_HOST $$DB_PORT; do sleep 0.1; done &&
+        echo 'PostgreSQL started' &&
+        echo 'Running migrations...' &&
+        python manage.py migrate --noinput &&
+        echo 'Collecting static files...' &&
+        python manage.py collectstatic --noinput --clear &&
+        echo 'Starting development server with auto-reload...' &&
+        python manage.py runserver 0.0.0.0:8000
+      "
+    environment:
+      - DEBUG=True
+      - DJANGO_SETTINGS_MODULE=config.settings
+    # No restart policy for dev - let it crash for debugging
+    restart: "no"
+
+  # Override Celery for development with auto-reload
+  celery:
+    command: celery -A config worker --loglevel=info --concurrency=2 --pool=solo
+    restart: "no"
+
+  # Override Celery Beat for development
+  celery-beat:
+    command: celery -A config beat --loglevel=info
+    restart: "no"
