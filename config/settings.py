@@ -29,6 +29,11 @@ DEBUG = config('DEBUG', default=True, cast=bool)
 
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1', cast=Csv())
 
+# Auth redirects
+LOGIN_URL = '/dashboard/login/'
+LOGIN_REDIRECT_URL = '/dashboard/'
+LOGOUT_REDIRECT_URL = '/dashboard/login/'
+
 
 # Application definition
 
@@ -278,20 +283,8 @@ LOGGING = {
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # ============================================================================
-# EMAIL CONFIGURATION
+# EMAIL — extended config
 # ============================================================================
-
-# Email backend configuration
-# For development: use console backend (prints emails to console)
-# For production: use SMTP backend
-EMAIL_BACKEND = config('EMAIL_BACKEND', default='django.core.mail.backends.console.EmailBackend')
-
-# SMTP Configuration (for production)
-EMAIL_HOST = config('EMAIL_HOST', default='smtp.gmail.com')
-EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)
-EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
-EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
-EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
 
 # Default email addresses
 DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='noreply@toursystem.com')

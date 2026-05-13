@@ -5,6 +5,10 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
+    # ==================== AUTH URLS ====================
+    path('dashboard/login/', views.staff_login, name='staff_login'),
+    path('dashboard/logout/', views.staff_logout, name='staff_logout'),
+
     # ==================== PUBLIC URLS ====================
     # Contact
     path('contact/', views.contact_page, name='contact_page'),

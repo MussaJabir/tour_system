@@ -1,5 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
+from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib import messages
 from django.core.paginator import Paginator
 from django.db.models import Q
@@ -12,6 +13,7 @@ from .forms import ActivityForm, ActivityImageForm
 # ============================================
 
 @login_required
+@staff_member_required
 def dashboard_activity_list(request):
     """
     List all activities in custom dashboard
@@ -68,6 +70,7 @@ def dashboard_activity_list(request):
 
 
 @login_required
+@staff_member_required
 def dashboard_activity_create(request):
     """
     Create new activity in custom dashboard
@@ -96,6 +99,7 @@ def dashboard_activity_create(request):
 
 
 @login_required
+@staff_member_required
 def dashboard_activity_edit(request, pk):
     """
     Edit existing activity in custom dashboard
@@ -129,6 +133,7 @@ def dashboard_activity_edit(request, pk):
 
 
 @login_required
+@staff_member_required
 def dashboard_activity_detail(request, pk):
     """
     View activity details in dashboard
@@ -147,6 +152,7 @@ def dashboard_activity_detail(request, pk):
 
 
 @login_required
+@staff_member_required
 def dashboard_activity_delete(request, pk):
     """
     Delete activity
@@ -169,6 +175,7 @@ def dashboard_activity_delete(request, pk):
 
 
 @login_required
+@staff_member_required
 def dashboard_add_gallery_image(request, pk):
     """
     Add image to activity gallery
@@ -199,6 +206,7 @@ def dashboard_add_gallery_image(request, pk):
 
 
 @login_required
+@staff_member_required
 def dashboard_delete_gallery_image(request, pk):
     """
     Delete image from gallery
