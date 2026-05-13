@@ -9,12 +9,14 @@ Views for:
 """
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.contrib.admin.views.decorators import staff_member_required
 from django.core.paginator import Paginator
 from django.core.mail import send_mail, EmailMessage
 from django.conf import settings
 from django.http import JsonResponse
-from django.views.decorators.http import require_http_methods
+from django.views.decorators.http import require_http_methods, require_POST
 from django.db.models import Q, Count
 from django.utils import timezone
 
@@ -36,9 +38,35 @@ from packages.models import Package, BookingInquiry, CustomPackage
 from datetime import timedelta
 
 
+# ==================== AUTH VIEWS ====================
+
+def staff_login(request):
+    if request.user.is_authenticated and request.user.is_staff:
+        return redirect('dashboard_home')
+    if request.method == 'POST':
+        username = request.POST.get('username', '').strip()
+        password = request.POST.get('password', '')
+        user = authenticate(request, username=username, password=password)
+        if user is not None and user.is_staff:
+            login(request, user)
+            return redirect(request.GET.get('next', 'dashboard_home'))
+        elif user is not None and not user.is_staff:
+            messages.error(request, 'Your account does not have staff access.')
+        else:
+            messages.error(request, 'Invalid username or password.')
+    return render(request, 'backend/auth/login.html')
+
+
+@require_POST
+def staff_logout(request):
+    logout(request)
+    return redirect('staff_login')
+
+
 # ==================== DASHBOARD HOME ====================
 
 @login_required
+@staff_member_required
 def dashboard_home(request):
     """
     Main dashboard homepage with overview statistics and charts.
@@ -289,6 +317,7 @@ def faq_page(request):
 # ==================== DASHBOARD VIEWS - CONTACT MESSAGES ====================
 
 @login_required
+@staff_member_required
 def dashboard_contact_list(request):
     """
     Dashboard: List all contact messages.
@@ -342,6 +371,7 @@ def dashboard_contact_list(request):
 
 
 @login_required
+@staff_member_required
 def dashboard_contact_detail(request, pk):
     """
     Dashboard: View and reply to a single contact message.
@@ -410,6 +440,7 @@ def dashboard_contact_delete(request, pk):
 # ==================== DASHBOARD VIEWS - NEWSLETTER ====================
 
 @login_required
+@staff_member_required
 def dashboard_newsletter_list(request):
     """
     Dashboard: List all newsletter subscribers.
@@ -461,6 +492,7 @@ def dashboard_newsletter_list(request):
 
 
 @login_required
+@staff_member_required
 def dashboard_newsletter_export(request):
     """
     Dashboard: Export newsletter subscribers to CSV.
@@ -594,6 +626,7 @@ To unsubscribe at any time, click here: {unsubscribe_url}
 # ==================== DASHBOARD VIEWS - FAQ ====================
 
 @login_required
+@staff_member_required
 def dashboard_faq_list(request):
     """
     Dashboard: List all FAQs with filtering.
@@ -653,6 +686,7 @@ def dashboard_faq_list(request):
 
 
 @login_required
+@staff_member_required
 def dashboard_faq_create(request):
     """
     Dashboard: Create a new FAQ.
@@ -679,6 +713,7 @@ def dashboard_faq_create(request):
 
 
 @login_required
+@staff_member_required
 def dashboard_faq_edit(request, pk):
     """
     Dashboard: Edit an existing FAQ.
@@ -720,6 +755,7 @@ def dashboard_faq_delete(request, pk):
 # ==================== DASHBOARD VIEWS - TESTIMONIALS ====================
 
 @login_required
+@staff_member_required
 def dashboard_testimonial_list(request):
     """
     Dashboard: List all testimonials with filtering.
@@ -776,6 +812,7 @@ def dashboard_testimonial_list(request):
 
 
 @login_required
+@staff_member_required
 def dashboard_testimonial_create(request):
     """
     Dashboard: Create a new testimonial.
@@ -802,6 +839,7 @@ def dashboard_testimonial_create(request):
 
 
 @login_required
+@staff_member_required
 def dashboard_testimonial_edit(request, pk):
     """
     Dashboard: Edit an existing testimonial.

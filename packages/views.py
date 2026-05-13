@@ -1,11 +1,15 @@
+import logging
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
+from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib import messages
 from django.core.paginator import Paginator
 from django.db.models import Q, Count, Avg
 from django.http import JsonResponse, Http404
 from django.utils import timezone
 from decimal import Decimal
+
+logger = logging.getLogger(__name__)
 
 from .models import (
     Package, PackageImage, PackageItinerary, PackageInclusion,
@@ -24,6 +28,7 @@ from destinations.models import Destination
 # ============================================================================
 
 @login_required
+@staff_member_required
 def dashboard_package_list(request):
     """List all packages in the dashboard"""
     packages = Package.objects.all().prefetch_related('destinations')
@@ -86,6 +91,7 @@ def dashboard_package_list(request):
 
 
 @login_required
+@staff_member_required
 def dashboard_package_create(request):
     """Create a new package"""
     if request.method == 'POST':
@@ -111,6 +117,7 @@ def dashboard_package_create(request):
 
 
 @login_required
+@staff_member_required
 def dashboard_package_edit(request, pk):
     """Edit an existing package"""
     package = get_object_or_404(Package, pk=pk)
@@ -146,6 +153,7 @@ def dashboard_package_edit(request, pk):
 
 
 @login_required
+@staff_member_required
 def dashboard_package_delete(request, pk):
     """Delete a package"""
     package = get_object_or_404(Package, pk=pk)
@@ -167,6 +175,7 @@ def dashboard_package_delete(request, pk):
 # ============================================================================
 
 @login_required
+@staff_member_required
 def dashboard_package_image_add(request, package_pk):
     """Add images to package gallery"""
     package = get_object_or_404(Package, pk=package_pk)
@@ -193,6 +202,7 @@ def dashboard_package_image_add(request, package_pk):
 
 
 @login_required
+@staff_member_required
 def dashboard_package_image_delete(request, pk):
     """Delete a package image"""
     package_image = get_object_or_404(PackageImage, pk=pk)
@@ -215,6 +225,7 @@ def dashboard_package_image_delete(request, pk):
 # ============================================================================
 
 @login_required
+@staff_member_required
 def dashboard_package_itinerary_add(request, package_pk):
     """Add a day to package itinerary"""
     package = get_object_or_404(Package, pk=package_pk)
@@ -245,6 +256,7 @@ def dashboard_package_itinerary_add(request, package_pk):
 
 
 @login_required
+@staff_member_required
 def dashboard_package_itinerary_edit(request, pk):
     """Edit a package itinerary day"""
     itinerary = get_object_or_404(PackageItinerary, pk=pk)
@@ -271,6 +283,7 @@ def dashboard_package_itinerary_edit(request, pk):
 
 
 @login_required
+@staff_member_required
 def dashboard_package_itinerary_delete(request, pk):
     """Delete a package itinerary day"""
     itinerary = get_object_or_404(PackageItinerary, pk=pk)
@@ -294,6 +307,7 @@ def dashboard_package_itinerary_delete(request, pk):
 # ============================================================================
 
 @login_required
+@staff_member_required
 def dashboard_package_inclusion_add(request, package_pk):
     """Add inclusion/exclusion to package"""
     package = get_object_or_404(Package, pk=package_pk)
@@ -321,6 +335,7 @@ def dashboard_package_inclusion_add(request, package_pk):
 
 
 @login_required
+@staff_member_required
 def dashboard_package_inclusion_edit(request, pk):
     """Edit a package inclusion/exclusion"""
     inclusion = get_object_or_404(PackageInclusion, pk=pk)
@@ -348,6 +363,7 @@ def dashboard_package_inclusion_edit(request, pk):
 
 
 @login_required
+@staff_member_required
 def dashboard_package_inclusion_delete(request, pk):
     """Delete a package inclusion/exclusion"""
     inclusion = get_object_or_404(PackageInclusion, pk=pk)
@@ -405,27 +421,27 @@ def public_package_list(request):
     if min_price:
         try:
             packages = packages.filter(price_per_person__gte=Decimal(min_price))
-        except:
-            pass
+        except Exception:
+            logger.warning("Invalid min_price filter value: %s", min_price)
     if max_price:
         try:
             packages = packages.filter(price_per_person__lte=Decimal(max_price))
-        except:
-            pass
-    
+        except Exception:
+            logger.warning("Invalid max_price filter value: %s", max_price)
+
     # Filter by duration
     min_days = request.GET.get('min_days', '')
     max_days = request.GET.get('max_days', '')
     if min_days:
         try:
             packages = packages.filter(duration_days__gte=int(min_days))
-        except:
-            pass
+        except Exception:
+            logger.warning("Invalid min_days filter value: %s", min_days)
     if max_days:
         try:
             packages = packages.filter(duration_days__lte=int(max_days))
-        except:
-            pass
+        except Exception:
+            logger.warning("Invalid max_days filter value: %s", max_days)
     
     # Sorting
     sort_by = request.GET.get('sort', '-is_featured')
@@ -723,6 +739,7 @@ def custom_package_action(request, token, action):
 # -----------------------------------------------------------------------------
 
 @login_required
+@staff_member_required
 def dashboard_inquiry_list(request):
     """
     Staff dashboard view to list and filter all inquiries.
@@ -792,6 +809,7 @@ def dashboard_inquiry_list(request):
 
 
 @login_required
+@staff_member_required
 def dashboard_inquiry_detail(request, pk):
     """
     Staff view to see full inquiry details and manage it.
@@ -851,6 +869,7 @@ def dashboard_inquiry_detail(request, pk):
 
 
 @login_required
+@staff_member_required
 def dashboard_custom_package_builder(request, inquiry_pk):
     """
     Staff view to build a custom package for an inquiry.
@@ -922,6 +941,7 @@ def dashboard_custom_package_builder(request, inquiry_pk):
 
 
 @login_required
+@staff_member_required
 def dashboard_custom_package_list(request):
     """
     Staff view to list all custom packages.
@@ -974,6 +994,7 @@ def dashboard_custom_package_list(request):
 
 
 @login_required
+@staff_member_required
 def dashboard_custom_package_detail(request, pk):
     """
     Staff view to see and edit a custom package.
@@ -1011,6 +1032,7 @@ def dashboard_custom_package_detail(request, pk):
 
 
 @login_required
+@staff_member_required
 def dashboard_custom_package_send(request, pk):
     """
     Send custom package to client via email.
@@ -1062,6 +1084,7 @@ def dashboard_custom_package_send(request, pk):
 # ============================================================================
 
 @login_required
+@staff_member_required
 def dashboard_custom_itinerary_add(request, custom_package_pk):
     """
     Add a new itinerary day to a custom package.
@@ -1095,6 +1118,7 @@ def dashboard_custom_itinerary_add(request, custom_package_pk):
 
 
 @login_required
+@staff_member_required
 def dashboard_custom_itinerary_edit(request, pk):
     """
     Edit an existing custom itinerary day.
@@ -1124,6 +1148,7 @@ def dashboard_custom_itinerary_edit(request, pk):
 
 
 @login_required
+@staff_member_required
 def dashboard_custom_itinerary_delete(request, pk):
     """
     Delete a custom itinerary day.
@@ -1146,6 +1171,7 @@ def dashboard_custom_itinerary_delete(request, pk):
 
 
 @login_required
+@staff_member_required
 def dashboard_custom_itinerary_copy(request, custom_package_pk):
     """
     Copy itinerary from base package to custom package.

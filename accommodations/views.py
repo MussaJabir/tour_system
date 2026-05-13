@@ -1,5 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
+from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib import messages
 from django.core.paginator import Paginator
 from django.db.models import Q
@@ -12,6 +13,7 @@ from .forms import AccommodationForm, AccommodationImageForm, RoomForm
 # ============================================
 
 @login_required
+@staff_member_required
 def dashboard_accommodation_list(request):
     """List all accommodations in custom dashboard"""
     search_query = request.GET.get('search', '')
@@ -61,6 +63,7 @@ def dashboard_accommodation_list(request):
 
 
 @login_required
+@staff_member_required
 def dashboard_accommodation_create(request):
     """Create new accommodation"""
     if request.method == 'POST':
@@ -87,6 +90,7 @@ def dashboard_accommodation_create(request):
 
 
 @login_required
+@staff_member_required
 def dashboard_accommodation_edit(request, pk):
     """Edit existing accommodation"""
     accommodation = get_object_or_404(Accommodation, pk=pk)
@@ -119,6 +123,7 @@ def dashboard_accommodation_edit(request, pk):
 
 
 @login_required
+@staff_member_required
 def dashboard_accommodation_detail(request, pk):
     """View accommodation details"""
     accommodation = get_object_or_404(Accommodation, pk=pk)
@@ -137,6 +142,7 @@ def dashboard_accommodation_detail(request, pk):
 
 
 @login_required
+@staff_member_required
 def dashboard_accommodation_delete(request, pk):
     """Delete accommodation"""
     accommodation = get_object_or_404(Accommodation, pk=pk)
@@ -157,6 +163,7 @@ def dashboard_accommodation_delete(request, pk):
 
 
 @login_required
+@staff_member_required
 def dashboard_add_gallery_image(request, pk):
     """Add image to accommodation gallery"""
     accommodation = get_object_or_404(Accommodation, pk=pk)
@@ -185,6 +192,7 @@ def dashboard_add_gallery_image(request, pk):
 
 
 @login_required
+@staff_member_required
 def dashboard_delete_gallery_image(request, pk):
     """Delete image from gallery"""
     image = get_object_or_404(AccommodationImage, pk=pk)
@@ -199,6 +207,7 @@ def dashboard_delete_gallery_image(request, pk):
 
 
 @login_required
+@staff_member_required
 def dashboard_add_room(request, pk):
     """Add room to accommodation"""
     accommodation = get_object_or_404(Accommodation, pk=pk)
@@ -227,6 +236,7 @@ def dashboard_add_room(request, pk):
 
 
 @login_required
+@staff_member_required
 def dashboard_edit_room(request, pk):
     """Edit room"""
     room = get_object_or_404(Room, pk=pk)
@@ -255,6 +265,7 @@ def dashboard_edit_room(request, pk):
 
 
 @login_required
+@staff_member_required
 def dashboard_delete_room(request, pk):
     """Delete room"""
     room = get_object_or_404(Room, pk=pk)
