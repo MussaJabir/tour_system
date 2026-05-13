@@ -88,6 +88,44 @@ source venv/bin/activate
 python manage.py runserver
 ```
 
+## Branch & PR Workflow
+
+**IMPORTANT — Follow this for every implementation task without exception.**
+
+```
+main        ← production-ready, user merges here manually only
+  └── develop   ← integration branch, all features PR here
+        └── feature/<descriptive-name>   ← one branch per task
+        └── fix/<descriptive-name>
+```
+
+### Rules
+1. Never commit implementation work directly to `main` or `develop`
+2. Always create a feature branch from `develop`:
+   ```bash
+   git checkout develop && git pull origin develop
+   git checkout -b feature/<descriptive-name>
+   ```
+3. Branch naming:
+   - `feature/staff-dashboard-auth-gate` — new feature or security fix
+   - `feature/booking-reservation-system` — larger feature
+   - `fix/duplicate-email-settings` — bug fix
+   - `fix/bare-exception-handlers` — code quality fix
+4. Before opening a PR to `develop`: run `python manage.py test` — all tests must pass
+5. Open a PR from the feature branch → `develop` with a clear description
+6. User manually reviews and merges `develop` → `main` when ready for production
+
+### Claude's responsibility per task
+- Create the branch
+- Implement the change
+- Write or update tests covering the change
+- Confirm tests pass
+- Push the branch and open a PR to `develop`
+- Update `session.md` with what was done
+- Mark the item in `todo.md` as `[x]` done
+
+---
+
 ## Development Rules
 
 ### Before committing
