@@ -1,0 +1,104 @@
+{% extends "backend/base.html" %}
+
+{% block title %}Review #{{ review.pk }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <a href="{% url 'reviews:dashboard_review_list' %}" class="text-muted small">
+                <i class="mdi mdi-arrow-left"></i> Reviews
+            </a>
+            <h4 class="mb-0 mt-1">Review #{{ review.pk }}</h4>
+        </div>
+        <div class="d-flex gap-2">
+            {% if review.status == 'pending' %}
+                <a href="{% url 'reviews:dashboard_review_approve' review.pk %}" class="btn btn-success btn-sm">Approve</a>
+                <a href="{% url 'reviews:dashboard_review_reject' review.pk %}" class="btn btn-warning btn-sm">Reject</a>
+            {% endif %}
+            <a href="{% url 'reviews:dashboard_review_delete' review.pk %}" class="btn btn-outline-danger btn-sm">Delete</a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card mb-3">
+                <div class="card-header d-flex justify-content-between">
+                    <strong>Review Content</strong>
+                    <span style="color:#f59e0b; font-size: 1.2rem;">
+                        {% for i in "12345" %}{% if forloop.counter <= review.rating %}★{% else %}☆{% endif %}{% endfor %}
+                    </span>
+                </div>
+                <div class="card-body">
+                    <h5>{{ review.title }}</h5>
+                    <p>{{ review.body }}</p>
+                    {% if review.photos.all %}
+                        <div class="d-flex flex-wrap gap-2 mt-2">
+                            {% for photo in review.photos.all %}
+                                <img src="{{ photo.photo.url }}" alt="{{ photo.caption }}"
+                                     style="width:100px; height:100px; object-fit:cover; border-radius:6px;">
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card mb-3">
+                <div class="card-header"><strong>Reviewer</strong></div>
+                <div class="card-body">
+                    <dl class="row mb-0">
+                        <dt class="col-5">Name</dt>
+                        <dd class="col-7">{{ review.reviewer_name|default:"—" }}</dd>
+                        <dt class="col-5">Country</dt>
+                        <dd class="col-7">{{ review.reviewer_country|default:"—" }}</dd>
+                        <dt class="col-5">Account</dt>
+                        <dd class="col-7">{{ review.author|default:"Guest" }}</dd>
+                        <dt class="col-5">Booking</dt>
+                        <dd class="col-7">
+                            {% if review.booking %}
+                                <a href="{% url 'packages:dashboard_booking_detail' review.booking.pk %}">
+                                    {{ review.booking.booking_reference }}
+                                </a>
+                            {% else %}—{% endif %}
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+
+            <div class="card mb-3">
+                <div class="card-header"><strong>Moderation</strong></div>
+                <div class="card-body">
+                    <dl class="row mb-0">
+                        <dt class="col-5">Package</dt>
+                        <dd class="col-7">{{ review.package.name }}</dd>
+                        <dt class="col-5">Status</dt>
+                        <dd class="col-7">
+                            {% if review.status == 'approved' %}
+                                <span class="badge bg-success">Approved</span>
+                            {% elif review.status == 'pending' %}
+                                <span class="badge bg-warning text-dark">Pending</span>
+                            {% else %}
+                                <span class="badge bg-danger">Rejected</span>
+                            {% endif %}
+                        </dd>
+                        {% if review.approved_by %}
+                            <dt class="col-5">Approved by</dt>
+                            <dd class="col-7">{{ review.approved_by.get_full_name|default:review.approved_by.username }}</dd>
+                            <dt class="col-5">Approved at</dt>
+                            <dd class="col-7">{{ review.approved_at|date:"M d, Y H:i" }}</dd>
+                        {% endif %}
+                        {% if review.rejection_reason %}
+                            <dt class="col-5">Reason</dt>
+                            <dd class="col-7 text-danger">{{ review.rejection_reason }}</dd>
+                        {% endif %}
+                        <dt class="col-5">Submitted</dt>
+                        <dd class="col-7">{{ review.created_at|date:"M d, Y H:i" }}</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

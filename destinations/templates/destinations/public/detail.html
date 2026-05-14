@@ -1,15 +1,21 @@
 {% extends 'frontend/base.html' %}
 {% load static %}
 
-{% block title %}{{ destination.meta_title|default:destination.name }} | Tour System{% endblock %}
+{% block title %}{{ destination.get_meta_title }} | Tour System{% endblock %}
+{% block title2 %}{{ destination.get_meta_title }} | Tour System{% endblock %}
 
-{% block meta_description %}{{ destination.meta_description|default:destination.short_description }}{% endblock %}
+{% block meta_description %}{{ destination.get_meta_description }}{% endblock %}
+{% block og_description %}{{ destination.get_meta_description }}{% endblock %}
 
-{% block meta_tags %}
-{% if destination.meta_keywords %}
-<meta name="keywords" content="{{ destination.meta_keywords }}">
-{% endif %}
-{% endblock %}
+{% block meta_keywords %}{{ destination.meta_keywords }}{% endblock %}
+
+{% block canonical %}<link rel="canonical" href="{{ request.build_absolute_uri }}">{% endblock %}
+
+{% block og_type %}place{% endblock %}
+{% block og_url %}{{ request.build_absolute_uri }}{% endblock %}
+{% block og_image %}{% if destination.featured_image %}{{ request.scheme }}://{{ request.get_host }}{{ destination.featured_image.url }}{% endif %}{% endblock %}
+
+{% block meta_tags %}{% endblock %}
 
 {% block content %}
 <!-- Page Banner Start -->

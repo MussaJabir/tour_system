@@ -32,7 +32,7 @@ Status key: `[ ]` not started · `[~]` in progress · `[x]` done
   - Balance auto-calculated from confirmed payments vs quoted price
   - Status auto-advances: deposit recorded → `deposit_paid`, fully paid → `confirmed`
 
-- [ ] **Availability calendar** — packages need departure dates and seat limits:
+- [x] **Availability calendar** — packages need departure dates and seat limits:
   - `Departure` model: package + date + max_seats + booked_seats
   - Public listing shows available dates
   - Booking locks a seat on a departure
@@ -48,25 +48,24 @@ Status key: `[ ]` not started · `[~]` in progress · `[x]` done
 ## Phase 3 — Mobile App (Token Auth)
 > The README claims token auth exists. It does not.
 
-- [ ] **Token authentication** — add `rest_framework.authtoken`, add `TokenAuthentication` to DRF config, wire up `/api/v1/auth/login/` and `/api/v1/auth/logout/` endpoints
-- [ ] **Custom User model** — do before any production users exist:
-  - Extend `AbstractUser` with: phone, profile photo, preferred currency, nationality
-  - Enables customer accounts, booking history, saved packages
-- [ ] **Customer-facing API endpoints** — bookings, profile, saved packages, inquiry status for the Flutter app
+- [x] **Token authentication** — `rest_framework.authtoken` + `TokenAuthentication` added to DRF; `/api/v1/auth/login/` returns DRF token for Flutter app
+- [x] **Custom User model** — `accounts.CustomUser(AbstractUser)` with phone, profile_photo, preferred_currency, nationality; `AUTH_USER_MODEL` set; DB wiped and rebuilt
+- [x] **Auth API endpoints** — register, login (token), logout, profile (GET/PATCH), change-password (rotates token)
+- [x] **Customer-facing API endpoints** — bookings, saved packages, inquiry status for the Flutter app (next iteration)
 
 ---
 
 ## Phase 4 — Reviews + AI (Differentiators)
 
-- [ ] **Reviews app** — implement the stub:
-  - `Review` model: linked to `Package` + `User` + `Booking` (only completed-booking guests can review)
-  - Fields: rating (1–5), title, body, optional photos
-  - Staff moderation (approve/reject workflow)
-  - Aggregate rating cached on `Package` model
-  - Schema markup for Google rich snippets
-  - Public display with filtering and sorting
+- [x] **Reviews app** — implement the stub:
+  - `Review` model: Package + User + Booking + rating (1–5) + title/body + photos
+  - Staff moderation: approve (publishes + updates package rating) / reject (with reason) / delete
+  - Aggregate rating auto-updated in `Package.rating_average` via `update_rating()`
+  - JSON-LD schema markup for Google rich snippets (AggregateRating)
+  - Public display with rating breakdown, star filter, sort; submit form with eligibility check
+  - REST API: GET approved reviews per package, POST create review (token auth)
 
-- [ ] **AI Assistant app** — implement the stub, all as async Celery tasks:
+- [x] **AI Assistant app** — implement the stub, all as async Celery tasks:
   - **PDF parser**: upload lodge PDF brochure → auto-populate `Accommodation` fields
   - **Itinerary generator**: destination + duration + budget → draft day-by-day itinerary
   - **Custom quote builder**: AI suggests packages from inquiry requirements
@@ -76,8 +75,8 @@ Status key: `[ ]` not started · `[~]` in progress · `[x]` done
 
 ## Phase 5 — Growth & Polish
 
-- [ ] **SEO meta tags in templates** — base templates don't use the `meta_title` / `meta_description` fields that are on every model. Wire `get_meta_title()` and `get_meta_description()` into `<head>`. Free organic traffic.
-- [ ] **Sitemap** — add Django's sitemaps framework for destinations, packages, activities. Submittable to Google Search Console.
+- [x] **SEO meta tags in templates** — base templates don't use the `meta_title` / `meta_description` fields that are on every model. Wire `get_meta_title()` and `get_meta_description()` into `<head>`. Free organic traffic.
+- [x] **Sitemap** — add Django's sitemaps framework for destinations, packages, activities. Submittable to Google Search Console.
 - [ ] **Multi-currency display** — `Package` model already has currency choices. Wire to exchange rates so the public site shows prices in visitor's currency.
 - [ ] **Analytics dashboard** — `view_count` is already tracked on every model. Surface it:
   - Most viewed packages / destinations

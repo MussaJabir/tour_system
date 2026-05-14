@@ -11,6 +11,19 @@
 
     <!-- Title -->
     <title>{% block title %}Tour Management System{% endblock %}</title>
+
+    <!-- Canonical URL -->
+    {% block canonical %}{% endblock %}
+
+    <!-- Open Graph / Social -->
+    <meta property="og:type" content="{% block og_type %}website{% endblock %}">
+    <meta property="og:title" content="{% block og_title %}{% block title2 %}Tour Management System{% endblock %}{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}Explore amazing tour packages, destinations, activities and accommodations.{% endblock %}">
+    <meta property="og:image" content="{% block og_image %}{% endblock %}">
+    <meta property="og:url" content="{% block og_url %}{{ request.build_absolute_uri }}{% endblock %}">
+
+    <!-- Extra head tags (robots, schema, etc.) -->
+    {% block meta_tags %}{% endblock %}
     
     <!-- Favicon Icon -->
     <link rel="shortcut icon" href="{% static 'frontend/assets/images/logos/favicon.png' %}" type="image/x-icon">

@@ -5,7 +5,7 @@ from django.utils.safestring import mark_safe
 from .models import (
     Package, PackageImage, PackageItinerary, PackageInclusion,
     BookingInquiry, CustomPackage, InquiryMessage,
-    Booking, Passenger, Payment,
+    Booking, Passenger, Payment, Departure, SavedPackage,
 )
 
 
@@ -31,6 +31,14 @@ class PackageInclusionInline(admin.TabularInline):
     model = PackageInclusion
     extra = 1
     fields = ['inclusion_type', 'item_name', 'is_included', 'order', 'is_active']
+    classes = ['collapse']
+
+
+class DepartureInline(admin.TabularInline):
+    model = Departure
+    extra = 1
+    fields = ['departure_date', 'max_seats', 'booked_seats', 'status', 'notes']
+    readonly_fields = ['booked_seats']
     classes = ['collapse']
 
 
@@ -108,7 +116,7 @@ class PackageAdmin(admin.ModelAdmin):
             'classes': ('collapse',)
         }),
     )
-    inlines = [PackageImageInline, PackageItineraryInline, PackageInclusionInline]
+    inlines = [PackageImageInline, PackageItineraryInline, PackageInclusionInline, DepartureInline]
     date_hierarchy = 'created_at'
     list_per_page = 25
     actions = ['make_featured', 'remove_featured', 'activate', 'deactivate']
@@ -809,3 +817,28 @@ class PaymentAdmin(admin.ModelAdmin):
             color, obj.get_status_display()
         )
     status_badge.short_description = 'Status'
+
+
+@admin.register(Departure)
+class DepartureAdmin(admin.ModelAdmin):
+    list_display = ['package', 'departure_date', 'max_seats', 'booked_seats', 'seats_remaining_display', 'status']
+    list_filter = ['status', 'departure_date']
+    search_fields = ['package__name']
+    readonly_fields = ['booked_seats']
+    ordering = ['departure_date']
+
+    def seats_remaining_display(self, obj):
+        remaining = obj.seats_remaining
+        color = '#28a745' if remaining > 0 else '#dc3545'
+        return format_html(
+            '<span style="color: {}; font-weight: bold;">{}</span>', color, remaining
+        )
+    seats_remaining_display.short_description = 'Remaining'
+
+
+@admin.register(SavedPackage)
+class SavedPackageAdmin(admin.ModelAdmin):
+    list_display = ['user', 'package', 'created_at']
+    list_filter = ['created_at']
+    search_fields = ['user__email', 'user__username', 'package__name']
+    raw_id_fields = ['user', 'package']

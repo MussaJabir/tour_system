@@ -1,8 +1,20 @@
 from rest_framework import serializers
-from .models import Package, PackageImage, PackageItinerary, PackageInclusion
+from .models import Package, PackageImage, PackageItinerary, PackageInclusion, Departure
 from destinations.serializers import DestinationListSerializer
 from activities.serializers import ActivityListSerializer
 from accommodations.serializers import AccommodationListSerializer
+
+
+class DepartureSerializer(serializers.ModelSerializer):
+    seats_remaining = serializers.ReadOnlyField()
+    is_available = serializers.ReadOnlyField()
+
+    class Meta:
+        model = Departure
+        fields = [
+            'id', 'departure_date', 'max_seats', 'booked_seats',
+            'seats_remaining', 'is_available', 'status',
+        ]
 
 
 class PackageImageSerializer(serializers.ModelSerializer):
@@ -78,19 +90,20 @@ class PackageDetailSerializer(serializers.ModelSerializer):
     gallery_images = PackageImageSerializer(many=True, read_only=True)
     itineraries = PackageItinerarySerializer(many=True, read_only=True)
     inclusions = PackageInclusionSerializer(many=True, read_only=True)
-    
+    upcoming_departures = serializers.SerializerMethodField()
+
     final_price = serializers.ReadOnlyField()
     discount_amount = serializers.ReadOnlyField()
     duration_display = serializers.ReadOnlyField()
     is_available = serializers.ReadOnlyField()
     spots_remaining = serializers.ReadOnlyField()
-    
+
     # Convert text fields to lists
     highlights_list = serializers.SerializerMethodField()
     included_items_list = serializers.SerializerMethodField()
     excluded_items_list = serializers.SerializerMethodField()
     requirements_list = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = Package
         fields = [
@@ -114,6 +127,7 @@ class PackageDetailSerializer(serializers.ModelSerializer):
             'gallery_images',
             'itineraries',
             'inclusions',
+            'upcoming_departures',
             'is_customizable',
             'rating_average', 'review_count',
             'booking_count', 'view_count',
@@ -127,6 +141,14 @@ class PackageDetailSerializer(serializers.ModelSerializer):
             'created_at', 'updated_at'
         ]
     
+    def get_upcoming_departures(self, obj):
+        from django.utils import timezone
+        qs = obj.departures.filter(
+            status=Departure.STATUS_AVAILABLE,
+            departure_date__gte=timezone.now().date(),
+        )
+        return DepartureSerializer(qs, many=True).data
+
     def get_highlights_list(self, obj):
         """Convert highlights text to list"""
         if not obj.highlights:

@@ -44,9 +44,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sitemaps',
     'rest_framework',
+    'rest_framework.authtoken',
     'corsheaders',
     'django_filters',
+    'accounts',
     'core',
     'destinations',
     'accommodations',
@@ -54,8 +57,10 @@ INSTALLED_APPS = [
     'activities',
     'reviews',
     'ai_assistant',
-    'api'
+    'api',
 ]
+
+AUTH_USER_MODEL = 'accounts.CustomUser'
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
@@ -183,8 +188,10 @@ CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60  # 30 minutes
 CELERY_RESULT_EXPIRES = 3600  # 1 hour
 
-# OpenAI Configuration
+# OpenAI Configuration (fallback — primary config is via Admin > AI Configuration)
 OPENAI_API_KEY = config('OPENAI_API_KEY', default='')
+
+# django-cryptography derives its key from SECRET_KEY by default — no extra config needed.
 
 # Email Configuration
 EMAIL_BACKEND = config('EMAIL_BACKEND', default='django.core.mail.backends.console.EmailBackend')
@@ -197,6 +204,7 @@ EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
 # DRF Configuration
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
         'rest_framework.authentication.SessionAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [

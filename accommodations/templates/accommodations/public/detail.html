@@ -1,6 +1,20 @@
 {% extends 'frontend/base.html' %}
 {% load static %}
-{% block title %}{{ accommodation.name }} | Tour System{% endblock %}
+
+{% block title %}{{ accommodation.get_meta_title }} | Tour System{% endblock %}
+{% block title2 %}{{ accommodation.get_meta_title }} | Tour System{% endblock %}
+
+{% block meta_description %}{{ accommodation.get_meta_description }}{% endblock %}
+{% block og_description %}{{ accommodation.get_meta_description }}{% endblock %}
+
+{% block meta_keywords %}{{ accommodation.meta_keywords }}{% endblock %}
+
+{% block canonical %}<link rel="canonical" href="{{ request.build_absolute_uri }}">{% endblock %}
+
+{% block og_type %}place{% endblock %}
+{% block og_url %}{{ request.build_absolute_uri }}{% endblock %}
+{% block og_image %}{% if accommodation.featured_image %}{{ request.scheme }}://{{ request.get_host }}{{ accommodation.featured_image.url }}{% endif %}{% endblock %}
+
 {% block content %}
 <section class="page-banner-area pt-245 rpt-150 pb-170 rpb-100 rel z-1 bgc-lighter text-center">
     <div class="container"><h1 class="page-title">{{ accommodation.name }}</h1></div>

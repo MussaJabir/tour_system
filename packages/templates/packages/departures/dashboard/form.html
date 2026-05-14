@@ -1,0 +1,74 @@
+{% extends "backend/base.html" %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0">{{ title }}</h4>
+        <a href="{% url 'packages:dashboard_departure_list' package_pk=package.pk %}"
+           class="btn btn-outline-secondary btn-sm">
+            <i class="mdi mdi-arrow-left"></i> Back to Departures
+        </a>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">{{ package.name }}</h6>
+                </div>
+                <div class="card-body">
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+
+                        {% if form.non_field_errors %}
+                        <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+                        {% endif %}
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Departure Date <span class="text-danger">*</span></label>
+                            {{ form.departure_date }}
+                            {% if form.departure_date.errors %}
+                            <div class="text-danger small mt-1">{{ form.departure_date.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Max Seats <span class="text-danger">*</span></label>
+                            {{ form.max_seats }}
+                            {% if form.max_seats.errors %}
+                            <div class="text-danger small mt-1">{{ form.max_seats.errors }}</div>
+                            {% endif %}
+                            <div class="form-text">Total seats available for this departure.</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Status</label>
+                            {{ form.status }}
+                            {% if form.status.errors %}
+                            <div class="text-danger small mt-1">{{ form.status.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Notes</label>
+                            {{ form.notes }}
+                            {% if form.notes.errors %}
+                            <div class="text-danger small mt-1">{{ form.notes.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">Save Departure</button>
+                            <a href="{% url 'packages:dashboard_departure_list' package_pk=package.pk %}"
+                               class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

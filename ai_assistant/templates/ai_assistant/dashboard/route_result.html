@@ -1,0 +1,77 @@
+{% extends "backend/base.html" %}
+
+{% block title %}Route Result{% endblock %}
+
+{% if job.is_running %}
+<meta http-equiv="refresh" content="4">
+{% endif %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="h4 mb-0">Route Optimization — Job #{{ job.pk }}</h2>
+        <a href="{% url 'ai_assistant:route_optimize' %}" class="btn btn-outline-info btn-sm">
+            <i class="mdi mdi-plus me-1"></i>New Route
+        </a>
+    </div>
+
+    <div class="card mb-3">
+        <div class="card-header">Input Destinations</div>
+        <div class="card-body">
+            <pre class="mb-0" style="white-space:pre-wrap;">{{ job.destination_names }}</pre>
+        </div>
+    </div>
+
+    {% if job.status == 'pending' or job.status == 'processing' %}
+    <div class="alert alert-info">
+        <i class="mdi mdi-loading mdi-spin me-1"></i>
+        AI is calculating the optimal route — refreshing every 4 seconds.
+    </div>
+
+    {% elif job.status == 'done' %}
+    <div class="alert alert-success"><i class="mdi mdi-check-circle me-1"></i>Route optimized.</div>
+    {% if job.optimized_route %}
+    <div class="card">
+        <div class="card-header">Optimized Route</div>
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Destination</th>
+                        <th>Drive from previous</th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for stop in job.optimized_route %}
+                    <tr>
+                        <td><span class="badge bg-info">{{ stop.order }}</span></td>
+                        <td><strong>{{ stop.name }}</strong></td>
+                        <td>
+                            {% if stop.drive_from_previous_minutes %}
+                            {{ stop.drive_from_previous_minutes }} min
+                            {% else %}
+                            — Start
+                            {% endif %}
+                        </td>
+                        <td class="text-muted small">{{ stop.notes }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    {% elif job.status == 'failed' %}
+    <div class="alert alert-danger">
+        <strong>Failed:</strong> {{ job.error_message }}
+    </div>
+    {% endif %}
+
+    <div class="mt-3">
+        <small class="text-muted">Created {{ job.created_at }}{% if job.completed_at %} · Completed {{ job.completed_at }}{% endif %}</small>
+    </div>
+</div>
+{% endblock %}

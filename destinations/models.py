@@ -1,6 +1,8 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.utils.text import slugify
+
+User = get_user_model()
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.urls import reverse
 
@@ -150,9 +152,18 @@ class Destination(models.Model):
         super().save(*args, **kwargs)
     
     def get_absolute_url(self):
-        """Return the URL for this destination"""
         return reverse('public_destination_detail', kwargs={'slug': self.slug})
-    
+
+    def get_meta_title(self):
+        return self.meta_title or self.name
+
+    def get_meta_description(self):
+        if self.meta_description:
+            return self.meta_description
+        if self.short_description:
+            return self.short_description[:160]
+        return self.description[:160] + '...' if self.description else ''
+
     def increment_view_count(self):
         """Increment the view counter"""
         self.view_count += 1
