@@ -22,4 +22,7 @@ urlpatterns = [
 
     # Reviews API
     path('', include('reviews.api_urls')),
+
+    # Customer-facing API (Flutter app)
+    path('', include('packages.customer_api_urls')),
 ]
