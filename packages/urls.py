@@ -69,5 +69,24 @@ urlpatterns = [
     # Custom Package View (Secure Token)
     path('custom/<uuid:token>/', views.custom_package_view, name='custom_package_view'),
     path('custom/<uuid:token>/<str:action>/', views.custom_package_action, name='custom_package_action'),
+
+    # ============================================================================
+    # BOOKING SYSTEM URLs
+    # ============================================================================
+    path('dashboard/bookings/', views.dashboard_booking_list, name='dashboard_booking_list'),
+    path('dashboard/bookings/create/', views.dashboard_booking_create, name='dashboard_booking_create'),
+    path('dashboard/bookings/create/from-inquiry/<int:inquiry_pk>/', views.dashboard_booking_create, name='dashboard_booking_create_from_inquiry'),
+    path('dashboard/bookings/<int:pk>/', views.dashboard_booking_detail, name='dashboard_booking_detail'),
+    path('dashboard/bookings/<int:pk>/edit/', views.dashboard_booking_edit, name='dashboard_booking_edit'),
+    path('dashboard/bookings/<int:pk>/cancel/', views.dashboard_booking_cancel, name='dashboard_booking_cancel'),
+
+    # Passengers
+    path('dashboard/bookings/<int:booking_pk>/passengers/add/', views.dashboard_passenger_add, name='dashboard_passenger_add'),
+    path('dashboard/passengers/<int:pk>/edit/', views.dashboard_passenger_edit, name='dashboard_passenger_edit'),
+    path('dashboard/passengers/<int:pk>/delete/', views.dashboard_passenger_delete, name='dashboard_passenger_delete'),
+
+    # Payments
+    path('dashboard/bookings/<int:booking_pk>/payments/record/', views.dashboard_payment_record, name='dashboard_payment_record'),
+    path('dashboard/payments/<int:pk>/delete/', views.dashboard_payment_delete, name='dashboard_payment_delete'),
 ]
 

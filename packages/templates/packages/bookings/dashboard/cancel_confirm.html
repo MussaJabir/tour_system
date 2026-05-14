@@ -1,0 +1,46 @@
+{% extends "backend/base.html" %}
+{% load static %}
+
+{% block title %}Cancel Booking{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white">
+                    <strong>Cancel Booking</strong>
+                </div>
+                <div class="card-body">
+                    <p>Are you sure you want to cancel booking <strong>{{ booking.booking_reference }}</strong>?</p>
+
+                    <dl class="row mb-3">
+                        <dt class="col-5">Package</dt>
+                        <dd class="col-7">{{ booking.package.name }}</dd>
+
+                        <dt class="col-5">Customer</dt>
+                        <dd class="col-7">
+                            {% if booking.inquiry %}{{ booking.inquiry.customer_name }}{% else %}—{% endif %}
+                        </dd>
+
+                        <dt class="col-5">Departure</dt>
+                        <dd class="col-7">{{ booking.departure_date|date:"M d, Y" }}</dd>
+
+                        <dt class="col-5">Total Paid</dt>
+                        <dd class="col-7">{{ booking.currency }} {{ booking.total_paid }}</dd>
+                    </dl>
+
+                    <p class="text-danger small">This action will send a cancellation notification to staff and the customer.</p>
+
+                    <form method="post" class="d-flex gap-2">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger">Yes, Cancel Booking</button>
+                        <a href="{% url 'packages:dashboard_booking_detail' booking.pk %}"
+                           class="btn btn-outline-secondary">Go Back</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

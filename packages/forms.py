@@ -3,7 +3,8 @@ from django.core.exceptions import ValidationError
 from django.contrib.auth import get_user_model
 from .models import (
     Package, PackageImage, PackageItinerary, PackageInclusion,
-    BookingInquiry, CustomPackage, InquiryMessage, CustomPackageItinerary
+    BookingInquiry, CustomPackage, InquiryMessage, CustomPackageItinerary,
+    Booking, Passenger, Payment,
 )
 
 User = get_user_model()
@@ -979,6 +980,84 @@ class CustomPackageItineraryForm(forms.ModelForm):
                 raise ValidationError({
                     'end_day_number': 'End day must be equal to or greater than start day.'
                 })
-        
+
         return cleaned_data
+
+
+# ============================================================================
+# BOOKING SYSTEM FORMS
+# ============================================================================
+
+class BookingForm(forms.ModelForm):
+    class Meta:
+        model = Booking
+        fields = [
+            'package', 'inquiry', 'custom_package',
+            'departure_date', 'return_date',
+            'num_adults', 'num_children',
+            'quoted_price', 'deposit_amount', 'currency',
+            'status', 'staff_assigned',
+            'special_requirements', 'internal_notes',
+        ]
+        widgets = {
+            'departure_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'return_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'special_requirements': forms.Textarea(attrs={'rows': 3, 'class': 'form-control'}),
+            'internal_notes': forms.Textarea(attrs={'rows': 3, 'class': 'form-control'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields.values():
+            if not isinstance(field.widget, forms.Textarea):
+                field.widget.attrs.setdefault('class', 'form-control')
+        self.fields['inquiry'].queryset = BookingInquiry.objects.filter(
+            status__in=['approved', 'converted']
+        )
+        self.fields['inquiry'].required = False
+        self.fields['custom_package'].required = False
+        self.fields['return_date'].required = False
+        self.fields['staff_assigned'].required = False
+
+
+class PassengerForm(forms.ModelForm):
+    class Meta:
+        model = Passenger
+        fields = [
+            'first_name', 'last_name', 'passport_number', 'nationality',
+            'date_of_birth', 'dietary_requirements', 'medical_notes',
+            'emergency_contact_name', 'emergency_contact_phone', 'is_lead_passenger',
+        ]
+        widgets = {
+            'date_of_birth': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'medical_notes': forms.Textarea(attrs={'rows': 2, 'class': 'form-control'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields.values():
+            if not isinstance(field.widget, (forms.Textarea, forms.CheckboxInput)):
+                field.widget.attrs.setdefault('class', 'form-control')
+
+
+class PaymentForm(forms.ModelForm):
+    class Meta:
+        model = Payment
+        fields = [
+            'payment_type', 'amount', 'currency', 'payment_method',
+            'status', 'reference_number', 'received_at', 'notes',
+        ]
+        widgets = {
+            'received_at': forms.DateTimeInput(
+                attrs={'type': 'datetime-local', 'class': 'form-control'}
+            ),
+            'notes': forms.Textarea(attrs={'rows': 2, 'class': 'form-control'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields.values():
+            if not isinstance(field.widget, forms.Textarea):
+                field.widget.attrs.setdefault('class', 'form-control')
+        self.fields['received_at'].required = False
 

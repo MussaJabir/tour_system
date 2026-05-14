@@ -1,0 +1,71 @@
+{% extends "backend/base.html" %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="mb-3">
+        <a href="{% url 'packages:dashboard_booking_list' %}" class="text-muted small">
+            <i class="mdi mdi-arrow-left"></i> Bookings
+        </a>
+        {% if booking %}
+            /
+            <a href="{% url 'packages:dashboard_booking_detail' booking.pk %}" class="text-muted small">
+                {{ booking.booking_reference }}
+            </a>
+        {% endif %}
+        <h4 class="mb-0 mt-1">{{ title }}</h4>
+    </div>
+
+    {% if inquiry %}
+        <div class="alert alert-info">
+            <strong>Linked Inquiry:</strong> {{ inquiry.inquiry_reference }} —
+            {{ inquiry.customer_name }} ({{ inquiry.customer_email }})
+        </div>
+    {% endif %}
+
+    <div class="card">
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+                {% endif %}
+
+                <div class="row g-3">
+                    {% for field in form %}
+                        <div class="col-md-6">
+                            <label class="form-label" for="{{ field.id_for_label }}">
+                                {{ field.label }}
+                                {% if field.field.required %}<span class="text-danger">*</span>{% endif %}
+                            </label>
+                            {{ field }}
+                            {% if field.help_text %}
+                                <div class="form-text">{{ field.help_text }}</div>
+                            {% endif %}
+                            {% if field.errors %}
+                                <div class="text-danger small">{{ field.errors }}</div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <div class="mt-4 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        {% if booking %}Save Changes{% else %}Create Booking{% endif %}
+                    </button>
+                    {% if booking %}
+                        <a href="{% url 'packages:dashboard_booking_detail' booking.pk %}"
+                           class="btn btn-outline-secondary">Cancel</a>
+                    {% else %}
+                        <a href="{% url 'packages:dashboard_booking_list' %}"
+                           class="btn btn-outline-secondary">Cancel</a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
