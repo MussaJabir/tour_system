@@ -75,8 +75,8 @@ Status key: `[ ]` not started · `[~]` in progress · `[x]` done
 
 ## Phase 5 — Growth & Polish
 
-- [ ] **SEO meta tags in templates** — base templates don't use the `meta_title` / `meta_description` fields that are on every model. Wire `get_meta_title()` and `get_meta_description()` into `<head>`. Free organic traffic.
-- [ ] **Sitemap** — add Django's sitemaps framework for destinations, packages, activities. Submittable to Google Search Console.
+- [x] **SEO meta tags in templates** — base templates don't use the `meta_title` / `meta_description` fields that are on every model. Wire `get_meta_title()` and `get_meta_description()` into `<head>`. Free organic traffic.
+- [x] **Sitemap** — add Django's sitemaps framework for destinations, packages, activities. Submittable to Google Search Console.
 - [ ] **Multi-currency display** — `Package` model already has currency choices. Wire to exchange rates so the public site shows prices in visitor's currency.
 - [ ] **Analytics dashboard** — `view_count` is already tracked on every model. Surface it:
   - Most viewed packages / destinations

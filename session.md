@@ -194,4 +194,26 @@ Running record of every working session. Most recent at the top.
 
 ---
 
+## Session 009 — 2026-05-14
+
+**Type:** Phase 5 — SEO Meta Tags & Sitemap
+**Branch:** `feature/phase-5-seo-sitemap` → PR #10 → `develop`
+
+### What we did
+1. **Base template SEO blocks** (`templates/frontend/base.html`) — added `{% block canonical %}`, `{% block og_type %}`, `{% block og_title %}`, `{% block og_description %}`, `{% block og_image %}`, `{% block og_url %}` after the existing meta keywords block; defaults to sensible fallbacks
+2. **Package detail template** — wired all 6 SEO blocks using `package.get_meta_title()`, `package.get_meta_description()`, `package.meta_keywords`; og:image inside the block with `{% if %}` (not wrapping the block)
+3. **Destination detail template** — same SEO blocks wired to `destination.*`
+4. **Activity detail template** — same SEO blocks wired to `activity.*`
+5. **Accommodation detail template** — same SEO blocks wired to `accommodation.*`
+6. **Bug fix** — fixed `{% if obj.image %}{% block og_image %}...{% endblock %}{% endif %}` anti-pattern in all four templates; Django evaluates block tags before if conditions so the if must go inside the block
+7. **Model helpers** — added `get_meta_title()` and `get_meta_description()` to `Destination`, `Activity`, and `Accommodation` (they pre-dated `SEOMixin` and had the fields inline but not the fallback methods)
+8. **Sitemap** (`core/sitemaps.py`) — `PackageSitemap` (priority 0.9, weekly), `DestinationSitemap` (0.8, monthly), `ActivitySitemap` (0.7, monthly), `AccommodationSitemap` (0.6, monthly), `StaticSitemap` (0.5, weekly for home/list pages); registered at `/sitemap.xml` in `config/urls.py`
+9. **`django.contrib.sitemaps` added** to `INSTALLED_APPS` in `config/settings.py`
+10. **13 new tests** (`core/tests_sitemaps.py`) — sitemap 200 status, XML validity, slug presence for all 4 content types in sitemap, meta title on all 4 detail page types; **128/128 total tests passing**
+
+### PR
+- https://github.com/MussaJabir/tour_system/pull/10
+
+---
+
 _Add new sessions above this line._
