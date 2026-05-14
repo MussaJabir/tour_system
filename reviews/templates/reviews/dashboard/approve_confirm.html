@@ -1,0 +1,30 @@
+{% extends "backend/base.html" %}
+
+{% block title %}Approve Review{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card border-success">
+                <div class="card-header bg-success text-white"><strong>Approve Review</strong></div>
+                <div class="card-body">
+                    <p>Approve and publish this review?</p>
+                    <dl class="row">
+                        <dt class="col-4">Package</dt><dd class="col-8">{{ review.package.name }}</dd>
+                        <dt class="col-4">Reviewer</dt><dd class="col-8">{{ review.reviewer_name|default:"Anonymous" }}</dd>
+                        <dt class="col-4">Rating</dt><dd class="col-8">{{ review.rating }}/5</dd>
+                        <dt class="col-4">Title</dt><dd class="col-8">{{ review.title }}</dd>
+                    </dl>
+                    <p class="text-muted small">This will publish the review and update the package rating.</p>
+                    <form method="post" class="d-flex gap-2">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-success">Yes, Approve</button>
+                        <a href="{% url 'reviews:dashboard_review_detail' review.pk %}" class="btn btn-outline-secondary">Cancel</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

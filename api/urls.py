@@ -19,4 +19,7 @@ urlpatterns = [
 
     # Packages API
     path('', include('packages.api_urls')),
+
+    # Reviews API
+    path('', include('reviews.api_urls')),
 ]

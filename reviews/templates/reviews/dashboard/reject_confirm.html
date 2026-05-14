@@ -1,0 +1,34 @@
+{% extends "backend/base.html" %}
+
+{% block title %}Reject Review{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card border-warning">
+                <div class="card-header bg-warning text-dark"><strong>Reject Review</strong></div>
+                <div class="card-body">
+                    <p>Reject this review? It will not be shown publicly.</p>
+                    <dl class="row">
+                        <dt class="col-4">Package</dt><dd class="col-8">{{ review.package.name }}</dd>
+                        <dt class="col-4">Reviewer</dt><dd class="col-8">{{ review.reviewer_name|default:"Anonymous" }}</dd>
+                        <dt class="col-4">Rating</dt><dd class="col-8">{{ review.rating }}/5</dd>
+                    </dl>
+                    <form method="post" class="d-flex flex-column gap-2">
+                        {% csrf_token %}
+                        <div>
+                            <label class="form-label">Rejection Reason (optional)</label>
+                            <textarea name="reason" class="form-control" rows="3" placeholder="Spam, inappropriate content, etc."></textarea>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-warning">Reject</button>
+                            <a href="{% url 'reviews:dashboard_review_detail' review.pk %}" class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

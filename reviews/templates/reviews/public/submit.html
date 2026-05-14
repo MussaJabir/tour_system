@@ -1,0 +1,65 @@
+{% extends "frontend/base.html" %}
+{% load static %}
+
+{% block title %}Write a Review — {{ package.name }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-7">
+            <nav aria-label="breadcrumb" class="mb-4">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'packages:public_package_list' %}">Packages</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'packages:public_package_detail' package.slug %}">{{ package.name }}</a></li>
+                    <li class="breadcrumb-item active">Write a Review</li>
+                </ol>
+            </nav>
+
+            <h3 class="mb-4">Review: {{ package.name }}</h3>
+
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+
+            {% if not user.is_authenticated %}
+                <div class="alert alert-info">
+                    You need to be logged in to submit a review.
+                </div>
+            {% else %}
+                {% if not eligible_booking %}
+                    <div class="alert alert-warning">
+                        Only guests who have completed a booking for this package can leave a review.
+                        Your review will still be accepted but marked for manual verification.
+                    </div>
+                {% else %}
+                    <div class="alert alert-success">
+                        Verified guest review — linked to booking {{ eligible_booking.booking_reference }}.
+                    </div>
+                {% endif %}
+
+                <div class="card p-4">
+                    <form method="post">
+                        {% csrf_token %}
+                        {% for field in form %}
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold" for="{{ field.id_for_label }}">
+                                    {{ field.label }}
+                                    {% if field.field.required %}<span class="text-danger">*</span>{% endif %}
+                                </label>
+                                {{ field }}
+                                {% if field.errors %}<div class="text-danger small mt-1">{{ field.errors }}</div>{% endif %}
+                            </div>
+                        {% endfor %}
+                        <button type="submit" class="btn btn-primary w-100">Submit Review</button>
+                    </form>
+                </div>
+                <p class="text-muted small text-center mt-3">
+                    Reviews are moderated before appearing publicly. We aim to review within 24 hours.
+                </p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

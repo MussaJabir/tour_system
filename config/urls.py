@@ -31,6 +31,7 @@ urlpatterns = [
     path('', include('accommodations.urls')),
     path('', include('packages.urls')),
     path('', include('core.urls')),
+    path('', include('reviews.urls')),
 ]
 
 # Serve media files in development
