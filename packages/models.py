@@ -955,7 +955,7 @@ class CustomPackageItinerary(TimeStampedModel):
         if self.end_day_number and self.end_day_number > self.day_number:
             return self.end_day_number - self.day_number + 1
         return 1
-    
+
     @property
     def meals_display(self):
         """Human-readable meals included"""
@@ -967,3 +967,174 @@ class CustomPackageItinerary(TimeStampedModel):
         if self.dinner_included:
             meals.append('Dinner')
         return ', '.join(meals) if meals else 'No meals'
+
+
+# ============================================================================
+# BOOKING SYSTEM
+# ============================================================================
+
+class Booking(TimeStampedModel):
+    STATUS_CHOICES = [
+        ('pending_deposit', 'Pending Deposit'),
+        ('deposit_paid', 'Deposit Paid'),
+        ('confirmed', 'Confirmed - Fully Paid'),
+        ('in_progress', 'In Progress - Trip Ongoing'),
+        ('completed', 'Completed'),
+        ('cancelled', 'Cancelled'),
+        ('refunded', 'Refunded'),
+    ]
+    CURRENCY_CHOICES = [
+        ('USD', 'US Dollar'),
+        ('EUR', 'Euro'),
+        ('GBP', 'British Pound'),
+        ('TZS', 'Tanzanian Shilling'),
+        ('KES', 'Kenyan Shilling'),
+    ]
+    booking_reference = models.CharField(max_length=50, unique=True, editable=False)
+    inquiry = models.OneToOneField(
+        BookingInquiry, on_delete=models.SET_NULL, null=True, blank=True, related_name='booking',
+    )
+    custom_package = models.ForeignKey(
+        CustomPackage, on_delete=models.SET_NULL, null=True, blank=True, related_name='bookings',
+    )
+    package = models.ForeignKey(Package, on_delete=models.PROTECT, related_name='bookings')
+    departure_date = models.DateField()
+    return_date = models.DateField(null=True, blank=True)
+    num_adults = models.PositiveIntegerField(default=1, validators=[MinValueValidator(1)])
+    num_children = models.PositiveIntegerField(default=0)
+    quoted_price = models.DecimalField(max_digits=12, decimal_places=2)
+    deposit_amount = models.DecimalField(max_digits=12, decimal_places=2)
+    currency = models.CharField(max_length=3, choices=CURRENCY_CHOICES, default='USD')
+    status = models.CharField(
+        max_length=20, choices=STATUS_CHOICES, default='pending_deposit', db_index=True
+    )
+    special_requirements = models.TextField(blank=True)
+    staff_assigned = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_bookings',
+    )
+    internal_notes = models.TextField(blank=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Booking'
+        verbose_name_plural = 'Bookings'
+        indexes = [
+            models.Index(fields=['status', '-created_at']),
+            models.Index(fields=['departure_date']),
+        ]
+
+    def __str__(self):
+        return f"{self.booking_reference} - {self.package.name}"
+
+    def save(self, *args, **kwargs):
+        if not self.booking_reference:
+            from django.utils import timezone
+            date_str = timezone.now().strftime('%Y%m%d')
+            last = Booking.objects.filter(
+                booking_reference__startswith=f'BKG-{date_str}'
+            ).order_by('-booking_reference').first()
+            seq = int(last.booking_reference.split('-')[-1]) + 1 if last else 1
+            self.booking_reference = f'BKG-{date_str}-{seq:05d}'
+        super().save(*args, **kwargs)
+
+    @property
+    def total_travelers(self):
+        return self.num_adults + self.num_children
+
+    @property
+    def total_paid(self):
+        return sum(p.amount for p in self.payments.filter(status='confirmed'))
+
+    @property
+    def balance_due(self):
+        return self.quoted_price - self.total_paid
+
+    @property
+    def is_fully_paid(self):
+        return self.total_paid >= self.quoted_price
+
+    @property
+    def status_badge_color(self):
+        return {
+            'pending_deposit': 'warning', 'deposit_paid': 'info',
+            'confirmed': 'success', 'in_progress': 'primary',
+            'completed': 'success', 'cancelled': 'secondary', 'refunded': 'danger',
+        }.get(self.status, 'secondary')
+
+
+class Passenger(TimeStampedModel):
+    booking = models.ForeignKey(Booking, on_delete=models.CASCADE, related_name='passengers')
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100)
+    passport_number = models.CharField(max_length=50, blank=True)
+    nationality = models.CharField(max_length=100, blank=True)
+    date_of_birth = models.DateField(null=True, blank=True)
+    dietary_requirements = models.CharField(max_length=200, blank=True)
+    medical_notes = models.TextField(blank=True)
+    emergency_contact_name = models.CharField(max_length=200, blank=True)
+    emergency_contact_phone = models.CharField(max_length=50, blank=True)
+    is_lead_passenger = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ['-is_lead_passenger', 'last_name', 'first_name']
+        verbose_name = 'Passenger'
+        verbose_name_plural = 'Passengers'
+
+    def __str__(self):
+        lead = ' (Lead)' if self.is_lead_passenger else ''
+        return f"{self.first_name} {self.last_name}{lead}"
+
+    @property
+    def full_name(self):
+        return f"{self.first_name} {self.last_name}"
+
+
+class Payment(TimeStampedModel):
+    PAYMENT_TYPE_CHOICES = [
+        ('deposit', 'Deposit'),
+        ('balance', 'Balance Payment'),
+        ('full', 'Full Payment'),
+        ('extra', 'Extra Charge'),
+        ('refund', 'Refund'),
+    ]
+    PAYMENT_METHOD_CHOICES = [
+        ('cash', 'Cash'),
+        ('bank_transfer', 'Bank Transfer'),
+        ('mpesa', 'M-Pesa'),
+        ('card', 'Credit / Debit Card'),
+        ('stripe', 'Stripe (Online)'),
+        ('other', 'Other'),
+    ]
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('confirmed', 'Confirmed / Received'),
+        ('refunded', 'Refunded'),
+        ('failed', 'Failed'),
+    ]
+    booking = models.ForeignKey(Booking, on_delete=models.CASCADE, related_name='payments')
+    payment_type = models.CharField(max_length=20, choices=PAYMENT_TYPE_CHOICES, default='deposit')
+    amount = models.DecimalField(max_digits=12, decimal_places=2)
+    currency = models.CharField(max_length=3, default='USD')
+    payment_method = models.CharField(
+        max_length=20, choices=PAYMENT_METHOD_CHOICES, default='bank_transfer'
+    )
+    status = models.CharField(
+        max_length=20, choices=STATUS_CHOICES, default='confirmed', db_index=True
+    )
+    reference_number = models.CharField(max_length=100, blank=True)
+    notes = models.TextField(blank=True)
+    received_at = models.DateTimeField(null=True, blank=True)
+    recorded_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True, related_name='recorded_payments',
+    )
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Payment'
+        verbose_name_plural = 'Payments'
+
+    def __str__(self):
+        return (
+            f"{self.booking.booking_reference} - "
+            f"{self.get_payment_type_display()} {self.currency} {self.amount}"
+        )

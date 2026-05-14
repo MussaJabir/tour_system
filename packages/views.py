@@ -13,12 +13,14 @@ logger = logging.getLogger(__name__)
 
 from .models import (
     Package, PackageImage, PackageItinerary, PackageInclusion,
-    BookingInquiry, CustomPackage, InquiryMessage
+    BookingInquiry, CustomPackage, InquiryMessage,
+    Booking, Passenger, Payment,
 )
 from .forms import (
     PackageForm, PackageImageForm, PackageItineraryForm, PackageInclusionForm,
-    BookingInquiryForm, InquiryManagementForm, CustomPackageForm, 
-    InquiryMessageForm, InquiryFilterForm
+    BookingInquiryForm, InquiryManagementForm, CustomPackageForm,
+    InquiryMessageForm, InquiryFilterForm,
+    BookingForm, PassengerForm, PaymentForm,
 )
 from destinations.models import Destination
 
@@ -1240,3 +1242,218 @@ def dashboard_custom_itinerary_copy(request, custom_package_pk):
         'custom_package': custom_package,
     }
     return render(request, 'packages/inquiry/dashboard/custom_itinerary_copy.html', context)
+
+
+# ============================================================================
+# BOOKING DASHBOARD VIEWS
+# ============================================================================
+
+@login_required
+@staff_member_required
+def dashboard_booking_list(request):
+    bookings = Booking.objects.select_related('package', 'staff_assigned', 'inquiry').all()
+    status_filter = request.GET.get('status', '')
+    if status_filter:
+        bookings = bookings.filter(status=status_filter)
+    search = request.GET.get('q', '').strip()
+    if search:
+        bookings = bookings.filter(
+            Q(booking_reference__icontains=search) |
+            Q(package__name__icontains=search) |
+            Q(inquiry__customer_name__icontains=search) |
+            Q(inquiry__customer_email__icontains=search)
+        )
+    paginator = Paginator(bookings, 20)
+    page = paginator.get_page(request.GET.get('page'))
+    return render(request, 'packages/bookings/dashboard/list.html', {
+        'page_obj': page,
+        'status_filter': status_filter,
+        'search': search,
+        'status_choices': Booking.STATUS_CHOICES,
+        'total_count': bookings.count(),
+    })
+
+
+@login_required
+@staff_member_required
+def dashboard_booking_create(request, inquiry_pk=None):
+    inquiry = None
+    initial = {}
+    if inquiry_pk:
+        inquiry = get_object_or_404(BookingInquiry, pk=inquiry_pk)
+        initial = {
+            'inquiry': inquiry,
+            'num_adults': inquiry.number_of_adults,
+            'num_children': inquiry.number_of_children,
+            'departure_date': inquiry.preferred_travel_date,
+            'package': inquiry.base_package,
+            'staff_assigned': inquiry.staff_assigned,
+        }
+        if inquiry.custom_package:
+            initial['custom_package'] = inquiry.custom_package
+
+    if request.method == 'POST':
+        form = BookingForm(request.POST)
+        if form.is_valid():
+            booking = form.save()
+            if inquiry:
+                inquiry.status = 'converted'
+                inquiry.save(update_fields=['status'])
+            from .booking_emails import send_booking_confirmation
+            send_booking_confirmation(booking)
+            messages.success(request, f"Booking {booking.booking_reference} created.")
+            return redirect('packages:dashboard_booking_detail', pk=booking.pk)
+    else:
+        form = BookingForm(initial=initial)
+
+    return render(request, 'packages/bookings/dashboard/form.html', {
+        'form': form,
+        'inquiry': inquiry,
+        'title': 'Create Booking',
+    })
+
+
+@login_required
+@staff_member_required
+def dashboard_booking_detail(request, pk):
+    booking = get_object_or_404(
+        Booking.objects.select_related('package', 'inquiry', 'custom_package', 'staff_assigned')
+                       .prefetch_related('passengers', 'payments'),
+        pk=pk,
+    )
+    passenger_form = PassengerForm()
+    payment_form = PaymentForm()
+    return render(request, 'packages/bookings/dashboard/detail.html', {
+        'booking': booking,
+        'passenger_form': passenger_form,
+        'payment_form': payment_form,
+    })
+
+
+@login_required
+@staff_member_required
+def dashboard_booking_edit(request, pk):
+    booking = get_object_or_404(Booking, pk=pk)
+    old_status = booking.status
+    if request.method == 'POST':
+        form = BookingForm(request.POST, instance=booking)
+        if form.is_valid():
+            booking = form.save()
+            if booking.status != old_status:
+                from .booking_emails import send_booking_status_update
+                send_booking_status_update(booking, old_status)
+            messages.success(request, "Booking updated.")
+            return redirect('packages:dashboard_booking_detail', pk=booking.pk)
+    else:
+        form = BookingForm(instance=booking)
+    return render(request, 'packages/bookings/dashboard/form.html', {
+        'form': form,
+        'booking': booking,
+        'title': 'Edit Booking',
+    })
+
+
+@login_required
+@staff_member_required
+def dashboard_booking_cancel(request, pk):
+    booking = get_object_or_404(Booking, pk=pk)
+    if request.method == 'POST':
+        old_status = booking.status
+        booking.status = 'cancelled'
+        booking.save(update_fields=['status'])
+        from .booking_emails import send_booking_status_update
+        send_booking_status_update(booking, old_status)
+        messages.success(request, f"Booking {booking.booking_reference} cancelled.")
+        return redirect('packages:dashboard_booking_list')
+    return render(request, 'packages/bookings/dashboard/cancel_confirm.html', {'booking': booking})
+
+
+@login_required
+@staff_member_required
+def dashboard_passenger_add(request, booking_pk):
+    booking = get_object_or_404(Booking, pk=booking_pk)
+    if request.method == 'POST':
+        form = PassengerForm(request.POST)
+        if form.is_valid():
+            passenger = form.save(commit=False)
+            passenger.booking = booking
+            if passenger.is_lead_passenger:
+                booking.passengers.filter(is_lead_passenger=True).update(is_lead_passenger=False)
+            passenger.save()
+            messages.success(request, f"Passenger {passenger.full_name} added.")
+        else:
+            messages.error(request, "Please fix the errors below.")
+    return redirect('packages:dashboard_booking_detail', pk=booking_pk)
+
+
+@login_required
+@staff_member_required
+def dashboard_passenger_edit(request, pk):
+    passenger = get_object_or_404(Passenger, pk=pk)
+    booking = passenger.booking
+    if request.method == 'POST':
+        form = PassengerForm(request.POST, instance=passenger)
+        if form.is_valid():
+            updated = form.save(commit=False)
+            if updated.is_lead_passenger:
+                booking.passengers.exclude(pk=pk).filter(
+                    is_lead_passenger=True
+                ).update(is_lead_passenger=False)
+            updated.save()
+            messages.success(request, "Passenger updated.")
+            return redirect('packages:dashboard_booking_detail', pk=booking.pk)
+    else:
+        form = PassengerForm(instance=passenger)
+    return render(request, 'packages/bookings/dashboard/passenger_form.html', {
+        'form': form, 'passenger': passenger, 'booking': booking,
+    })
+
+
+@login_required
+@staff_member_required
+def dashboard_passenger_delete(request, pk):
+    passenger = get_object_or_404(Passenger, pk=pk)
+    booking_pk = passenger.booking.pk
+    if request.method == 'POST':
+        name = passenger.full_name
+        passenger.delete()
+        messages.success(request, f"Passenger {name} removed.")
+    return redirect('packages:dashboard_booking_detail', pk=booking_pk)
+
+
+@login_required
+@staff_member_required
+def dashboard_payment_record(request, booking_pk):
+    booking = get_object_or_404(Booking, pk=booking_pk)
+    if request.method == 'POST':
+        form = PaymentForm(request.POST)
+        if form.is_valid():
+            payment = form.save(commit=False)
+            payment.booking = booking
+            payment.recorded_by = request.user
+            payment.save()
+            if booking.is_fully_paid and booking.status == 'deposit_paid':
+                booking.status = 'confirmed'
+                booking.save(update_fields=['status'])
+                from .booking_emails import send_booking_status_update
+                send_booking_status_update(booking, 'deposit_paid')
+            elif payment.payment_type == 'deposit' and booking.status == 'pending_deposit':
+                booking.status = 'deposit_paid'
+                booking.save(update_fields=['status'])
+            from .booking_emails import send_payment_received
+            send_payment_received(booking, payment)
+            messages.success(request, f"Payment of {payment.currency} {payment.amount} recorded.")
+        else:
+            messages.error(request, "Please fix the errors below.")
+    return redirect('packages:dashboard_booking_detail', pk=booking_pk)
+
+
+@login_required
+@staff_member_required
+def dashboard_payment_delete(request, pk):
+    payment = get_object_or_404(Payment, pk=pk)
+    booking_pk = payment.booking.pk
+    if request.method == 'POST':
+        payment.delete()
+        messages.success(request, "Payment record deleted.")
+    return redirect('packages:dashboard_booking_detail', pk=booking_pk)

@@ -4,7 +4,8 @@ from django.urls import reverse
 from django.utils.safestring import mark_safe
 from .models import (
     Package, PackageImage, PackageItinerary, PackageInclusion,
-    BookingInquiry, CustomPackage, InquiryMessage
+    BookingInquiry, CustomPackage, InquiryMessage,
+    Booking, Passenger, Payment,
 )
 
 
@@ -653,3 +654,158 @@ class InquiryMessageAdmin(admin.ModelAdmin):
             'border-radius: 3px; font-size: 10px;">📧 Public</span>'
         )
     message_type.short_description = 'Type'
+
+
+# ============================================================================
+# BOOKING SYSTEM ADMIN (Phase 2)
+# ============================================================================
+
+class PassengerInline(admin.TabularInline):
+    model = Passenger
+    extra = 0
+    fields = ['first_name', 'last_name', 'passport_number', 'nationality', 'is_lead_passenger']
+    classes = ['collapse']
+
+
+class PaymentInline(admin.TabularInline):
+    model = Payment
+    extra = 0
+    fields = ['payment_type', 'amount', 'currency', 'payment_method', 'status', 'received_at']
+    readonly_fields = ['received_at']
+    classes = ['collapse']
+
+
+@admin.register(Booking)
+class BookingAdmin(admin.ModelAdmin):
+    list_display = [
+        'booking_reference', 'package', 'inquiry_link',
+        'departure_date', 'travelers_display', 'price_display',
+        'status_badge', 'created_at',
+    ]
+    list_filter = ['status', 'currency', 'departure_date', 'created_at']
+    search_fields = [
+        'booking_reference', 'package__name',
+        'inquiry__customer_name', 'inquiry__customer_email',
+    ]
+    readonly_fields = [
+        'booking_reference', 'total_travelers', 'total_paid',
+        'balance_due', 'is_fully_paid', 'created_at', 'updated_at',
+    ]
+    date_hierarchy = 'created_at'
+    list_per_page = 25
+    inlines = [PassengerInline, PaymentInline]
+
+    fieldsets = (
+        ('Booking Info', {
+            'fields': (
+                'booking_reference', 'package', 'inquiry', 'custom_package',
+                'staff_assigned', 'status',
+            )
+        }),
+        ('Travel Details', {
+            'fields': (
+                'departure_date', 'return_date',
+                'num_adults', 'num_children', 'total_travelers',
+            )
+        }),
+        ('Pricing', {
+            'fields': (
+                'quoted_price', 'deposit_amount', 'currency',
+                'total_paid', 'balance_due', 'is_fully_paid',
+            )
+        }),
+        ('Notes', {
+            'fields': ('special_requirements', 'internal_notes'),
+            'classes': ('collapse',)
+        }),
+        ('Timestamps', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+
+    def travelers_display(self, obj):
+        return f"{obj.num_adults}A / {obj.num_children}C"
+    travelers_display.short_description = 'Travelers'
+
+    def price_display(self, obj):
+        return format_html(
+            '{} {}<br><small>Deposit: {} {}</small>',
+            obj.currency, obj.quoted_price,
+            obj.currency, obj.deposit_amount,
+        )
+    price_display.short_description = 'Price'
+
+    def status_badge(self, obj):
+        colors = {
+            'pending_deposit': '#ffc107',
+            'deposit_paid': '#17a2b8',
+            'confirmed': '#28a745',
+            'in_progress': '#007bff',
+            'completed': '#20c997',
+            'cancelled': '#dc3545',
+            'refunded': '#6c757d',
+        }
+        color = colors.get(obj.status, '#6c757d')
+        return format_html(
+            '<span style="background-color: {}; color: white; padding: 3px 10px; '
+            'border-radius: 3px; font-size: 11px; font-weight: 600;">{}</span>',
+            color, obj.get_status_display()
+        )
+    status_badge.short_description = 'Status'
+
+    def inquiry_link(self, obj):
+        if obj.inquiry:
+            url = reverse('packages:dashboard_inquiry_detail', args=[obj.inquiry.pk])
+            return mark_safe(f'<a href="{url}">{obj.inquiry.customer_name}</a>')
+        return '-'
+    inquiry_link.short_description = 'Customer'
+
+
+@admin.register(Passenger)
+class PassengerAdmin(admin.ModelAdmin):
+    list_display = [
+        'full_name', 'booking', 'nationality',
+        'passport_number', 'is_lead_passenger', 'created_at',
+    ]
+    list_filter = ['is_lead_passenger', 'nationality', 'created_at']
+    search_fields = [
+        'first_name', 'last_name', 'passport_number',
+        'booking__booking_reference',
+    ]
+    list_per_page = 50
+
+
+@admin.register(Payment)
+class PaymentAdmin(admin.ModelAdmin):
+    list_display = [
+        'booking', 'payment_type', 'amount_display',
+        'payment_method', 'status_badge', 'received_at', 'recorded_by',
+    ]
+    list_filter = ['payment_type', 'payment_method', 'status', 'received_at']
+    search_fields = [
+        'booking__booking_reference', 'reference_number',
+        'booking__inquiry__customer_name',
+    ]
+    readonly_fields = ['received_at', 'created_at', 'updated_at']
+    list_per_page = 50
+    date_hierarchy = 'received_at'
+
+    def amount_display(self, obj):
+        return f"{obj.currency} {obj.amount}"
+    amount_display.short_description = 'Amount'
+
+    def status_badge(self, obj):
+        colors = {
+            'pending': '#ffc107',
+            'confirmed': '#28a745',
+            'refunded': '#17a2b8',
+            'failed': '#dc3545',
+        }
+        color = colors.get(obj.status, '#6c757d')
+        return format_html(
+            '<span style="background-color: {}; color: white; padding: 3px 10px; '
+            'border-radius: 3px; font-size: 11px;">{}</span>',
+            color, obj.get_status_display()
+        )
+    status_badge.short_description = 'Status'

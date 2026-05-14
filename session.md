@@ -58,4 +58,25 @@ Running record of every working session. Most recent at the top.
 
 ---
 
+## Session 003 — 2026-05-14
+
+**Type:** Phase 2 — Booking & Payment System
+**Branch:** `feature/phase-2-booking-and-payments` → PR #3 → `develop`
+
+### What we did
+1. **Booking model** — `Booking` with auto-generated `BKG-YYYYMMDD-NNNNN` reference, 7-state status workflow, balance tracking (`total_paid`, `balance_due`, `is_fully_paid`), email hooks
+2. **Passenger model** — per-booking passenger records: name, passport, DOB, dietary/medical notes, emergency contact, lead passenger flag
+3. **Payment model** — 5 payment types, 6 methods, status tracking; auto-advances booking status on deposit/full payment
+4. **Email notifications** — `booking_emails.py`: `send_booking_confirmation`, `send_booking_status_update`, `send_payment_received`; sends to customer + all staff
+5. **10 dashboard views** — booking list/create/edit/cancel, passenger add/edit/delete, payment record/delete; all behind `@staff_member_required`
+6. **5 booking dashboard templates** — list, detail (with inline passenger/payment panels), form, cancel confirm, passenger edit
+7. **Django admin** — `BookingAdmin` with `PassengerInline` + `PaymentInline`; `PassengerAdmin`; `PaymentAdmin` with status badges
+8. **Migration 0005** — applied cleanly
+9. **25 tests** — 25/25 passing: model reference generation, paid/balance logic, view auth gates, passenger/payment CRUD flows
+
+### PR
+- https://github.com/MussaJabir/tour_system/pull/3
+
+---
+
 _Add new sessions above this line._
