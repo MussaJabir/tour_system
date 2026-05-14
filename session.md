@@ -79,4 +79,29 @@ Running record of every working session. Most recent at the top.
 
 ---
 
+## Session 004 — 2026-05-14
+
+**Type:** Phase 3 — Custom User Model & Token Authentication
+**Branch:** `feature/phase-3-token-auth-and-user-model` → PR #5 → `develop`
+
+### What we did
+1. **Custom User model** — created `accounts` app with `CustomUser(AbstractUser)`: adds `phone`, `profile_photo`, `preferred_currency`, `nationality`; set `AUTH_USER_MODEL = 'accounts.CustomUser'`
+2. **DB wipe and rebuild** — dropped `tour_system` PostgreSQL database, deleted all migration files, ran fresh `makemigrations` (all apps now have a single `0001_initial` referencing `accounts.CustomUser`), applied migrations to new DB
+3. **Token authentication** — `rest_framework.authtoken` + `TokenAuthentication` added to DRF config alongside session auth; Flutter app can now authenticate with `Authorization: Token <key>` header
+4. **Auth API endpoints** — 5 endpoints at `/api/v1/auth/*`:
+   - `POST /auth/register/` — customer self-registration → creates user + returns token
+   - `POST /auth/login/` — credentials → token + user profile
+   - `POST /auth/logout/` — deletes token
+   - `GET/PATCH /auth/profile/` — read and update own profile
+   - `POST /auth/change-password/` — rotates token on success
+5. **CustomUserAdmin** — extends Django's UserAdmin with profile fieldset
+6. **Bug fix** — `destinations/models.py` was using `from django.contrib.auth.models import User` directly (hardcoded); replaced with `get_user_model()`; same fix applied to test imports in `core/tests.py` and `packages/tests.py`
+7. **Superuser recreated** — `admin` / `mussajabir937@gmail.com` / `admin1234`
+8. **51 tests passing** (16 new accounts tests + 35 existing)
+
+### PR
+- https://github.com/MussaJabir/tour_system/pull/5
+
+---
+
 _Add new sessions above this line._
