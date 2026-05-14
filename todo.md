@@ -48,11 +48,10 @@ Status key: `[ ]` not started · `[~]` in progress · `[x]` done
 ## Phase 3 — Mobile App (Token Auth)
 > The README claims token auth exists. It does not.
 
-- [ ] **Token authentication** — add `rest_framework.authtoken`, add `TokenAuthentication` to DRF config, wire up `/api/v1/auth/login/` and `/api/v1/auth/logout/` endpoints
-- [ ] **Custom User model** — do before any production users exist:
-  - Extend `AbstractUser` with: phone, profile photo, preferred currency, nationality
-  - Enables customer accounts, booking history, saved packages
-- [ ] **Customer-facing API endpoints** — bookings, profile, saved packages, inquiry status for the Flutter app
+- [x] **Token authentication** — `rest_framework.authtoken` + `TokenAuthentication` added to DRF; `/api/v1/auth/login/` returns DRF token for Flutter app
+- [x] **Custom User model** — `accounts.CustomUser(AbstractUser)` with phone, profile_photo, preferred_currency, nationality; `AUTH_USER_MODEL` set; DB wiped and rebuilt
+- [x] **Auth API endpoints** — register, login (token), logout, profile (GET/PATCH), change-password (rotates token)
+- [ ] **Customer-facing API endpoints** — bookings, saved packages, inquiry status for the Flutter app (next iteration)
 
 ---
 
