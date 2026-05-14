@@ -14,13 +14,13 @@ logger = logging.getLogger(__name__)
 from .models import (
     Package, PackageImage, PackageItinerary, PackageInclusion,
     BookingInquiry, CustomPackage, InquiryMessage,
-    Booking, Passenger, Payment,
+    Booking, Passenger, Payment, Departure,
 )
 from .forms import (
     PackageForm, PackageImageForm, PackageItineraryForm, PackageInclusionForm,
     BookingInquiryForm, InquiryManagementForm, CustomPackageForm,
     InquiryMessageForm, InquiryFilterForm,
-    BookingForm, PassengerForm, PaymentForm,
+    BookingForm, PassengerForm, PaymentForm, DepartureForm,
 )
 from destinations.models import Destination
 
@@ -525,7 +525,13 @@ def public_package_detail(request, slug):
         Q(category=package.category) | Q(destinations__in=package.destinations.all()),
         is_active=True
     ).exclude(pk=package.pk).distinct()[:4]
-    
+
+    from django.utils import timezone
+    upcoming_departures = package.departures.filter(
+        status=Departure.STATUS_AVAILABLE,
+        departure_date__gte=timezone.now().date(),
+    )
+
     context = {
         'package': package,
         'itineraries': itineraries,
@@ -533,6 +539,7 @@ def public_package_detail(request, slug):
         'exclusions': exclusions,
         'gallery_images': gallery_images,
         'related_packages': related_packages,
+        'upcoming_departures': upcoming_departures,
     }
     return render(request, 'packages/public/detail.html', context)
 
@@ -1359,8 +1366,7 @@ def dashboard_booking_cancel(request, pk):
     booking = get_object_or_404(Booking, pk=pk)
     if request.method == 'POST':
         old_status = booking.status
-        booking.status = 'cancelled'
-        booking.save(update_fields=['status'])
+        booking.cancel()
         from .booking_emails import send_booking_status_update
         send_booking_status_update(booking, old_status)
         messages.success(request, f"Booking {booking.booking_reference} cancelled.")
@@ -1457,3 +1463,72 @@ def dashboard_payment_delete(request, pk):
         payment.delete()
         messages.success(request, "Payment record deleted.")
     return redirect('packages:dashboard_booking_detail', pk=booking_pk)
+
+
+# ============================================================================
+# DEPARTURE / AVAILABILITY CALENDAR VIEWS
+# ============================================================================
+
+@login_required
+@staff_member_required
+def dashboard_departure_list(request, package_pk):
+    package = get_object_or_404(Package, pk=package_pk)
+    departures = package.departures.all()
+    return render(request, 'packages/departures/dashboard/list.html', {
+        'package': package,
+        'departures': departures,
+    })
+
+
+@login_required
+@staff_member_required
+def dashboard_departure_create(request, package_pk):
+    package = get_object_or_404(Package, pk=package_pk)
+    if request.method == 'POST':
+        form = DepartureForm(request.POST)
+        if form.is_valid():
+            departure = form.save(commit=False)
+            departure.package = package
+            departure.save()
+            messages.success(request, f"Departure on {departure.departure_date} added.")
+            return redirect('packages:dashboard_departure_list', package_pk=package.pk)
+    else:
+        form = DepartureForm()
+    return render(request, 'packages/departures/dashboard/form.html', {
+        'form': form, 'package': package, 'title': 'Add Departure',
+    })
+
+
+@login_required
+@staff_member_required
+def dashboard_departure_edit(request, pk):
+    departure = get_object_or_404(Departure, pk=pk)
+    package = departure.package
+    if request.method == 'POST':
+        form = DepartureForm(request.POST, instance=departure)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Departure updated.")
+            return redirect('packages:dashboard_departure_list', package_pk=package.pk)
+    else:
+        form = DepartureForm(instance=departure)
+    return render(request, 'packages/departures/dashboard/form.html', {
+        'form': form, 'package': package, 'departure': departure, 'title': 'Edit Departure',
+    })
+
+
+@login_required
+@staff_member_required
+def dashboard_departure_delete(request, pk):
+    departure = get_object_or_404(Departure, pk=pk)
+    package = departure.package
+    if request.method == 'POST':
+        if departure.booked_seats > 0:
+            messages.error(request, "Cannot delete a departure that has confirmed bookings.")
+            return redirect('packages:dashboard_departure_list', package_pk=package.pk)
+        departure.delete()
+        messages.success(request, "Departure removed.")
+        return redirect('packages:dashboard_departure_list', package_pk=package.pk)
+    return render(request, 'packages/departures/dashboard/delete_confirm.html', {
+        'departure': departure, 'package': package,
+    })

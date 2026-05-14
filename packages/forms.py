@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model
 from .models import (
     Package, PackageImage, PackageItinerary, PackageInclusion,
     BookingInquiry, CustomPackage, InquiryMessage, CustomPackageItinerary,
-    Booking, Passenger, Payment,
+    Booking, Passenger, Payment, Departure,
 )
 
 User = get_user_model()
@@ -1060,4 +1060,25 @@ class PaymentForm(forms.ModelForm):
             if not isinstance(field.widget, forms.Textarea):
                 field.widget.attrs.setdefault('class', 'form-control')
         self.fields['received_at'].required = False
+
+
+class DepartureForm(forms.ModelForm):
+    class Meta:
+        model = Departure
+        fields = ['departure_date', 'max_seats', 'status', 'notes']
+        widgets = {
+            'departure_date': forms.DateInput(attrs={
+                'class': 'form-control', 'type': 'date',
+            }),
+            'max_seats': forms.NumberInput(attrs={'class': 'form-control', 'min': 1}),
+            'status': forms.Select(attrs={'class': 'form-select'}),
+            'notes': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+        }
+
+    def clean_departure_date(self):
+        from django.utils import timezone
+        date = self.cleaned_data['departure_date']
+        if not self.instance.pk and date < timezone.now().date():
+            raise ValidationError("Departure date cannot be in the past.")
+        return date
 

@@ -32,7 +32,7 @@ Status key: `[ ]` not started · `[~]` in progress · `[x]` done
   - Balance auto-calculated from confirmed payments vs quoted price
   - Status auto-advances: deposit recorded → `deposit_paid`, fully paid → `confirmed`
 
-- [ ] **Availability calendar** — packages need departure dates and seat limits:
+- [x] **Availability calendar** — packages need departure dates and seat limits:
   - `Departure` model: package + date + max_seats + booked_seats
   - Public listing shows available dates
   - Booking locks a seat on a departure

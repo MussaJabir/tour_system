@@ -148,4 +148,27 @@ Running record of every working session. Most recent at the top.
 
 ---
 
+## Session 007 — 2026-05-14
+
+**Type:** Phase 2 — Availability Calendar
+**Branch:** `feature/phase-2-availability-calendar` → PR #8 → `develop`
+
+### What we did
+1. **Departure model** — `Departure` (package FK, departure_date, max_seats, booked_seats, status: available/sold_out/cancelled); `unique_together` on (package, departure_date); `lock_seat()` auto-sets sold_out when full; `release_seat()` restores available; `seats_remaining` and `is_available` properties
+2. **Booking seat locking** — added `departure` FK (nullable) to `Booking`; `Booking.save()` calls `departure.lock_seat()` on first creation; `Booking.cancel()` helper sets status=cancelled and calls `departure.release_seat()`
+3. **Cancel view updated** — `dashboard_booking_cancel` now calls `booking.cancel()` instead of raw field set, ensuring seat release is always triggered
+4. **Staff dashboard** — 4 views (list / create / edit / delete) per package; delete blocked if departure has booked_seats > 0; all behind `@staff_member_required`
+5. **Public detail** — upcoming available departures shown in the booking card with date and seats remaining
+6. **DepartureForm** — with past-date validation on create
+7. **Templates** — 3 new dashboard templates (list, form, delete_confirm); booking card section updated on public detail
+8. **Departures link** — added "Manage Departures" card to the package edit dashboard template
+9. **API** — `DepartureSerializer` + read-only `DepartureViewSet` (filters by package slug/id; future+available by default; staff can pass `?all=1`); `PackageDetailSerializer` includes `upcoming_departures`
+10. **Admin** — `DepartureInline` on `PackageAdmin`; standalone `DepartureAdmin` with remaining seats display
+11. **20 new tests** — model lifecycle, seat locking via booking, cancel release, view auth gates, CRUD flows; **115/115 total tests passing**
+
+### PR
+- https://github.com/MussaJabir/tour_system/pull/8
+
+---
+
 _Add new sessions above this line._

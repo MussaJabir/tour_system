@@ -88,5 +88,13 @@ urlpatterns = [
     # Payments
     path('dashboard/bookings/<int:booking_pk>/payments/record/', views.dashboard_payment_record, name='dashboard_payment_record'),
     path('dashboard/payments/<int:pk>/delete/', views.dashboard_payment_delete, name='dashboard_payment_delete'),
+
+    # ============================================================================
+    # DEPARTURE / AVAILABILITY CALENDAR
+    # ============================================================================
+    path('dashboard/packages/<int:package_pk>/departures/', views.dashboard_departure_list, name='dashboard_departure_list'),
+    path('dashboard/packages/<int:package_pk>/departures/add/', views.dashboard_departure_create, name='dashboard_departure_create'),
+    path('dashboard/departures/<int:pk>/edit/', views.dashboard_departure_edit, name='dashboard_departure_edit'),
+    path('dashboard/departures/<int:pk>/delete/', views.dashboard_departure_delete, name='dashboard_departure_delete'),
 ]
 

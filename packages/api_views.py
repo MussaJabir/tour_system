@@ -5,14 +5,15 @@ from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Q
 
-from .models import Package, PackageImage, PackageItinerary, PackageInclusion
+from .models import Package, PackageImage, PackageItinerary, PackageInclusion, Departure
 from .serializers import (
     PackageListSerializer,
     PackageDetailSerializer,
     PackageCreateUpdateSerializer,
     PackageImageSerializer,
     PackageItinerarySerializer,
-    PackageInclusionSerializer
+    PackageInclusionSerializer,
+    DepartureSerializer,
 )
 
 
@@ -179,3 +180,35 @@ class PackageInclusionViewSet(viewsets.ModelViewSet):
         
         return queryset.order_by('order')
 
+
+
+class DepartureViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    Read-only API endpoint for departure dates.
+    Filters by package slug or package id.
+    Only returns available, future departures for public clients.
+    Staff can see all via ?all=1.
+    """
+    serializer_class = DepartureSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+    def get_queryset(self):
+        from django.utils import timezone
+        qs = Departure.objects.select_related('package')
+
+        package_slug = self.request.query_params.get('package_slug')
+        if package_slug:
+            qs = qs.filter(package__slug=package_slug)
+
+        package_id = self.request.query_params.get('package')
+        if package_id:
+            qs = qs.filter(package_id=package_id)
+
+        show_all = self.request.query_params.get('all') and self.request.user.is_staff
+        if not show_all:
+            qs = qs.filter(
+                status=Departure.STATUS_AVAILABLE,
+                departure_date__gte=timezone.now().date(),
+            )
+
+        return qs.order_by('departure_date')

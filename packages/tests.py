@@ -5,7 +5,7 @@ from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
-from .models import Package, Booking, Passenger, Payment
+from .models import Package, Booking, Passenger, Payment, Departure
 
 
 def make_package(**kwargs):
@@ -248,3 +248,177 @@ class BookingDashboardViewTests(TestCase):
             reverse('packages:dashboard_payment_delete', args=[payment.pk])
         )
         self.assertEqual(self.booking.payments.count(), 0)
+
+
+import datetime
+from django.utils import timezone
+
+
+def make_departure(package, days_from_now=30, max_seats=10, **kwargs):
+    defaults = dict(
+        departure_date=timezone.now().date() + datetime.timedelta(days=days_from_now),
+        max_seats=max_seats,
+        status='available',
+    )
+    defaults.update(kwargs)
+    return Departure.objects.create(package=package, **defaults)
+
+
+class DepartureModelTests(TestCase):
+    def setUp(self):
+        self.package = make_package()
+        self.departure = make_departure(self.package)
+
+    def test_seats_remaining_initial(self):
+        self.assertEqual(self.departure.seats_remaining, 10)
+
+    def test_is_available_true_when_seats_and_status_available(self):
+        self.assertTrue(self.departure.is_available)
+
+    def test_lock_seat_increments_booked(self):
+        self.departure.lock_seat()
+        self.departure.refresh_from_db()
+        self.assertEqual(self.departure.booked_seats, 1)
+        self.assertEqual(self.departure.seats_remaining, 9)
+
+    def test_lock_seat_sets_sold_out_when_full(self):
+        dep = make_departure(self.package, days_from_now=60, max_seats=1)
+        dep.lock_seat()
+        dep.refresh_from_db()
+        self.assertEqual(dep.status, 'sold_out')
+        self.assertFalse(dep.is_available)
+
+    def test_release_seat_decrements_booked(self):
+        self.departure.booked_seats = 3
+        self.departure.save()
+        self.departure.release_seat()
+        self.departure.refresh_from_db()
+        self.assertEqual(self.departure.booked_seats, 2)
+
+    def test_release_seat_restores_available_from_sold_out(self):
+        self.departure.booked_seats = 10
+        self.departure.status = 'sold_out'
+        self.departure.save()
+        self.departure.release_seat()
+        self.departure.refresh_from_db()
+        self.assertEqual(self.departure.status, 'available')
+
+    def test_is_available_false_when_sold_out(self):
+        self.departure.status = 'sold_out'
+        self.departure.save()
+        self.assertFalse(self.departure.is_available)
+
+    def test_str_includes_package_and_date(self):
+        s = str(self.departure)
+        self.assertIn('Test Safari', s)
+
+    def test_unique_per_package_date(self):
+        from django.db import IntegrityError
+        with self.assertRaises(IntegrityError):
+            Departure.objects.create(
+                package=self.package,
+                departure_date=self.departure.departure_date,
+                max_seats=5,
+            )
+
+
+class BookingLocksSeatOnCreate(TestCase):
+    def setUp(self):
+        self.package = make_package()
+        self.departure = make_departure(self.package)
+
+    def test_booking_locks_departure_seat(self):
+        make_booking(self.package, departure=self.departure)
+        self.departure.refresh_from_db()
+        self.assertEqual(self.departure.booked_seats, 1)
+
+    def test_booking_cancel_releases_seat(self):
+        booking = make_booking(self.package, departure=self.departure)
+        self.departure.refresh_from_db()
+        self.assertEqual(self.departure.booked_seats, 1)
+        booking.cancel()
+        self.departure.refresh_from_db()
+        self.assertEqual(self.departure.booked_seats, 0)
+        self.assertEqual(booking.status, 'cancelled')
+
+    def test_booking_without_departure_does_not_error(self):
+        booking = make_booking(self.package)
+        self.assertIsNone(booking.departure)
+        booking.cancel()
+        self.assertEqual(booking.status, 'cancelled')
+
+
+class DepartureDashboardViewTests(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.staff = User.objects.create_user(
+            username='depart_staff', password='pass', is_staff=True
+        )
+        self.regular = User.objects.create_user(
+            username='depart_cust', password='pass', is_staff=False
+        )
+        self.package = make_package(name='Depart Test Safari', slug='depart-test-safari')
+        self.departure = make_departure(self.package)
+
+    def test_departure_list_blocks_anonymous(self):
+        url = reverse('packages:dashboard_departure_list', args=[self.package.pk])
+        response = self.client.get(url)
+        self.assertIn(response.status_code, [301, 302])
+
+    def test_departure_list_blocks_non_staff(self):
+        self.client.login(username='depart_cust', password='pass')
+        url = reverse('packages:dashboard_departure_list', args=[self.package.pk])
+        response = self.client.get(url)
+        self.assertIn(response.status_code, [301, 302])
+
+    def test_departure_list_accessible_by_staff(self):
+        self.client.login(username='depart_staff', password='pass')
+        url = reverse('packages:dashboard_departure_list', args=[self.package.pk])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_departure_create_get(self):
+        self.client.login(username='depart_staff', password='pass')
+        url = reverse('packages:dashboard_departure_create', args=[self.package.pk])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_departure_create_post(self):
+        self.client.login(username='depart_staff', password='pass')
+        url = reverse('packages:dashboard_departure_create', args=[self.package.pk])
+        future = (timezone.now().date() + datetime.timedelta(days=90)).isoformat()
+        response = self.client.post(url, {
+            'departure_date': future,
+            'max_seats': 8,
+            'status': 'available',
+            'notes': '',
+        })
+        self.assertIn(response.status_code, [301, 302])
+        self.assertEqual(Departure.objects.filter(package=self.package).count(), 2)
+
+    def test_departure_edit_post(self):
+        self.client.login(username='depart_staff', password='pass')
+        url = reverse('packages:dashboard_departure_edit', args=[self.departure.pk])
+        response = self.client.post(url, {
+            'departure_date': self.departure.departure_date.isoformat(),
+            'max_seats': 20,
+            'status': 'available',
+            'notes': 'Updated',
+        })
+        self.assertIn(response.status_code, [301, 302])
+        self.departure.refresh_from_db()
+        self.assertEqual(self.departure.max_seats, 20)
+
+    def test_departure_delete_blocks_if_booked(self):
+        self.client.login(username='depart_staff', password='pass')
+        self.departure.booked_seats = 2
+        self.departure.save()
+        url = reverse('packages:dashboard_departure_delete', args=[self.departure.pk])
+        self.client.post(url)
+        self.assertTrue(Departure.objects.filter(pk=self.departure.pk).exists())
+
+    def test_departure_delete_succeeds_when_no_bookings(self):
+        self.client.login(username='depart_staff', password='pass')
+        url = reverse('packages:dashboard_departure_delete', args=[self.departure.pk])
+        self.client.post(url)
+        self.assertFalse(Departure.objects.filter(pk=self.departure.pk).exists())
