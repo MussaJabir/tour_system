@@ -1,9 +1,19 @@
 {% extends "frontend/base.html" %}
 {% load static %}
 
-{% block title %}{{ package.name }} - Tour Package{% endblock %}
+{% block title %}{{ package.get_meta_title }} | Tour System{% endblock %}
+{% block title2 %}{{ package.get_meta_title }} | Tour System{% endblock %}
 
-{% block meta_description %}{{ package.meta_description|default:package.short_description }}{% endblock %}
+{% block meta_description %}{{ package.get_meta_description }}{% endblock %}
+{% block og_description %}{{ package.get_meta_description }}{% endblock %}
+
+{% block meta_keywords %}{{ package.meta_keywords }}{% endblock %}
+
+{% block canonical %}<link rel="canonical" href="{{ request.build_absolute_uri }}">{% endblock %}
+
+{% block og_type %}product{% endblock %}
+{% block og_url %}{{ request.build_absolute_uri }}{% endblock %}
+{% block og_image %}{% if package.featured_image %}{{ request.scheme }}://{{ request.get_host }}{{ package.featured_image.url }}{% endif %}{% endblock %}
 
 {% block extra_css %}
 <style>

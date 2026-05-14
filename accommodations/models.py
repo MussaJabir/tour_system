@@ -267,9 +267,18 @@ class Accommodation(models.Model):
         super().save(*args, **kwargs)
     
     def get_absolute_url(self):
-        """Return the URL for this accommodation"""
         return reverse('public_accommodation_detail', kwargs={'slug': self.slug})
-    
+
+    def get_meta_title(self):
+        return self.meta_title or self.name
+
+    def get_meta_description(self):
+        if self.meta_description:
+            return self.meta_description
+        if self.short_description:
+            return self.short_description[:160]
+        return self.description[:160] + '...' if self.description else ''
+
     def increment_view_count(self):
         """Increment the view counter"""
         self.view_count += 1
