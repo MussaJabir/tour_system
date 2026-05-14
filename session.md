@@ -144,7 +144,7 @@ Running record of every working session. Most recent at the top.
 11. **25 new tests** — singleton enforcement, `get_active` logic, job lifecycle (mark_processing/done/failed, is_running), all 4 task functions mocked, view auth gates, form POST → job creation, result page access; **95/95 total tests passing**
 
 ### PR
-- (to be filled after push)
+- https://github.com/MussaJabir/tour_system/pull/7
 
 ---
 
