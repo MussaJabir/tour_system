@@ -970,6 +970,29 @@ class CustomPackageItinerary(TimeStampedModel):
 
 
 # ============================================================================
+# SAVED PACKAGES (Customer wishlist)
+# ============================================================================
+
+class SavedPackage(TimeStampedModel):
+    """A customer's saved/wishlisted package."""
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='saved_packages',
+    )
+    package = models.ForeignKey(
+        Package, on_delete=models.CASCADE, related_name='saved_by',
+    )
+
+    class Meta:
+        unique_together = ['user', 'package']
+        ordering = ['-created_at']
+        verbose_name = 'Saved Package'
+        verbose_name_plural = 'Saved Packages'
+
+    def __str__(self):
+        return f"{self.user} → {self.package.name}"
+
+
+# ============================================================================
 # DEPARTURE / AVAILABILITY CALENDAR
 # ============================================================================
 

@@ -5,7 +5,7 @@ from django.utils.safestring import mark_safe
 from .models import (
     Package, PackageImage, PackageItinerary, PackageInclusion,
     BookingInquiry, CustomPackage, InquiryMessage,
-    Booking, Passenger, Payment, Departure,
+    Booking, Passenger, Payment, Departure, SavedPackage,
 )
 
 
@@ -834,3 +834,11 @@ class DepartureAdmin(admin.ModelAdmin):
             '<span style="color: {}; font-weight: bold;">{}</span>', color, remaining
         )
     seats_remaining_display.short_description = 'Remaining'
+
+
+@admin.register(SavedPackage)
+class SavedPackageAdmin(admin.ModelAdmin):
+    list_display = ['user', 'package', 'created_at']
+    list_filter = ['created_at']
+    search_fields = ['user__email', 'user__username', 'package__name']
+    raw_id_fields = ['user', 'package']

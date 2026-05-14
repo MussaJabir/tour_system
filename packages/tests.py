@@ -422,3 +422,188 @@ class DepartureDashboardViewTests(TestCase):
         url = reverse('packages:dashboard_departure_delete', args=[self.departure.pk])
         self.client.post(url)
         self.assertFalse(Departure.objects.filter(pk=self.departure.pk).exists())
+
+
+# ============================================================================
+# CUSTOMER API TESTS
+# ============================================================================
+
+from .models import SavedPackage
+
+
+class CustomerBookingAPITests(TestCase):
+    def setUp(self):
+        self.client = Client()
+        from rest_framework.authtoken.models import Token
+        self.user = User.objects.create_user(
+            username='flutter_user', email='customer@test.com', password='pass',
+        )
+        self.token = Token.objects.create(user=self.user)
+        self.auth = {'HTTP_AUTHORIZATION': f'Token {self.token.key}'}
+
+        self.package = make_package(name='Customer Package', slug='customer-package')
+
+        from packages.models import BookingInquiry
+        self.inquiry = BookingInquiry.objects.create(
+            customer_name='Test Customer',
+            customer_email='customer@test.com',
+            customer_phone='255700000000',
+            number_of_adults=2,
+        )
+        self.booking = make_booking(
+            self.package,
+            inquiry=self.inquiry,
+            status='confirmed',
+        )
+
+    def test_booking_list_requires_auth(self):
+        response = self.client.get('/api/v1/customer/bookings/')
+        self.assertEqual(response.status_code, 401)
+
+    def test_booking_list_returns_own_bookings(self):
+        response = self.client.get('/api/v1/customer/bookings/', **self.auth)
+        self.assertEqual(response.status_code, 200)
+        refs = [b['booking_reference'] for b in response.json()]
+        self.assertIn(self.booking.booking_reference, refs)
+
+    def test_booking_list_excludes_other_customers(self):
+        other_user = User.objects.create_user(
+            username='other', email='other@test.com', password='pass',
+        )
+        from rest_framework.authtoken.models import Token
+        other_token = Token.objects.create(user=other_user)
+        response = self.client.get(
+            '/api/v1/customer/bookings/',
+            **{'HTTP_AUTHORIZATION': f'Token {other_token.key}'},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json()), 0)
+
+    def test_booking_detail_returns_passengers_and_payments(self):
+        from packages.models import Passenger, Payment
+        Passenger.objects.create(
+            booking=self.booking, first_name='Alice', last_name='Doe', is_lead_passenger=True,
+        )
+        response = self.client.get(
+            f'/api/v1/customer/bookings/{self.booking.booking_reference}/',
+            **self.auth,
+        )
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(data['booking_reference'], self.booking.booking_reference)
+        self.assertEqual(len(data['passengers']), 1)
+
+    def test_booking_detail_forbidden_for_other_user(self):
+        other_user = User.objects.create_user(username='thief', email='thief@x.com', password='pass')
+        from rest_framework.authtoken.models import Token
+        other_token = Token.objects.create(user=other_user)
+        response = self.client.get(
+            f'/api/v1/customer/bookings/{self.booking.booking_reference}/',
+            **{'HTTP_AUTHORIZATION': f'Token {other_token.key}'},
+        )
+        self.assertEqual(response.status_code, 404)
+
+
+class CustomerInquiryAPITests(TestCase):
+    def setUp(self):
+        self.client = Client()
+        from rest_framework.authtoken.models import Token
+        self.user = User.objects.create_user(
+            username='inq_user', email='inq@test.com', password='pass',
+        )
+        self.token = Token.objects.create(user=self.user)
+        self.auth = {'HTTP_AUTHORIZATION': f'Token {self.token.key}'}
+
+        self.package = make_package(name='Inquiry Package', slug='inquiry-package')
+        from packages.models import BookingInquiry
+        self.inquiry = BookingInquiry.objects.create(
+            customer_name='Inq Customer',
+            customer_email='inq@test.com',
+            customer_phone='255700000001',
+            number_of_adults=2,
+            base_package=self.package,
+        )
+
+    def test_inquiry_list_requires_auth(self):
+        response = self.client.get('/api/v1/customer/inquiries/')
+        self.assertEqual(response.status_code, 401)
+
+    def test_inquiry_list_returns_own_inquiries(self):
+        response = self.client.get('/api/v1/customer/inquiries/', **self.auth)
+        self.assertEqual(response.status_code, 200)
+        refs = [i['inquiry_reference'] for i in response.json()]
+        self.assertIn(self.inquiry.inquiry_reference, refs)
+
+    def test_inquiry_detail_returns_package_name(self):
+        response = self.client.get(
+            f'/api/v1/customer/inquiries/{self.inquiry.inquiry_reference}/',
+            **self.auth,
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['package_name'], 'Inquiry Package')
+
+    def test_inquiry_detail_404_for_other_user(self):
+        other_user = User.objects.create_user(username='spy', email='spy@x.com', password='pass')
+        from rest_framework.authtoken.models import Token
+        other_token = Token.objects.create(user=other_user)
+        response = self.client.get(
+            f'/api/v1/customer/inquiries/{self.inquiry.inquiry_reference}/',
+            **{'HTTP_AUTHORIZATION': f'Token {other_token.key}'},
+        )
+        self.assertEqual(response.status_code, 404)
+
+
+class CustomerSavedPackageAPITests(TestCase):
+    def setUp(self):
+        self.client = Client()
+        from rest_framework.authtoken.models import Token
+        self.user = User.objects.create_user(
+            username='saver', email='saver@test.com', password='pass',
+        )
+        self.token = Token.objects.create(user=self.user)
+        self.auth = {'HTTP_AUTHORIZATION': f'Token {self.token.key}'}
+        self.package = make_package(name='Saveable Package', slug='saveable-package')
+
+    def test_saved_list_requires_auth(self):
+        response = self.client.get('/api/v1/customer/saved-packages/')
+        self.assertEqual(response.status_code, 401)
+
+    def test_save_package_creates_entry(self):
+        response = self.client.post(
+            f'/api/v1/customer/packages/{self.package.slug}/save/',
+            **self.auth,
+        )
+        self.assertEqual(response.status_code, 201)
+        self.assertTrue(SavedPackage.objects.filter(user=self.user, package=self.package).exists())
+
+    def test_save_package_idempotent(self):
+        SavedPackage.objects.create(user=self.user, package=self.package)
+        response = self.client.post(
+            f'/api/v1/customer/packages/{self.package.slug}/save/',
+            **self.auth,
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(SavedPackage.objects.filter(user=self.user).count(), 1)
+
+    def test_unsave_package(self):
+        SavedPackage.objects.create(user=self.user, package=self.package)
+        response = self.client.delete(
+            f'/api/v1/customer/packages/{self.package.slug}/save/',
+            **self.auth,
+        )
+        self.assertEqual(response.status_code, 204)
+        self.assertFalse(SavedPackage.objects.filter(user=self.user, package=self.package).exists())
+
+    def test_unsave_package_not_saved_returns_404(self):
+        response = self.client.delete(
+            f'/api/v1/customer/packages/{self.package.slug}/save/',
+            **self.auth,
+        )
+        self.assertEqual(response.status_code, 404)
+
+    def test_saved_list_returns_saved_packages(self):
+        SavedPackage.objects.create(user=self.user, package=self.package)
+        response = self.client.get('/api/v1/customer/saved-packages/', **self.auth)
+        self.assertEqual(response.status_code, 200)
+        names = [s['package']['name'] for s in response.json()]
+        self.assertIn('Saveable Package', names)
