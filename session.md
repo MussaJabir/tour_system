@@ -171,4 +171,27 @@ Running record of every working session. Most recent at the top.
 
 ---
 
+## Session 008 — 2026-05-14
+
+**Type:** Phase 3 — Customer-facing API (Flutter)
+**Branch:** `feature/phase-3-customer-api` → PR #9 → `develop`
+
+### What we did
+1. **SavedPackage model** — `user + package` unique wishlist; `TimeStampedModel`; migration 0003
+2. **6 customer API endpoints** under `/api/v1/customer/` — all require token auth, data scoped to `request.user`:
+   - `GET /customer/bookings/` — own booking list matched by `inquiry__customer_email`
+   - `GET /customer/bookings/{reference}/` — full detail with passengers + payment history
+   - `GET /customer/inquiries/` — own inquiry history matched by `customer_email`
+   - `GET /customer/inquiries/{reference}/` — detail; includes secure quote URL if staff sent a custom package
+   - `GET /customer/saved-packages/` — wishlist with full package data
+   - `POST /DELETE /customer/packages/{slug}/save/` — save/unsave (POST is idempotent)
+3. **Serializers** (`packages/customer_serializers.py`) — dedicated serializers for all customer views; no passport/internal data exposed
+4. **Admin** — `SavedPackageAdmin` registered
+5. **15 new tests** — auth enforcement, own-data isolation, 404 on cross-user access, idempotent save, unsave, saved list; **130/130 total tests passing**
+
+### PR
+- https://github.com/MussaJabir/tour_system/pull/9
+
+---
+
 _Add new sessions above this line._

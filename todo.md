@@ -51,7 +51,7 @@ Status key: `[ ]` not started · `[~]` in progress · `[x]` done
 - [x] **Token authentication** — `rest_framework.authtoken` + `TokenAuthentication` added to DRF; `/api/v1/auth/login/` returns DRF token for Flutter app
 - [x] **Custom User model** — `accounts.CustomUser(AbstractUser)` with phone, profile_photo, preferred_currency, nationality; `AUTH_USER_MODEL` set; DB wiped and rebuilt
 - [x] **Auth API endpoints** — register, login (token), logout, profile (GET/PATCH), change-password (rotates token)
-- [ ] **Customer-facing API endpoints** — bookings, saved packages, inquiry status for the Flutter app (next iteration)
+- [x] **Customer-facing API endpoints** — bookings, saved packages, inquiry status for the Flutter app (next iteration)
 
 ---
 
