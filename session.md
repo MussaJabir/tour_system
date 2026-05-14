@@ -125,4 +125,27 @@ Running record of every working session. Most recent at the top.
 
 ---
 
+## Session 006 — 2026-05-14
+
+**Type:** Phase 4 Part 2 — AI Assistant App
+**Branch:** `feature/phase-4-ai-assistant` → PR #7 → `develop`
+
+### What we did
+1. **AIConfiguration singleton model** — admin-configurable AI vendor/key: vendor (OpenAI/Anthropic), `api_key` (encrypted at rest via custom `EncryptedCharField` using Fernet + SECRET_KEY derivation), model_name, max_tokens, temperature, is_active; enforced as singleton (pk=1 always); admin blocks add when one exists, blocks delete
+2. **Custom encrypted field** (`ai_assistant/fields.py`) — `EncryptedCharField(TextField)` using `cryptography.fernet` derived from `SECRET_KEY`; transparent encrypt on write, decrypt on read; no external key management needed; works with Django 5.2 (both `django-fernet-fields` and `django-cryptography` had Django 5.x incompatibilities)
+3. **BaseAIJob abstract model** — `status` (pending/processing/done/failed), `error_message`, `started_at`, `completed_at`, `created_by`; `mark_processing()`, `mark_done()`, `mark_failed()`, `is_running` property
+4. **4 job models** — `BrochureParseJob` (pdf_file + target_accommodation + extracted_data JSON), `ItineraryGenerationJob` (destination FK + duration/budget/group_size/interests + raw_output), `QuoteSuggestionJob` (inquiry FK + suggestions JSON), `RouteOptimizationJob` (destination_names text + optimized_route JSON)
+5. **AI client** (`ai_assistant/ai_client.py`) — `get_ai_response(prompt, system_prompt)` reads from DB config first, falls back to `settings.OPENAI_API_KEY`; dispatches to `_call_openai()` or `_call_anthropic()` based on vendor; raises `AIServiceError` on failure
+6. **4 Celery tasks** (`ai_assistant/tasks.py`) — `parse_brochure_task`, `generate_itinerary_task`, `build_custom_quote_task`, `optimize_route_task`; all async `@shared_task(bind=True, max_retries=2)`; PDF text extracted via `pdfplumber` → `PyPDF2` fallback; AI JSON responses stripped of markdown code fences before `json.loads`
+7. **7 dashboard views** — `dashboard_ai_home`, `brochure_upload/result`, `itinerary_generate/result`, `quote_from_inquiry/result`, `route_optimize/result`; all behind `@staff_member_required`; result pages auto-refresh every 4s via `<meta http-equiv="refresh">` while job is running
+8. **7 templates** — home hub (config status + 4 feature cards), brochure upload form + result with extracted fields preview, itinerary form + result with copy button, quote result with match-score cards, route form + result with ordered table
+9. **Django admin** — `AIConfigurationAdmin` (blocks add if config exists, blocks delete), plus admin classes for all 4 job types with status badges and readonly result fields
+10. **Dependencies** — added `anthropic>=0.40.0` to requirements.txt; `cryptography` already present
+11. **25 new tests** — singleton enforcement, `get_active` logic, job lifecycle (mark_processing/done/failed, is_running), all 4 task functions mocked, view auth gates, form POST → job creation, result page access; **95/95 total tests passing**
+
+### PR
+- https://github.com/MussaJabir/tour_system/pull/7
+
+---
+
 _Add new sessions above this line._

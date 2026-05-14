@@ -16,6 +16,7 @@ pdfminer-six==20250506
 
 # AI Integration
 openai==2.7.1
+anthropic>=0.40.0
 
 # Caching & Background Tasks
 redis==5.2.1

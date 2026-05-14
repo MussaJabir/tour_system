@@ -32,6 +32,7 @@ urlpatterns = [
     path('', include('packages.urls')),
     path('', include('core.urls')),
     path('', include('reviews.urls')),
+    path('', include('ai_assistant.urls')),
 ]
 
 # Serve media files in development

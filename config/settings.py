@@ -187,8 +187,10 @@ CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60  # 30 minutes
 CELERY_RESULT_EXPIRES = 3600  # 1 hour
 
-# OpenAI Configuration
+# OpenAI Configuration (fallback — primary config is via Admin > AI Configuration)
 OPENAI_API_KEY = config('OPENAI_API_KEY', default='')
+
+# django-cryptography derives its key from SECRET_KEY by default — no extra config needed.
 
 # Email Configuration
 EMAIL_BACKEND = config('EMAIL_BACKEND', default='django.core.mail.backends.console.EmailBackend')

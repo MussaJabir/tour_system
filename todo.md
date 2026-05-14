@@ -65,7 +65,7 @@ Status key: `[ ]` not started · `[~]` in progress · `[x]` done
   - Public display with rating breakdown, star filter, sort; submit form with eligibility check
   - REST API: GET approved reviews per package, POST create review (token auth)
 
-- [ ] **AI Assistant app** — implement the stub, all as async Celery tasks:
+- [x] **AI Assistant app** — implement the stub, all as async Celery tasks:
   - **PDF parser**: upload lodge PDF brochure → auto-populate `Accommodation` fields
   - **Itinerary generator**: destination + duration + budget → draft day-by-day itinerary
   - **Custom quote builder**: AI suggests packages from inquiry requirements
