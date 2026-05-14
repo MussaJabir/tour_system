@@ -8,30 +8,29 @@ Status key: `[ ]` not started · `[~]` in progress · `[x]` done
 ## Phase 1 — Fix the Holes (Security & Stability)
 > These are not features. The app is not production-safe without them.
 
-- [ ] **Staff gate on all dashboard views** — add `@staff_member_required` alongside `@login_required` on every dashboard view across `core`, `destinations`, `accommodations`, `activities`, `packages`. Any logged-in user can currently hit the dashboard.
-- [ ] **Login / logout views for the staff dashboard** — `@login_required` redirects to `/accounts/login/` which 404s. Staff cannot log in through the dashboard. Add Django's built-in auth URLs or a minimal custom login/logout view.
-- [ ] **Remove duplicate email config in `settings.py`** — `EMAIL_*` vars are defined twice (around line 110 and again at line 180). Delete the second block.
-- [ ] **Remove bare `pass` in exception handlers** — `packages/views.py:409, 414, 423, 428` silently swallow exceptions. At minimum log them with `logger.exception(...)`.
-- [ ] **Clean up template directory** — delete `templates/frontend/index_new.html` and `templates/frontend/index_old.html.bak`. Commit hygiene.
+- [x] **Staff gate on all dashboard views** — add `@staff_member_required` alongside `@login_required` on every dashboard view across `core`, `destinations`, `accommodations`, `activities`, `packages`. Any logged-in user can currently hit the dashboard.
+- [x] **Login / logout views for the staff dashboard** — `@login_required` redirects to `/accounts/login/` which 404s. Staff cannot log in through the dashboard. Add Django's built-in auth URLs or a minimal custom login/logout view.
+- [x] **Remove duplicate email config in `settings.py`** — `EMAIL_*` vars are defined twice (around line 110 and again at line 180). Delete the second block.
+- [x] **Remove bare `pass` in exception handlers** — `packages/views.py:409, 414, 423, 428` silently swallow exceptions. At minimum log them with `logger.exception(...)`.
+- [x] **Clean up template directory** — delete `templates/frontend/index_new.html` and `templates/frontend/index_old.html.bak`. Commit hygiene.
 
 ---
 
 ## Phase 2 — Revenue Loop (Core Business Gap)
 > Inquiry system exists. Closing the booking loop is what makes this a product.
 
-- [ ] **Booking + Reservation model** — turn inquiries into confirmed bookings:
+- [x] **Booking + Reservation model** — turn inquiries into confirmed bookings:
   - `Booking` model: links inquiry → package → passengers
-  - Status workflow: `inquiry` → `quote_sent` → `deposit_paid` → `confirmed` → `completed` → `cancelled`
-  - Booking reference number (auto-generated)
-  - Passenger details (names, passport numbers, dietary requirements, emergency contacts)
-  - Email triggers at each status change
-  - Dashboard: staff can move bookings through stages
+  - Status workflow: `pending_deposit` → `deposit_paid` → `confirmed` → `in_progress` → `completed` → `cancelled` / `refunded`
+  - Auto-generated booking reference (`BKG-YYYYMMDD-NNNNN`)
+  - `Passenger` model: names, passport, DOB, dietary/medical, emergency contacts, lead passenger flag
+  - Email triggers: booking confirmation, status change, payment received
+  - Dashboard: staff can create/edit/cancel bookings, manage passengers and payments
 
-- [ ] **Payment tracking (manual first)** — before building a full gateway:
-  - Record payment received (amount, method, date, reference)
-  - Mark deposit paid / balance paid
-  - Flag overdue balances
-  - This alone is 10x better than nothing
+- [x] **Payment tracking (manual first)** — before building a full gateway:
+  - `Payment` model: type (deposit/balance/full/extra/refund), method (cash/bank/M-Pesa/card/Stripe), status, reference
+  - Balance auto-calculated from confirmed payments vs quoted price
+  - Status auto-advances: deposit recorded → `deposit_paid`, fully paid → `confirmed`
 
 - [ ] **Availability calendar** — packages need departure dates and seat limits:
   - `Departure` model: package + date + max_seats + booked_seats

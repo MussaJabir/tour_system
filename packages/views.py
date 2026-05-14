@@ -1,5 +1,7 @@
+import logging
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
+from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib import messages
 from django.core.paginator import Paginator
 from django.db.models import Q, Count, Avg
@@ -7,14 +9,18 @@ from django.http import JsonResponse, Http404
 from django.utils import timezone
 from decimal import Decimal
 
+logger = logging.getLogger(__name__)
+
 from .models import (
     Package, PackageImage, PackageItinerary, PackageInclusion,
-    BookingInquiry, CustomPackage, InquiryMessage
+    BookingInquiry, CustomPackage, InquiryMessage,
+    Booking, Passenger, Payment,
 )
 from .forms import (
     PackageForm, PackageImageForm, PackageItineraryForm, PackageInclusionForm,
-    BookingInquiryForm, InquiryManagementForm, CustomPackageForm, 
-    InquiryMessageForm, InquiryFilterForm
+    BookingInquiryForm, InquiryManagementForm, CustomPackageForm,
+    InquiryMessageForm, InquiryFilterForm,
+    BookingForm, PassengerForm, PaymentForm,
 )
 from destinations.models import Destination
 
@@ -24,6 +30,7 @@ from destinations.models import Destination
 # ============================================================================
 
 @login_required
+@staff_member_required
 def dashboard_package_list(request):
     """List all packages in the dashboard"""
     packages = Package.objects.all().prefetch_related('destinations')
@@ -86,6 +93,7 @@ def dashboard_package_list(request):
 
 
 @login_required
+@staff_member_required
 def dashboard_package_create(request):
     """Create a new package"""
     if request.method == 'POST':
@@ -111,6 +119,7 @@ def dashboard_package_create(request):
 
 
 @login_required
+@staff_member_required
 def dashboard_package_edit(request, pk):
     """Edit an existing package"""
     package = get_object_or_404(Package, pk=pk)
@@ -146,6 +155,7 @@ def dashboard_package_edit(request, pk):
 
 
 @login_required
+@staff_member_required
 def dashboard_package_delete(request, pk):
     """Delete a package"""
     package = get_object_or_404(Package, pk=pk)
@@ -167,6 +177,7 @@ def dashboard_package_delete(request, pk):
 # ============================================================================
 
 @login_required
+@staff_member_required
 def dashboard_package_image_add(request, package_pk):
     """Add images to package gallery"""
     package = get_object_or_404(Package, pk=package_pk)
@@ -193,6 +204,7 @@ def dashboard_package_image_add(request, package_pk):
 
 
 @login_required
+@staff_member_required
 def dashboard_package_image_delete(request, pk):
     """Delete a package image"""
     package_image = get_object_or_404(PackageImage, pk=pk)
@@ -215,6 +227,7 @@ def dashboard_package_image_delete(request, pk):
 # ============================================================================
 
 @login_required
+@staff_member_required
 def dashboard_package_itinerary_add(request, package_pk):
     """Add a day to package itinerary"""
     package = get_object_or_404(Package, pk=package_pk)
@@ -245,6 +258,7 @@ def dashboard_package_itinerary_add(request, package_pk):
 
 
 @login_required
+@staff_member_required
 def dashboard_package_itinerary_edit(request, pk):
     """Edit a package itinerary day"""
     itinerary = get_object_or_404(PackageItinerary, pk=pk)
@@ -271,6 +285,7 @@ def dashboard_package_itinerary_edit(request, pk):
 
 
 @login_required
+@staff_member_required
 def dashboard_package_itinerary_delete(request, pk):
     """Delete a package itinerary day"""
     itinerary = get_object_or_404(PackageItinerary, pk=pk)
@@ -294,6 +309,7 @@ def dashboard_package_itinerary_delete(request, pk):
 # ============================================================================
 
 @login_required
+@staff_member_required
 def dashboard_package_inclusion_add(request, package_pk):
     """Add inclusion/exclusion to package"""
     package = get_object_or_404(Package, pk=package_pk)
@@ -321,6 +337,7 @@ def dashboard_package_inclusion_add(request, package_pk):
 
 
 @login_required
+@staff_member_required
 def dashboard_package_inclusion_edit(request, pk):
     """Edit a package inclusion/exclusion"""
     inclusion = get_object_or_404(PackageInclusion, pk=pk)
@@ -348,6 +365,7 @@ def dashboard_package_inclusion_edit(request, pk):
 
 
 @login_required
+@staff_member_required
 def dashboard_package_inclusion_delete(request, pk):
     """Delete a package inclusion/exclusion"""
     inclusion = get_object_or_404(PackageInclusion, pk=pk)
@@ -405,27 +423,27 @@ def public_package_list(request):
     if min_price:
         try:
             packages = packages.filter(price_per_person__gte=Decimal(min_price))
-        except:
-            pass
+        except Exception:
+            logger.warning("Invalid min_price filter value: %s", min_price)
     if max_price:
         try:
             packages = packages.filter(price_per_person__lte=Decimal(max_price))
-        except:
-            pass
-    
+        except Exception:
+            logger.warning("Invalid max_price filter value: %s", max_price)
+
     # Filter by duration
     min_days = request.GET.get('min_days', '')
     max_days = request.GET.get('max_days', '')
     if min_days:
         try:
             packages = packages.filter(duration_days__gte=int(min_days))
-        except:
-            pass
+        except Exception:
+            logger.warning("Invalid min_days filter value: %s", min_days)
     if max_days:
         try:
             packages = packages.filter(duration_days__lte=int(max_days))
-        except:
-            pass
+        except Exception:
+            logger.warning("Invalid max_days filter value: %s", max_days)
     
     # Sorting
     sort_by = request.GET.get('sort', '-is_featured')
@@ -723,6 +741,7 @@ def custom_package_action(request, token, action):
 # -----------------------------------------------------------------------------
 
 @login_required
+@staff_member_required
 def dashboard_inquiry_list(request):
     """
     Staff dashboard view to list and filter all inquiries.
@@ -792,6 +811,7 @@ def dashboard_inquiry_list(request):
 
 
 @login_required
+@staff_member_required
 def dashboard_inquiry_detail(request, pk):
     """
     Staff view to see full inquiry details and manage it.
@@ -851,6 +871,7 @@ def dashboard_inquiry_detail(request, pk):
 
 
 @login_required
+@staff_member_required
 def dashboard_custom_package_builder(request, inquiry_pk):
     """
     Staff view to build a custom package for an inquiry.
@@ -922,6 +943,7 @@ def dashboard_custom_package_builder(request, inquiry_pk):
 
 
 @login_required
+@staff_member_required
 def dashboard_custom_package_list(request):
     """
     Staff view to list all custom packages.
@@ -974,6 +996,7 @@ def dashboard_custom_package_list(request):
 
 
 @login_required
+@staff_member_required
 def dashboard_custom_package_detail(request, pk):
     """
     Staff view to see and edit a custom package.
@@ -1011,6 +1034,7 @@ def dashboard_custom_package_detail(request, pk):
 
 
 @login_required
+@staff_member_required
 def dashboard_custom_package_send(request, pk):
     """
     Send custom package to client via email.
@@ -1062,6 +1086,7 @@ def dashboard_custom_package_send(request, pk):
 # ============================================================================
 
 @login_required
+@staff_member_required
 def dashboard_custom_itinerary_add(request, custom_package_pk):
     """
     Add a new itinerary day to a custom package.
@@ -1095,6 +1120,7 @@ def dashboard_custom_itinerary_add(request, custom_package_pk):
 
 
 @login_required
+@staff_member_required
 def dashboard_custom_itinerary_edit(request, pk):
     """
     Edit an existing custom itinerary day.
@@ -1124,6 +1150,7 @@ def dashboard_custom_itinerary_edit(request, pk):
 
 
 @login_required
+@staff_member_required
 def dashboard_custom_itinerary_delete(request, pk):
     """
     Delete a custom itinerary day.
@@ -1146,6 +1173,7 @@ def dashboard_custom_itinerary_delete(request, pk):
 
 
 @login_required
+@staff_member_required
 def dashboard_custom_itinerary_copy(request, custom_package_pk):
     """
     Copy itinerary from base package to custom package.
@@ -1214,3 +1242,218 @@ def dashboard_custom_itinerary_copy(request, custom_package_pk):
         'custom_package': custom_package,
     }
     return render(request, 'packages/inquiry/dashboard/custom_itinerary_copy.html', context)
+
+
+# ============================================================================
+# BOOKING DASHBOARD VIEWS
+# ============================================================================
+
+@login_required
+@staff_member_required
+def dashboard_booking_list(request):
+    bookings = Booking.objects.select_related('package', 'staff_assigned', 'inquiry').all()
+    status_filter = request.GET.get('status', '')
+    if status_filter:
+        bookings = bookings.filter(status=status_filter)
+    search = request.GET.get('q', '').strip()
+    if search:
+        bookings = bookings.filter(
+            Q(booking_reference__icontains=search) |
+            Q(package__name__icontains=search) |
+            Q(inquiry__customer_name__icontains=search) |
+            Q(inquiry__customer_email__icontains=search)
+        )
+    paginator = Paginator(bookings, 20)
+    page = paginator.get_page(request.GET.get('page'))
+    return render(request, 'packages/bookings/dashboard/list.html', {
+        'page_obj': page,
+        'status_filter': status_filter,
+        'search': search,
+        'status_choices': Booking.STATUS_CHOICES,
+        'total_count': bookings.count(),
+    })
+
+
+@login_required
+@staff_member_required
+def dashboard_booking_create(request, inquiry_pk=None):
+    inquiry = None
+    initial = {}
+    if inquiry_pk:
+        inquiry = get_object_or_404(BookingInquiry, pk=inquiry_pk)
+        initial = {
+            'inquiry': inquiry,
+            'num_adults': inquiry.number_of_adults,
+            'num_children': inquiry.number_of_children,
+            'departure_date': inquiry.preferred_travel_date,
+            'package': inquiry.base_package,
+            'staff_assigned': inquiry.staff_assigned,
+        }
+        if inquiry.custom_package:
+            initial['custom_package'] = inquiry.custom_package
+
+    if request.method == 'POST':
+        form = BookingForm(request.POST)
+        if form.is_valid():
+            booking = form.save()
+            if inquiry:
+                inquiry.status = 'converted'
+                inquiry.save(update_fields=['status'])
+            from .booking_emails import send_booking_confirmation
+            send_booking_confirmation(booking)
+            messages.success(request, f"Booking {booking.booking_reference} created.")
+            return redirect('packages:dashboard_booking_detail', pk=booking.pk)
+    else:
+        form = BookingForm(initial=initial)
+
+    return render(request, 'packages/bookings/dashboard/form.html', {
+        'form': form,
+        'inquiry': inquiry,
+        'title': 'Create Booking',
+    })
+
+
+@login_required
+@staff_member_required
+def dashboard_booking_detail(request, pk):
+    booking = get_object_or_404(
+        Booking.objects.select_related('package', 'inquiry', 'custom_package', 'staff_assigned')
+                       .prefetch_related('passengers', 'payments'),
+        pk=pk,
+    )
+    passenger_form = PassengerForm()
+    payment_form = PaymentForm()
+    return render(request, 'packages/bookings/dashboard/detail.html', {
+        'booking': booking,
+        'passenger_form': passenger_form,
+        'payment_form': payment_form,
+    })
+
+
+@login_required
+@staff_member_required
+def dashboard_booking_edit(request, pk):
+    booking = get_object_or_404(Booking, pk=pk)
+    old_status = booking.status
+    if request.method == 'POST':
+        form = BookingForm(request.POST, instance=booking)
+        if form.is_valid():
+            booking = form.save()
+            if booking.status != old_status:
+                from .booking_emails import send_booking_status_update
+                send_booking_status_update(booking, old_status)
+            messages.success(request, "Booking updated.")
+            return redirect('packages:dashboard_booking_detail', pk=booking.pk)
+    else:
+        form = BookingForm(instance=booking)
+    return render(request, 'packages/bookings/dashboard/form.html', {
+        'form': form,
+        'booking': booking,
+        'title': 'Edit Booking',
+    })
+
+
+@login_required
+@staff_member_required
+def dashboard_booking_cancel(request, pk):
+    booking = get_object_or_404(Booking, pk=pk)
+    if request.method == 'POST':
+        old_status = booking.status
+        booking.status = 'cancelled'
+        booking.save(update_fields=['status'])
+        from .booking_emails import send_booking_status_update
+        send_booking_status_update(booking, old_status)
+        messages.success(request, f"Booking {booking.booking_reference} cancelled.")
+        return redirect('packages:dashboard_booking_list')
+    return render(request, 'packages/bookings/dashboard/cancel_confirm.html', {'booking': booking})
+
+
+@login_required
+@staff_member_required
+def dashboard_passenger_add(request, booking_pk):
+    booking = get_object_or_404(Booking, pk=booking_pk)
+    if request.method == 'POST':
+        form = PassengerForm(request.POST)
+        if form.is_valid():
+            passenger = form.save(commit=False)
+            passenger.booking = booking
+            if passenger.is_lead_passenger:
+                booking.passengers.filter(is_lead_passenger=True).update(is_lead_passenger=False)
+            passenger.save()
+            messages.success(request, f"Passenger {passenger.full_name} added.")
+        else:
+            messages.error(request, "Please fix the errors below.")
+    return redirect('packages:dashboard_booking_detail', pk=booking_pk)
+
+
+@login_required
+@staff_member_required
+def dashboard_passenger_edit(request, pk):
+    passenger = get_object_or_404(Passenger, pk=pk)
+    booking = passenger.booking
+    if request.method == 'POST':
+        form = PassengerForm(request.POST, instance=passenger)
+        if form.is_valid():
+            updated = form.save(commit=False)
+            if updated.is_lead_passenger:
+                booking.passengers.exclude(pk=pk).filter(
+                    is_lead_passenger=True
+                ).update(is_lead_passenger=False)
+            updated.save()
+            messages.success(request, "Passenger updated.")
+            return redirect('packages:dashboard_booking_detail', pk=booking.pk)
+    else:
+        form = PassengerForm(instance=passenger)
+    return render(request, 'packages/bookings/dashboard/passenger_form.html', {
+        'form': form, 'passenger': passenger, 'booking': booking,
+    })
+
+
+@login_required
+@staff_member_required
+def dashboard_passenger_delete(request, pk):
+    passenger = get_object_or_404(Passenger, pk=pk)
+    booking_pk = passenger.booking.pk
+    if request.method == 'POST':
+        name = passenger.full_name
+        passenger.delete()
+        messages.success(request, f"Passenger {name} removed.")
+    return redirect('packages:dashboard_booking_detail', pk=booking_pk)
+
+
+@login_required
+@staff_member_required
+def dashboard_payment_record(request, booking_pk):
+    booking = get_object_or_404(Booking, pk=booking_pk)
+    if request.method == 'POST':
+        form = PaymentForm(request.POST)
+        if form.is_valid():
+            payment = form.save(commit=False)
+            payment.booking = booking
+            payment.recorded_by = request.user
+            payment.save()
+            if booking.is_fully_paid and booking.status == 'deposit_paid':
+                booking.status = 'confirmed'
+                booking.save(update_fields=['status'])
+                from .booking_emails import send_booking_status_update
+                send_booking_status_update(booking, 'deposit_paid')
+            elif payment.payment_type == 'deposit' and booking.status == 'pending_deposit':
+                booking.status = 'deposit_paid'
+                booking.save(update_fields=['status'])
+            from .booking_emails import send_payment_received
+            send_payment_received(booking, payment)
+            messages.success(request, f"Payment of {payment.currency} {payment.amount} recorded.")
+        else:
+            messages.error(request, "Please fix the errors below.")
+    return redirect('packages:dashboard_booking_detail', pk=booking_pk)
+
+
+@login_required
+@staff_member_required
+def dashboard_payment_delete(request, pk):
+    payment = get_object_or_404(Payment, pk=pk)
+    booking_pk = payment.booking.pk
+    if request.method == 'POST':
+        payment.delete()
+        messages.success(request, "Payment record deleted.")
+    return redirect('packages:dashboard_booking_detail', pk=booking_pk)

@@ -1,0 +1,286 @@
+{% extends "backend/base.html" %}
+{% load static %}
+
+{% block title %}Booking {{ booking.booking_reference }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <a href="{% url 'packages:dashboard_booking_list' %}" class="text-muted small">
+                <i class="mdi mdi-arrow-left"></i> Bookings
+            </a>
+            <h4 class="mb-0 mt-1">{{ booking.booking_reference }}</h4>
+        </div>
+        <div>
+            <a href="{% url 'packages:dashboard_booking_edit' booking.pk %}" class="btn btn-secondary btn-sm">
+                <i class="mdi mdi-pencil"></i> Edit
+            </a>
+            {% if booking.status != 'cancelled' and booking.status != 'completed' %}
+                <a href="{% url 'packages:dashboard_booking_cancel' booking.pk %}"
+                   class="btn btn-outline-danger btn-sm ms-1">
+                    Cancel Booking
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="row">
+        <!-- Left column: booking details -->
+        <div class="col-lg-8">
+
+            <!-- Booking Summary -->
+            <div class="card mb-3">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <strong>Booking Details</strong>
+                    <span class="badge bg-{{ booking.status_badge_color }}">{{ booking.get_status_display }}</span>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <dl class="row mb-0">
+                                <dt class="col-5">Package</dt>
+                                <dd class="col-7">{{ booking.package.name }}</dd>
+
+                                <dt class="col-5">Departure</dt>
+                                <dd class="col-7">{{ booking.departure_date|date:"M d, Y" }}</dd>
+
+                                {% if booking.return_date %}
+                                    <dt class="col-5">Return</dt>
+                                    <dd class="col-7">{{ booking.return_date|date:"M d, Y" }}</dd>
+                                {% endif %}
+
+                                <dt class="col-5">Travelers</dt>
+                                <dd class="col-7">{{ booking.num_adults }} adult(s), {{ booking.num_children }} child(ren)</dd>
+                            </dl>
+                        </div>
+                        <div class="col-sm-6">
+                            <dl class="row mb-0">
+                                <dt class="col-5">Total Price</dt>
+                                <dd class="col-7"><strong>{{ booking.currency }} {{ booking.quoted_price }}</strong></dd>
+
+                                <dt class="col-5">Deposit</dt>
+                                <dd class="col-7">{{ booking.currency }} {{ booking.deposit_amount }}</dd>
+
+                                <dt class="col-5">Total Paid</dt>
+                                <dd class="col-7 text-success"><strong>{{ booking.currency }} {{ booking.total_paid }}</strong></dd>
+
+                                <dt class="col-5">Balance Due</dt>
+                                <dd class="col-7 {% if booking.balance_due > 0 %}text-danger{% else %}text-success{% endif %}">
+                                    <strong>{{ booking.currency }} {{ booking.balance_due }}</strong>
+                                    {% if booking.is_fully_paid %}<span class="badge bg-success ms-1">Fully Paid</span>{% endif %}
+                                </dd>
+
+                                {% if booking.staff_assigned %}
+                                    <dt class="col-5">Staff</dt>
+                                    <dd class="col-7">{{ booking.staff_assigned.get_full_name|default:booking.staff_assigned.username }}</dd>
+                                {% endif %}
+                            </dl>
+                        </div>
+                    </div>
+                    {% if booking.special_requirements %}
+                        <hr>
+                        <p class="mb-0"><strong>Special Requirements:</strong> {{ booking.special_requirements }}</p>
+                    {% endif %}
+                    {% if booking.internal_notes %}
+                        <hr>
+                        <p class="mb-0 text-muted"><strong>Internal Notes:</strong> {{ booking.internal_notes }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Customer / Inquiry link -->
+            {% if booking.inquiry %}
+                <div class="card mb-3">
+                    <div class="card-header"><strong>Customer</strong></div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <p class="mb-1"><strong>{{ booking.inquiry.customer_name }}</strong></p>
+                                <p class="mb-1 text-muted">{{ booking.inquiry.customer_email }}</p>
+                                <p class="mb-0 text-muted">{{ booking.inquiry.customer_phone }}</p>
+                            </div>
+                            <div class="col-sm-6 text-sm-end">
+                                <a href="{% url 'packages:dashboard_inquiry_detail' booking.inquiry.pk %}"
+                                   class="btn btn-outline-primary btn-sm">View Inquiry</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- Passengers -->
+            <div class="card mb-3">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <strong>Passengers ({{ booking.passengers.count }})</strong>
+                </div>
+                <div class="card-body">
+                    {% if booking.passengers.all %}
+                        <div class="table-responsive mb-3">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Passport</th>
+                                        <th>Nationality</th>
+                                        <th>DOB</th>
+                                        <th>Lead</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for passenger in booking.passengers.all %}
+                                        <tr>
+                                            <td>{{ passenger.full_name }}</td>
+                                            <td>{{ passenger.passport_number|default:"—" }}</td>
+                                            <td>{{ passenger.nationality|default:"—" }}</td>
+                                            <td>{{ passenger.date_of_birth|date:"M d, Y"|default:"—" }}</td>
+                                            <td>
+                                                {% if passenger.is_lead_passenger %}
+                                                    <span class="badge bg-primary">Lead</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <a href="{% url 'packages:dashboard_passenger_edit' passenger.pk %}"
+                                                   class="btn btn-xs btn-secondary btn-sm">Edit</a>
+                                                <form method="post"
+                                                      action="{% url 'packages:dashboard_passenger_delete' passenger.pk %}"
+                                                      class="d-inline"
+                                                      onsubmit="return confirm('Remove {{ passenger.full_name }}?')">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn btn-xs btn-danger btn-sm">Remove</button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% endif %}
+
+                    <!-- Add Passenger -->
+                    <details>
+                        <summary class="btn btn-outline-secondary btn-sm mb-2">+ Add Passenger</summary>
+                        <form method="post" action="{% url 'packages:dashboard_passenger_add' booking.pk %}" class="mt-2">
+                            {% csrf_token %}
+                            <div class="row g-2">
+                                {% for field in passenger_form %}
+                                    <div class="col-md-6">
+                                        <label class="form-label form-label-sm">{{ field.label }}</label>
+                                        {{ field }}
+                                        {% if field.errors %}<div class="text-danger small">{{ field.errors }}</div>{% endif %}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-sm mt-2">Add Passenger</button>
+                        </form>
+                    </details>
+                </div>
+            </div>
+
+            <!-- Payments -->
+            <div class="card">
+                <div class="card-header"><strong>Payments</strong></div>
+                <div class="card-body">
+                    {% if booking.payments.all %}
+                        <div class="table-responsive mb-3">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Type</th>
+                                        <th>Amount</th>
+                                        <th>Method</th>
+                                        <th>Status</th>
+                                        <th>Reference</th>
+                                        <th>Received</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for payment in booking.payments.all %}
+                                        <tr>
+                                            <td>{{ payment.get_payment_type_display }}</td>
+                                            <td><strong>{{ payment.currency }} {{ payment.amount }}</strong></td>
+                                            <td>{{ payment.get_payment_method_display }}</td>
+                                            <td>
+                                                {% if payment.status == 'confirmed' %}
+                                                    <span class="badge bg-success">Confirmed</span>
+                                                {% elif payment.status == 'pending' %}
+                                                    <span class="badge bg-warning text-dark">Pending</span>
+                                                {% elif payment.status == 'refunded' %}
+                                                    <span class="badge bg-info">Refunded</span>
+                                                {% else %}
+                                                    <span class="badge bg-danger">{{ payment.get_status_display }}</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>{{ payment.reference_number|default:"—" }}</td>
+                                            <td>{{ payment.received_at|date:"M d, Y"|default:"—" }}</td>
+                                            <td>
+                                                <form method="post"
+                                                      action="{% url 'packages:dashboard_payment_delete' payment.pk %}"
+                                                      class="d-inline"
+                                                      onsubmit="return confirm('Delete this payment record?')">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% endif %}
+
+                    <!-- Record Payment -->
+                    <details>
+                        <summary class="btn btn-outline-success btn-sm mb-2">+ Record Payment</summary>
+                        <form method="post" action="{% url 'packages:dashboard_payment_record' booking.pk %}" class="mt-2">
+                            {% csrf_token %}
+                            <div class="row g-2">
+                                {% for field in payment_form %}
+                                    <div class="col-md-6">
+                                        <label class="form-label form-label-sm">{{ field.label }}</label>
+                                        {{ field }}
+                                        {% if field.errors %}<div class="text-danger small">{{ field.errors }}</div>{% endif %}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            <button type="submit" class="btn btn-success btn-sm mt-2">Record Payment</button>
+                        </form>
+                    </details>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right sidebar -->
+        <div class="col-lg-4">
+            <div class="card mb-3">
+                <div class="card-header"><strong>Quick Info</strong></div>
+                <div class="card-body">
+                    <p class="mb-1 text-muted small">Created</p>
+                    <p class="mb-2">{{ booking.created_at|date:"M d, Y H:i" }}</p>
+                    <p class="mb-1 text-muted small">Last Updated</p>
+                    <p class="mb-2">{{ booking.updated_at|date:"M d, Y H:i" }}</p>
+                    {% if booking.custom_package %}
+                        <p class="mb-1 text-muted small">Custom Package</p>
+                        <p class="mb-0">
+                            <a href="{% url 'packages:dashboard_custom_package_detail' booking.custom_package.pk %}">
+                                {{ booking.custom_package.custom_reference }}
+                            </a>
+                        </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
