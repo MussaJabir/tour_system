@@ -104,4 +104,25 @@ Running record of every working session. Most recent at the top.
 
 ---
 
+## Session 005 — 2026-05-14
+
+**Type:** Phase 4 — Reviews App
+**Branch:** `feature/phase-4-reviews-app` → PR #6 → `develop`
+
+### What we did
+1. **Review model** — `Review` (Package + User + Booking, 1–5 stars, title/body, status workflow: pending/approved/rejected, featured flag) and `ReviewPhoto` (multiple photos per review)
+2. **Moderation workflow** — `approve()` calls `Package.update_rating()` to recalculate `rating_average` and `review_count`; `reject()` records reason; both trigger on approve/reject bulk admin actions
+3. **Staff dashboard views** — list with status filter tabs + counts; detail with reviewer info and booking link; approve/reject/delete confirm flows; all behind `@staff_member_required`
+4. **Public views** — review list with rating breakdown sidebar, star/sort filters, pagination; review submit form with completed-booking eligibility check
+5. **JSON-LD schema markup** — `AggregateRating` structured data for Google rich snippets on the review list page
+6. **REST API** — `GET /api/v1/packages/<slug>/reviews/` (approved only, public); `POST /api/v1/reviews/` (authenticated, creates as pending)
+7. **Django admin** — `ReviewAdmin` with approve/reject/feature bulk actions, `ReviewPhotoInline`; `ReviewPhotoAdmin`
+8. **19 new tests** — model (approve, reject, rating update), dashboard views (auth gates, CRUD flows), public views, API endpoints
+9. **70/70 total tests passing**
+
+### PR
+- https://github.com/MussaJabir/tour_system/pull/6
+
+---
+
 _Add new sessions above this line._

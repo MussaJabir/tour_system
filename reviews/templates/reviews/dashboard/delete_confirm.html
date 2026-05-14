@@ -1,0 +1,28 @@
+{% extends "backend/base.html" %}
+
+{% block title %}Delete Review{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white"><strong>Delete Review</strong></div>
+                <div class="card-body">
+                    <p>Permanently delete this review? This cannot be undone.</p>
+                    <dl class="row">
+                        <dt class="col-4">Package</dt><dd class="col-8">{{ review.package.name }}</dd>
+                        <dt class="col-4">Reviewer</dt><dd class="col-8">{{ review.reviewer_name|default:"Anonymous" }}</dd>
+                        <dt class="col-4">Rating</dt><dd class="col-8">{{ review.rating }}/5</dd>
+                    </dl>
+                    <form method="post" class="d-flex gap-2">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger">Yes, Delete</button>
+                        <a href="{% url 'reviews:dashboard_review_detail' review.pk %}" class="btn btn-outline-secondary">Cancel</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

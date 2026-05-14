@@ -1,0 +1,163 @@
+{% extends "frontend/base.html" %}
+{% load static %}
+
+{% block title %}Reviews — {{ package.name }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'packages:public_package_list' %}">Packages</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'packages:public_package_detail' package.slug %}">{{ package.name }}</a></li>
+            <li class="breadcrumb-item active">Reviews</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <!-- Left: rating summary -->
+        <div class="col-lg-3 mb-4">
+            <div class="card text-center p-4 mb-3">
+                <div style="font-size: 4rem; font-weight: 700; line-height: 1;">{{ stats.average|floatformat:1 }}</div>
+                <div style="color: #f59e0b; font-size: 1.4rem;">
+                    {% for i in "12345" %}
+                        {% if forloop.counter <= stats.average %}★{% else %}☆{% endif %}
+                    {% endfor %}
+                </div>
+                <p class="text-muted small mt-1">{{ stats.count }} review{{ stats.count|pluralize }}</p>
+            </div>
+
+            <!-- Rating breakdown -->
+            <div class="card p-3 mb-3">
+                {% for star, count in stats.breakdown.items %}
+                    <div class="d-flex align-items-center mb-1">
+                        <span class="me-2 small" style="width:12px;">{{ star }}</span>
+                        <span style="color:#f59e0b;">★</span>
+                        <div class="progress flex-grow-1 mx-2" style="height:8px;">
+                            <div class="progress-bar bg-warning"
+                                 style="width:{% if stats.count %}{{ count|floatformat:0 }}{% else %}0{% endif %}%"></div>
+                        </div>
+                        <span class="small text-muted" style="width:20px;">{{ count }}</span>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <!-- Write a review CTA -->
+            <a href="{% url 'reviews:review_submit' package.slug %}" class="btn btn-primary w-100">
+                Write a Review
+            </a>
+
+            <!-- Filters -->
+            <div class="card p-3 mt-3">
+                <p class="mb-2 fw-semibold small">Filter</p>
+                <form method="get">
+                    <select name="rating" class="form-select form-select-sm mb-2" onchange="this.form.submit()">
+                        <option value="">All Ratings</option>
+                        {% for i in "54321" %}
+                            <option value="{{ i }}" {% if rating_filter == i %}selected{% endif %}>{{ i }} Star{{ i|pluralize }}</option>
+                        {% endfor %}
+                    </select>
+                    <select name="sort" class="form-select form-select-sm" onchange="this.form.submit()">
+                        <option value="-created_at" {% if sort == '-created_at' %}selected{% endif %}>Newest First</option>
+                        <option value="created_at" {% if sort == 'created_at' %}selected{% endif %}>Oldest First</option>
+                        <option value="-rating" {% if sort == '-rating' %}selected{% endif %}>Highest Rated</option>
+                        <option value="rating" {% if sort == 'rating' %}selected{% endif %}>Lowest Rated</option>
+                    </select>
+                </form>
+            </div>
+        </div>
+
+        <!-- Right: review list -->
+        <div class="col-lg-9">
+            {% if page_obj.object_list %}
+                {% for review in page_obj %}
+                    <!-- Review schema markup -->
+                    <div class="card mb-3 p-4" itemscope itemtype="https://schema.org/Review">
+                        <meta itemprop="itemReviewed" content="{{ package.name }}">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div>
+                                <strong itemprop="author">{{ review.reviewer_name|default:"Anonymous" }}</strong>
+                                {% if review.reviewer_country %}
+                                    <span class="text-muted small ms-2">{{ review.reviewer_country }}</span>
+                                {% endif %}
+                                {% if review.featured %}
+                                    <span class="badge bg-warning text-dark ms-2">Featured</span>
+                                {% endif %}
+                            </div>
+                            <div>
+                                <span itemprop="reviewRating" itemscope itemtype="https://schema.org/Rating">
+                                    <meta itemprop="ratingValue" content="{{ review.rating }}">
+                                    <meta itemprop="bestRating" content="5">
+                                    <span style="color:#f59e0b;">
+                                        {% for i in review.star_range %}
+                                            {% if i <= review.rating %}★{% else %}☆{% endif %}
+                                        {% endfor %}
+                                    </span>
+                                </span>
+                                <small class="text-muted ms-2">{{ review.created_at|date:"M d, Y" }}</small>
+                            </div>
+                        </div>
+
+                        <h6 itemprop="name" class="mb-1">{{ review.title }}</h6>
+                        <p itemprop="reviewBody" class="mb-2">{{ review.body }}</p>
+
+                        {% if review.photos.all %}
+                            <div class="d-flex flex-wrap gap-2 mt-2">
+                                {% for photo in review.photos.all|slice:":4" %}
+                                    <img src="{{ photo.photo.url }}" alt="{{ photo.caption }}"
+                                         style="width:80px; height:80px; object-fit:cover; border-radius:6px;">
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+
+                <!-- Pagination -->
+                {% if page_obj.has_other_pages %}
+                    <nav>
+                        <ul class="pagination justify-content-center">
+                            {% if page_obj.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}&rating={{ rating_filter }}&sort={{ sort }}">Previous</a>
+                                </li>
+                            {% endif %}
+                            {% for num in page_obj.paginator.page_range %}
+                                <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                                    <a class="page-link" href="?page={{ num }}&rating={{ rating_filter }}&sort={{ sort }}">{{ num }}</a>
+                                </li>
+                            {% endfor %}
+                            {% if page_obj.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}&rating={{ rating_filter }}&sort={{ sort }}">Next</a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                {% endif %}
+
+            {% else %}
+                <div class="text-center py-5">
+                    <p class="text-muted">No reviews yet. Be the first!</p>
+                    <a href="{% url 'reviews:review_submit' package.slug %}" class="btn btn-primary">Write a Review</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- JSON-LD schema markup for rich snippets -->
+{% if stats.count %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Product",
+  "name": "{{ package.name|escapejs }}",
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": "{{ stats.average|floatformat:1 }}",
+    "reviewCount": "{{ stats.count }}"
+  }
+}
+</script>
+{% endif %}
+{% endblock %}
