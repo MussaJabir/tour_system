@@ -970,6 +970,69 @@ class CustomPackageItinerary(TimeStampedModel):
 
 
 # ============================================================================
+# DEPARTURE / AVAILABILITY CALENDAR
+# ============================================================================
+
+class Departure(TimeStampedModel):
+    """
+    A specific departure date for a package with seat capacity.
+    Bookings attach to a Departure to lock seats.
+    """
+    STATUS_AVAILABLE = 'available'
+    STATUS_SOLD_OUT = 'sold_out'
+    STATUS_CANCELLED = 'cancelled'
+
+    STATUS_CHOICES = [
+        (STATUS_AVAILABLE, 'Available'),
+        (STATUS_SOLD_OUT, 'Sold Out'),
+        (STATUS_CANCELLED, 'Cancelled'),
+    ]
+
+    package = models.ForeignKey(
+        Package, on_delete=models.CASCADE, related_name='departures',
+    )
+    departure_date = models.DateField(db_index=True)
+    max_seats = models.PositiveIntegerField(default=12)
+    booked_seats = models.PositiveIntegerField(default=0)
+    status = models.CharField(
+        max_length=20, choices=STATUS_CHOICES, default=STATUS_AVAILABLE, db_index=True,
+    )
+    notes = models.TextField(blank=True)
+
+    class Meta:
+        ordering = ['departure_date']
+        verbose_name = 'Departure'
+        verbose_name_plural = 'Departures'
+        unique_together = ['package', 'departure_date']
+
+    def __str__(self):
+        return f"{self.package.name} — {self.departure_date} ({self.seats_remaining} seats left)"
+
+    @property
+    def seats_remaining(self):
+        return max(0, self.max_seats - self.booked_seats)
+
+    @property
+    def is_available(self):
+        return self.status == self.STATUS_AVAILABLE and self.seats_remaining > 0
+
+    def lock_seat(self):
+        """Increment booked_seats and auto-set sold_out when full."""
+        self.booked_seats += 1
+        if self.booked_seats >= self.max_seats:
+            self.status = self.STATUS_SOLD_OUT
+        self.save(update_fields=['booked_seats', 'status'])
+
+    def release_seat(self):
+        """Decrement booked_seats (booking cancelled) and restore available if needed."""
+        if self.booked_seats > 0:
+            self.booked_seats -= 1
+        if self.status == self.STATUS_SOLD_OUT and self.booked_seats < self.max_seats:
+            self.status = self.STATUS_AVAILABLE
+        self.save(update_fields=['booked_seats', 'status'])
+
+
+# ============================================================================
 # BOOKING SYSTEM
 # ============================================================================
 
@@ -998,6 +1061,9 @@ class Booking(TimeStampedModel):
         CustomPackage, on_delete=models.SET_NULL, null=True, blank=True, related_name='bookings',
     )
     package = models.ForeignKey(Package, on_delete=models.PROTECT, related_name='bookings')
+    departure = models.ForeignKey(
+        'Departure', on_delete=models.SET_NULL, null=True, blank=True, related_name='bookings',
+    )
     departure_date = models.DateField()
     return_date = models.DateField(null=True, blank=True)
     num_adults = models.PositiveIntegerField(default=1, validators=[MinValueValidator(1)])
@@ -1035,7 +1101,13 @@ class Booking(TimeStampedModel):
             ).order_by('-booking_reference').first()
             seq = int(last.booking_reference.split('-')[-1]) + 1 if last else 1
             self.booking_reference = f'BKG-{date_str}-{seq:05d}'
+
+        is_new = self.pk is None
         super().save(*args, **kwargs)
+
+        # Lock a seat on the departure when a booking is first created
+        if is_new and self.departure_id:
+            self.departure.lock_seat()
 
     @property
     def total_travelers(self):
@@ -1060,6 +1132,14 @@ class Booking(TimeStampedModel):
             'confirmed': 'success', 'in_progress': 'primary',
             'completed': 'success', 'cancelled': 'secondary', 'refunded': 'danger',
         }.get(self.status, 'secondary')
+
+    def cancel(self):
+        """Cancel booking and release the departure seat."""
+        if self.status != 'cancelled':
+            self.status = 'cancelled'
+            self.save(update_fields=['status'])
+            if self.departure_id:
+                self.departure.release_seat()
 
 
 class Passenger(TimeStampedModel):

@@ -1,0 +1,40 @@
+{% extends "backend/base.html" %}
+
+{% block title %}Delete Departure{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-lg-5">
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h6 class="mb-0">Confirm Deletion</h6>
+                </div>
+                <div class="card-body">
+                    <p>Are you sure you want to delete the departure on
+                        <strong>{{ departure.departure_date }}</strong> for
+                        <strong>{{ package.name }}</strong>?
+                    </p>
+                    {% if departure.booked_seats > 0 %}
+                    <div class="alert alert-warning">
+                        This departure has <strong>{{ departure.booked_seats }}</strong> confirmed booking(s).
+                        It cannot be deleted.
+                    </div>
+                    {% endif %}
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-danger"
+                                {% if departure.booked_seats > 0 %}disabled{% endif %}>
+                                Yes, Delete
+                            </button>
+                            <a href="{% url 'packages:dashboard_departure_list' package_pk=package.pk %}"
+                               class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
