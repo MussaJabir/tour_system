@@ -1,65 +1,68 @@
-{% extends "frontend/base.html" %}
+{% extends 'frontend/base_modern.html' %}
 {% load static %}
 
-{% block title %}Write a Review — {{ package.name }}{% endblock %}
+{% block title %}Write a review — {{ package.name }}{% endblock %}
+{% block meta_description %}Share your experience on {{ package.name }} with future travellers.{% endblock %}
 
 {% block content %}
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-lg-7">
-            <nav aria-label="breadcrumb" class="mb-4">
-                <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{% url 'packages:public_package_list' %}">Packages</a></li>
-                    <li class="breadcrumb-item"><a href="{% url 'packages:public_package_detail' package.slug %}">{{ package.name }}</a></li>
-                    <li class="breadcrumb-item active">Write a Review</li>
-                </ol>
-            </nav>
 
-            <h3 class="mb-4">Review: {{ package.name }}</h3>
+{% if package.featured_image %}
+    {% include 'frontend/partials/_listing_hero.html' with eyebrow=package.name title='Tell others how it went.' lede='Real reviews help future travellers pick the right trip. We read every single one.' image=package.featured_image.url %}
+{% else %}
+    {% include 'frontend/partials/_listing_hero.html' with eyebrow=package.name title='Tell others how it went.' lede='Real reviews help future travellers pick the right trip. We read every single one.' image='https://images.unsplash.com/photo-1516426122078-c23e76319801?w=2000&q=80' %}
+{% endif %}
 
-            {% if messages %}
-                {% for message in messages %}
-                    <div class="alert alert-{{ message.tags }}">{{ message }}</div>
-                {% endfor %}
-            {% endif %}
+<section class="py-16 lg:py-24">
+    <div class="container-editorial max-w-3xl">
 
-            {% if not user.is_authenticated %}
-                <div class="alert alert-info">
-                    You need to be logged in to submit a review.
+        {% if messages %}
+            {% for m in messages %}
+                <div class="mb-6 p-4 rounded-2xl text-sm
+                            {% if m.tags == 'success' %}bg-bush-50 text-bush-700 border border-bush-200
+                            {% elif m.tags == 'error' %}bg-clay-50 text-clay-700 border border-clay-200
+                            {% else %}bg-bone text-charcoal{% endif %}">
+                    {{ m }}
                 </div>
-            {% else %}
-                {% if not eligible_booking %}
-                    <div class="alert alert-warning">
-                        Only guests who have completed a booking for this package can leave a review.
-                        Your review will still be accepted but marked for manual verification.
-                    </div>
-                {% else %}
-                    <div class="alert alert-success">
-                        Verified guest review — linked to booking {{ eligible_booking.booking_reference }}.
+            {% endfor %}
+        {% endif %}
+
+        {% if not request.user.is_authenticated %}
+            <div class="bg-clay-50 border border-clay-200 text-clay-800 rounded-2xl p-6">
+                <h2 class="font-display text-xl">Sign in to review</h2>
+                <p class="mt-2 text-sm">You need a customer account (and a completed booking for this trip) to submit a review.</p>
+            </div>
+        {% elif not eligible_booking %}
+            <div class="bg-sand-50 border border-sand-200 text-charcoal rounded-2xl p-6">
+                <h2 class="font-display text-xl">No eligible booking on file</h2>
+                <p class="mt-2 text-sm text-mist">We only publish reviews from travellers who actually took the trip. If you completed this one and think this is in error, drop us a line.</p>
+                <a href="{% url 'contact_page' %}" class="btn btn-ghost mt-4 inline-flex">Contact us</a>
+            </div>
+        {% else %}
+            <p class="eyebrow">Your review</p>
+            <h2 class="font-display text-display-md mt-3 text-balance">Share your trip.</h2>
+            <p class="mt-4 text-mist max-w-xl">Reviews are moderated before publishing — usually within a day.</p>
+
+            <form method="post" class="mt-10 space-y-6" novalidate>
+                {% csrf_token %}
+                {% for field in form %}
+                    {% include 'frontend/partials/_form_field.html' with field=field %}
+                {% endfor %}
+                {% if form.non_field_errors %}
+                    <div class="text-sm text-clay-600">
+                        {% for err in form.non_field_errors %}<p>{{ err }}</p>{% endfor %}
                     </div>
                 {% endif %}
 
-                <div class="card p-4">
-                    <form method="post">
-                        {% csrf_token %}
-                        {% for field in form %}
-                            <div class="mb-3">
-                                <label class="form-label fw-semibold" for="{{ field.id_for_label }}">
-                                    {{ field.label }}
-                                    {% if field.field.required %}<span class="text-danger">*</span>{% endif %}
-                                </label>
-                                {{ field }}
-                                {% if field.errors %}<div class="text-danger small mt-1">{{ field.errors }}</div>{% endif %}
-                            </div>
-                        {% endfor %}
-                        <button type="submit" class="btn btn-primary w-100">Submit Review</button>
-                    </form>
+                <div class="pt-2 flex items-center gap-4 flex-wrap">
+                    <button type="submit" class="btn btn-primary">
+                        Submit Review
+                        <i class="fal fa-paper-plane"></i>
+                    </button>
+                    <a href="{% url 'packages:public_package_detail' package.slug %}" class="btn btn-ghost">Cancel</a>
                 </div>
-                <p class="text-muted small text-center mt-3">
-                    Reviews are moderated before appearing publicly. We aim to review within 24 hours.
-                </p>
-            {% endif %}
-        </div>
+            </form>
+        {% endif %}
     </div>
-</div>
+</section>
+
 {% endblock %}
