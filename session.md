@@ -431,4 +431,45 @@ tailwindcss -i static/frontend/src/tailwind.css \
 
 ---
 
+## Session 016 — 2026-05-16
+
+**Type:** Phase 6.4 — Conversion Flows (Safari Editorial)
+**Branch:** `feature/frontend-conversion` → PR → `develop`
+
+### What we did
+1. **New `_form_field.html` partial** — wraps any Django `BoundField` with the Safari Editorial styling: eyebrow label, `*` required marker, optional help text, inline error rendering. Used across contact + inquiry forms.
+2. **Tailwind component-layer form styles** — added pill-rounded input/select/textarea base styles inside `.form-field`, plus focus state (bush-600 border + soft glow) and `.form-field--error` red border. Pre-existing Django widget attrs (`form-control`, `form-select`) keep working untouched.
+3. **Rewrote `core/public/contact.html`** — `[1.4fr_1fr]` split layout:
+   - Left: form with `_form_field` partial, success/error message rendering, "Send Message" CTA + trust line
+   - Right: contact-info card (visit / call / email / WhatsApp with bush-green icon circles), "what to expect" 3-step card, Leaflet map of Arusha
+4. **Rewrote `packages/inquiry/create.html` as a 4-step Alpine.js wizard** — single `<form method="post">` with all fields present in the DOM (so one POST captures everything), Alpine `x-data="{ step: 1, total: 4 }"` controls visibility:
+   - **Step 1** — Trip basics: preferred date, flexible-dates checkbox, two backup dates
+   - **Step 2** — Group: adults / children / infants
+   - **Step 3** — Preferences: budget range, specific budget, accommodation preference, dietary requirements
+   - **Step 4** — About you: name, email, phone, country, source, special requests, preferred contact methods
+   - Progress bar with % complete, step labels (01/02/03/04), prev/next/submit buttons, trust line at bottom
+   - When called with a package slug, package PK is preserved as a hidden input
+5. **Rewrote `packages/inquiry/success.html`** — celebratory confirmation: bush-green check tick, "Thanks, {name}" headline, reference card with `inquiry_reference`, 3-step "what happens next" timeline, CTAs back to tours/home
+6. **Rewrote `packages/inquiry/custom_package_view.html`** — token-protected quote page for clients who received a tailor-made package:
+   - Cinematic hero with custom_reference eyebrow
+   - Sticky price + Accept/Request-Changes sidebar
+   - Expiry banner (warning at <7 days, blocking when expired)
+   - Itinerary timeline with day markers
+   - Optional "modifications made" + "note from your designer" sections
+7. **Tailwind rebuild** — 53 KB minified
+8. **Cache-bust** bumped to `v=20260516e`
+9. **12 new tests** (`core/tests_frontend_conversion.py`):
+   - Contact: 200, base_modern, form fields + info column render
+   - Inquiry wizard: generic + with-package both 200, all 4 step labels present, all expected field names in single form, hidden `base_package` when invoked with slug
+   - Inquiry success: 200, base_modern, reference + next steps + email render
+10. **All 222 tests pass** (210 prior + 12 new) — full suite run in `tour_django`, 136s
+
+### Template-defensive fix
+- The `_listing_hero` partial expects `image` as a string URL. Calling `package.featured_image.url` blows up when no image is set. Inquiry-create template now branches: `{% if package.featured_image %}` → pass `.url`; `{% else %}` → pass a stock fallback URL. Apply this pattern elsewhere if you reuse `_listing_hero` with optional images.
+
+### PR
+- (opening next…)
+
+---
+
 _Add new sessions above this line._

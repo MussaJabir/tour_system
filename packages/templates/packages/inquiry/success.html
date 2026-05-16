@@ -1,253 +1,63 @@
-{% extends "frontend/base.html" %}
+{% extends 'frontend/base_modern.html' %}
 {% load static %}
 
-{% block title %}Inquiry Submitted Successfully{% endblock %}
-
-{% block extra_css %}
-<style>
-    .success-hero {
-        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-        padding: 80px 0;
-        color: white;
-        margin-top: -30px;
-        text-align: center;
-    }
-    
-    .success-icon {
-        width: 120px;
-        height: 120px;
-        background: white;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 30px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-    }
-    
-    .success-icon i {
-        font-size: 60px;
-        color: #28a745;
-    }
-    
-    .success-content {
-        background: white;
-        border-radius: 10px;
-        padding: 40px;
-        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-        margin-top: -50px;
-        position: relative;
-        z-index: 1;
-    }
-    
-    .reference-box {
-        background: #f8f9fa;
-        border-left: 4px solid #28a745;
-        padding: 20px;
-        border-radius: 5px;
-        margin: 20px 0;
-    }
-    
-    .reference-number {
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: #28a745;
-        font-family: 'Courier New', monospace;
-    }
-    
-    .info-card {
-        background: #f8f9fa;
-        border-radius: 10px;
-        padding: 20px;
-        margin-bottom: 20px;
-    }
-    
-    .info-card h5 {
-        color: #495057;
-        margin-bottom: 15px;
-        font-weight: 600;
-    }
-    
-    .info-item {
-        display: flex;
-        justify-content: space-between;
-        padding: 10px 0;
-        border-bottom: 1px solid #dee2e6;
-    }
-    
-    .info-item:last-child {
-        border-bottom: none;
-    }
-    
-    .info-label {
-        color: #6c757d;
-        font-weight: 500;
-    }
-    
-    .info-value {
-        color: #495057;
-        font-weight: 600;
-    }
-    
-    .next-steps {
-        background: #e7f3ff;
-        border-left: 4px solid #0d6efd;
-        padding: 20px;
-        border-radius: 5px;
-        margin: 20px 0;
-    }
-    
-    .step-item {
-        display: flex;
-        align-items: start;
-        gap: 15px;
-        margin-bottom: 15px;
-    }
-    
-    .step-number {
-        background: #0d6efd;
-        color: white;
-        width: 30px;
-        height: 30px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: 700;
-        flex-shrink: 0;
-    }
-</style>
-{% endblock %}
+{% block title %}Inquiry received — Tour System{% endblock %}
+{% block meta_description %}We've received your trip inquiry. Our team will write back within 24 hours.{% endblock %}
 
 {% block content %}
-<!-- Success Hero Section -->
-<div class="success-hero">
-    <div class="container">
-        <div class="success-icon">
-            <i class="fas fa-check-circle"></i>
-        </div>
-        <h1 class="mb-3">Thank You!</h1>
-        <p class="lead">Your inquiry has been submitted successfully</p>
-    </div>
-</div>
 
-<!-- Success Content -->
-<div class="container">
-    <div class="row">
-        <div class="col-lg-8 mx-auto">
-            <div class="success-content">
-                
-                <!-- Reference Number -->
-                <div class="reference-box text-center">
-                    <p class="mb-2 text-muted">Your Inquiry Reference Number:</p>
-                    <div class="reference-number">{{ inquiry.inquiry_reference }}</div>
-                    <p class="mt-3 mb-0">
-                        <small class="text-muted">
-                            <i class="fas fa-info-circle"></i> 
-                            Please save this reference number for future communication
-                        </small>
-                    </p>
-                </div>
-                
-                <!-- Inquiry Details -->
-                <div class="info-card">
-                    <h5><i class="fas fa-clipboard-list"></i> Inquiry Details</h5>
-                    <div class="info-item">
-                        <span class="info-label">Package:</span>
-                        <span class="info-value">{{ inquiry.base_package.name }}</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-label">Travelers:</span>
-                        <span class="info-value">
-                            {{ inquiry.number_of_adults }} Adult{{ inquiry.number_of_adults|pluralize }}, 
-                            {{ inquiry.number_of_children }} Child{{ inquiry.number_of_children|pluralize }}{% if inquiry.number_of_infants > 0 %}, 
-                            {{ inquiry.number_of_infants }} Infant{{ inquiry.number_of_infants|pluralize }}{% endif %}
-                        </span>
-                    </div>
-                    {% if inquiry.preferred_travel_date %}
-                    <div class="info-item">
-                        <span class="info-label">Preferred Travel Date:</span>
-                        <span class="info-value">{{ inquiry.preferred_travel_date|date:"F d, Y" }}</span>
-                    </div>
-                    {% endif %}
-                    {% if inquiry.budget_range %}
-                    <div class="info-item">
-                        <span class="info-label">Budget:</span>
-                        <span class="info-value">{{ inquiry.get_budget_display_text }}</span>
-                    </div>
-                    {% endif %}
-                    <div class="info-item">
-                        <span class="info-label">Submitted:</span>
-                        <span class="info-value">{{ inquiry.created_at|date:"F d, Y g:i A" }}</span>
-                    </div>
-                </div>
-                
-                <!-- Next Steps -->
-                <div class="next-steps">
-                    <h5 class="mb-3"><i class="fas fa-list-check"></i> What Happens Next?</h5>
-                    
-                    <div class="step-item">
-                        <div class="step-number">1</div>
-                        <div>
-                            <strong>Review by Our Team</strong>
-                            <p class="mb-0 text-muted">Our travel experts will review your inquiry within 24 hours.</p>
-                        </div>
-                    </div>
-                    
-                    <div class="step-item">
-                        <div class="step-number">2</div>
-                        <div>
-                            <strong>Custom Package Creation</strong>
-                            <p class="mb-0 text-muted">We'll create a personalized package based on your preferences and requirements.</p>
-                        </div>
-                    </div>
-                    
-                    <div class="step-item">
-                        <div class="step-number">3</div>
-                        <div>
-                            <strong>Receive Your Quote</strong>
-                            <p class="mb-0 text-muted">You'll receive a secure link via email to view your custom package and pricing.</p>
-                        </div>
-                    </div>
-                    
-                    <div class="step-item">
-                        <div class="step-number">4</div>
-                        <div>
-                            <strong>Review & Approve</strong>
-                            <p class="mb-0 text-muted">Review the package details and let us know if you'd like any changes.</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Contact Information -->
-                <div class="info-card">
-                    <h5><i class="fas fa-headset"></i> Need Help?</h5>
-                    <p class="mb-2">If you have any questions or need to modify your inquiry, please contact us:</p>
-                    <ul class="list-unstyled">
-                        <li><i class="fas fa-envelope me-2"></i> <a href="mailto:support@toursystem.com">support@toursystem.com</a></li>
-                        <li><i class="fas fa-phone me-2"></i> <a href="tel:+1234567890">+1 (234) 567-890</a></li>
-                        <li><i class="fas fa-whatsapp me-2"></i> <a href="https://wa.me/1234567890">WhatsApp Support</a></li>
-                    </ul>
-                    <p class="mb-0">
-                        <strong>Reference your inquiry number:</strong> <code>{{ inquiry.inquiry_reference }}</code>
-                    </p>
-                </div>
-                
-                <!-- Action Buttons -->
-                <div class="text-center mt-4">
-                    {% if inquiry.base_package %}
-                        <a href="{% url 'packages:public_package_detail' inquiry.base_package.slug %}" class="btn btn-outline-primary me-2">
-                            <i class="fas fa-arrow-left"></i> Back to Package
-                        </a>
-                    {% endif %}
-                    <a href="{% url 'packages:public_package_list' %}" class="btn btn-primary">
-                        <i class="fas fa-search"></i> Browse More Packages
-                    </a>
-                </div>
-                
+<section class="py-32 lg:py-44">
+    <div class="container-editorial max-w-3xl text-center">
+
+        {# Tick mark #}
+        <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-bush-50 text-bush-700 mb-8">
+            <i class="fal fa-check text-3xl"></i>
+        </div>
+
+        <p class="eyebrow text-bush-700">Inquiry received</p>
+        <h1 class="font-display text-display-lg lg:text-display-xl mt-4 text-balance leading-[1.05]">
+            Thanks, {{ inquiry.customer_name|default:'traveller' }}.<br>It's in our hands.
+        </h1>
+
+        <p class="mt-6 text-lg text-mist max-w-xl mx-auto leading-relaxed">
+            We've sent a confirmation to <strong class="text-charcoal">{{ inquiry.customer_email }}</strong>. Our team is reviewing your request and you'll hear from us within 24 hours.
+        </p>
+
+        {# Reference card #}
+        <div class="mt-10 inline-flex flex-col bg-bone rounded-2xl px-8 py-6">
+            <p class="eyebrow text-mist">Your reference</p>
+            <p class="font-display text-2xl lg:text-3xl mt-2">{{ inquiry.inquiry_reference }}</p>
+            <p class="text-xs text-mist mt-2">Quote it in any reply or call.</p>
+        </div>
+
+        {# Next steps #}
+        <div class="mt-16 grid sm:grid-cols-3 gap-6 text-left">
+            <div class="bg-bone rounded-2xl p-6">
+                <span class="font-display text-3xl text-bush-700">1</span>
+                <h3 class="font-display text-lg mt-3">We review</h3>
+                <p class="text-sm text-mist mt-2 leading-relaxed">Our trip designer reads every word — no AI auto-replies.</p>
+            </div>
+            <div class="bg-bone rounded-2xl p-6">
+                <span class="font-display text-3xl text-bush-700">2</span>
+                <h3 class="font-display text-lg mt-3">Draft itinerary</h3>
+                <p class="text-sm text-mist mt-2 leading-relaxed">Within 24 hours: a day-by-day plan built around your dates.</p>
+            </div>
+            <div class="bg-bone rounded-2xl p-6">
+                <span class="font-display text-3xl text-bush-700">3</span>
+                <h3 class="font-display text-lg mt-3">Refine &amp; book</h3>
+                <p class="text-sm text-mist mt-2 leading-relaxed">We adjust together until it fits, then lock in lodges and seats.</p>
             </div>
         </div>
-    </div>
-</div>
-{% endblock %}
 
+        <div class="mt-12 flex flex-wrap justify-center gap-3">
+            <a href="{% url 'packages:public_package_list' %}" class="btn btn-secondary">
+                Keep exploring tours
+            </a>
+            <a href="{% url 'public_home' %}" class="btn btn-ghost">
+                Back to home
+            </a>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

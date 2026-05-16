@@ -156,10 +156,12 @@ Branch: `feature/frontend-detail-pages` → PR → `develop`
 - [x] Shared partials added: `_detail_hero.html`, `_gallery.html`, `_related_grid.html`
 
 ### Phase 6.4 — Conversion Flows (2 days)
-Branch: `feature/frontend-conversion`
-- [ ] Inquiry form — multi-step wizard feel (single POST), trust badges, progress bar
-- [ ] Contact page — split layout with map and multiple contact methods
-- [ ] Custom package builder — interactive form with real-time pricing
+Branch: `feature/frontend-conversion` → PR → `develop`
+- [x] Inquiry form — 4-step Alpine.js wizard (single POST), progress bar with %, step labels, prev/next/submit nav, trust line at bottom
+- [x] Contact page — `[1.4fr_1fr]` split layout: form left (name/email/phone/subject/message), info card + 3-step "what to expect" + Leaflet map of Arusha on right
+- [x] Custom package quote view — token-protected page styled for clients receiving a tailor-made quote; sticky price-and-actions sidebar (Accept &amp; Book / Request changes), itinerary timeline, expiry banners
+- [x] Inquiry success page — branded confirmation with reference card, 3-step "what happens next" timeline, links back to tours
+- [x] Shared `_form_field.html` partial + base styles for all inputs/selects/textareas (Tailwind component layer)
 
 ### Phase 6.5 — Static Pages + Auth (1 day)
 Branch: `feature/frontend-static`

@@ -1,413 +1,177 @@
-{% extends "frontend/base.html" %}
+{% extends 'frontend/base_modern.html' %}
 {% load static %}
 
-{% block title %}Request a Custom Quote - {{ package.name|default:"Tour Package" }}{% endblock %}
-
-{% block extra_css %}
-<style>
-    .inquiry-hero {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        padding: 60px 0;
-        color: white;
-        margin-top: -30px;
-    }
-    
-    .inquiry-form-section {
-        background: white;
-        border-radius: 10px;
-        padding: 40px;
-        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-        margin-top: -50px;
-        position: relative;
-        z-index: 1;
-    }
-    
-    .package-preview-card {
-        background: #f8f9fa;
-        border-radius: 10px;
-        padding: 20px;
-        margin-bottom: 30px;
-        border-left: 4px solid #667eea;
-    }
-    
-    .form-section-title {
-        color: #495057;
-        font-weight: 600;
-        font-size: 1.2rem;
-        margin-bottom: 20px;
-        padding-bottom: 10px;
-        border-bottom: 2px solid #e9ecef;
-    }
-    
-    .form-section-title i {
-        color: #667eea;
-        margin-right: 10px;
-    }
-    
-    .required-field::after {
-        content: " *";
-        color: #dc3545;
-    }
-    
-    .contact-method-group {
-        display: flex;
-        gap: 20px;
-        flex-wrap: wrap;
-    }
-    
-    .contact-method-item {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-    
-    .help-text-custom {
-        font-size: 0.875rem;
-        color: #6c757d;
-        margin-top: 5px;
-    }
-</style>
-{% endblock %}
+{% block title %}{% if package %}Plan {{ package.name }}{% else %}Plan Your Trip{% endif %} — Tour System{% endblock %}
+{% block meta_description %}Tell us what you have in mind and our team will write back within 24 hours with a draft itinerary built around it.{% endblock %}
 
 {% block content %}
-<!-- Hero Section -->
+
 {% if package %}
-<div class="inquiry-hero">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-8 mx-auto text-center">
-                <h1 class="mb-3">Request a Custom Quote</h1>
-                <p class="lead">Tell us about your travel preferences and we'll create a personalized package just for you!</p>
-            </div>
-        </div>
-    </div>
-</div>
+    {% if package.featured_image %}
+        {% include 'frontend/partials/_listing_hero.html' with eyebrow=package.get_category_display title=package.name lede='Tell us when, with whom, and how. We will write back within a day with a refined itinerary built around your dates.' image=package.featured_image.url %}
+    {% else %}
+        {% include 'frontend/partials/_listing_hero.html' with eyebrow=package.get_category_display title=package.name lede='Tell us when, with whom, and how. We will write back within a day with a refined itinerary built around your dates.' image='https://images.unsplash.com/photo-1535941339077-2dd1c7963098?w=2000&q=80' %}
+    {% endif %}
 {% else %}
-<div class="inquiry-hero">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-8 mx-auto text-center">
-                <h1 class="mb-3">Request a Custom Quote</h1>
-                <p class="lead">Interested in one of our packages? Fill out the form below and we'll get back to you with a personalized quote!</p>
-            </div>
-        </div>
-    </div>
-</div>
+    {% include 'frontend/partials/_listing_hero.html' with eyebrow='Plan Your Trip' title='Let us build it together.' lede='Tell us when, where, and how you want to travel. We will write back within a day with a draft itinerary and indicative pricing.' image='https://images.unsplash.com/photo-1535941339077-2dd1c7963098?w=2000&q=80' %}
 {% endif %}
 
-<!-- Inquiry Form Section -->
-<div class="container">
-    <div class="row">
-        <div class="col-lg-10 mx-auto">
-            <div class="inquiry-form-section">
-                
-                <!-- Package Preview (if coming from package detail) -->
-                {% if package %}
-                <div class="package-preview-card">
-                    <div class="row align-items-center">
-                        <div class="col-md-3">
-                            {% if package.featured_image %}
-                                <img src="{{ package.featured_image.url }}" alt="{{ package.name }}" class="img-fluid rounded">
-                            {% else %}
-                                <div class="bg-secondary rounded d-flex align-items-center justify-content-center" style="height: 120px;">
-                                    <i class="fas fa-image fa-3x text-white"></i>
-                                </div>
-                            {% endif %}
-                        </div>
-                        <div class="col-md-9">
-                            <h4 class="mb-2">{{ package.name }}</h4>
-                            <p class="text-muted mb-2">{{ package.short_description|truncatewords:20 }}</p>
-                            <div class="d-flex gap-3">
-                                <span><i class="fas fa-clock"></i> {{ package.duration_days }} Days / {{ package.duration_nights }} Nights</span>
-                                <span><i class="fas fa-tag"></i> {{ package.get_category_display }}</span>
-                                <span><i class="fas fa-dollar-sign"></i> {{ package.currency }} {{ package.price_per_person }} per person</span>
-                            </div>
+<section class="py-16 lg:py-24" x-data="{ step: 1, total: 4 }">
+    <div class="container-editorial max-w-4xl">
+
+        {# Progress bar #}
+        <div class="mb-12 lg:mb-16">
+            <div class="flex items-center justify-between text-xs uppercase tracking-wider text-mist mb-3">
+                <span x-text="'Step ' + step + ' of ' + total"></span>
+                <span x-text="Math.round((step / total) * 100) + '% complete'"></span>
+            </div>
+            <div class="h-1 bg-sand-200 rounded-full overflow-hidden">
+                <div class="h-full bg-bush-600 transition-all duration-500" :style="'width: ' + (step / total * 100) + '%'"></div>
+            </div>
+
+            <div class="grid grid-cols-4 gap-2 mt-6 text-xs">
+                <div class="text-center" :class="step >= 1 ? 'text-bush-700 font-medium' : 'text-mist'">
+                    <span class="block">01</span>
+                    <span class="hidden sm:block mt-1">Trip basics</span>
+                </div>
+                <div class="text-center" :class="step >= 2 ? 'text-bush-700 font-medium' : 'text-mist'">
+                    <span class="block">02</span>
+                    <span class="hidden sm:block mt-1">Who's coming</span>
+                </div>
+                <div class="text-center" :class="step >= 3 ? 'text-bush-700 font-medium' : 'text-mist'">
+                    <span class="block">03</span>
+                    <span class="hidden sm:block mt-1">Preferences</span>
+                </div>
+                <div class="text-center" :class="step >= 4 ? 'text-bush-700 font-medium' : 'text-mist'">
+                    <span class="block">04</span>
+                    <span class="hidden sm:block mt-1">About you</span>
+                </div>
+            </div>
+        </div>
+
+        <form method="post" class="space-y-8" novalidate>
+            {% csrf_token %}
+
+            {# Hidden base_package — preserved in submit even though only shown on step 1 #}
+            {% if package %}
+                <input type="hidden" name="base_package" value="{{ package.pk }}">
+            {% endif %}
+
+            {# ====================== STEP 1 — TRIP BASICS ====================== #}
+            <div x-show="step === 1" x-transition>
+                <p class="eyebrow">Step 1</p>
+                <h2 class="font-display text-display-md mt-3 text-balance">When are you thinking of travelling?</h2>
+                <p class="mt-3 text-mist max-w-md">Dates can be flexible — we'll suggest the best windows for your interests.</p>
+
+                <div class="mt-8 space-y-6">
+                    {% include 'frontend/partials/_form_field.html' with field=form.preferred_travel_date label='Preferred travel date' %}
+
+                    <div class="form-field flex items-center gap-2">
+                        {{ form.flexible_dates }}
+                        <label for="{{ form.flexible_dates.id_for_label }}" class="text-sm">My dates are flexible (we may suggest a better window)</label>
+                    </div>
+
+                    <div class="grid sm:grid-cols-2 gap-5">
+                        {% include 'frontend/partials/_form_field.html' with field=form.alternative_date_1 label='Backup date 1' %}
+                        {% include 'frontend/partials/_form_field.html' with field=form.alternative_date_2 label='Backup date 2' %}
+                    </div>
+                </div>
+            </div>
+
+            {# ====================== STEP 2 — GROUP ====================== #}
+            <div x-show="step === 2" x-transition x-cloak>
+                <p class="eyebrow">Step 2</p>
+                <h2 class="font-display text-display-md mt-3 text-balance">Who's coming?</h2>
+                <p class="mt-3 text-mist max-w-md">We tailor vehicle, lodge, and route choices to your group.</p>
+
+                <div class="mt-8 grid sm:grid-cols-3 gap-5">
+                    {% include 'frontend/partials/_form_field.html' with field=form.number_of_adults label='Adults (18+)' %}
+                    {% include 'frontend/partials/_form_field.html' with field=form.number_of_children label='Children (3–17)' %}
+                    {% include 'frontend/partials/_form_field.html' with field=form.number_of_infants label='Infants (0–2)' %}
+                </div>
+            </div>
+
+            {# ====================== STEP 3 — PREFERENCES ====================== #}
+            <div x-show="step === 3" x-transition x-cloak>
+                <p class="eyebrow">Step 3</p>
+                <h2 class="font-display text-display-md mt-3 text-balance">Your style of travel.</h2>
+                <p class="mt-3 text-mist max-w-md">Optional — but the more we know, the closer the first draft will be to the trip you actually want.</p>
+
+                <div class="mt-8 space-y-6">
+                    <div class="grid sm:grid-cols-2 gap-5">
+                        {% include 'frontend/partials/_form_field.html' with field=form.budget_range label='Budget range' %}
+                        {% include 'frontend/partials/_form_field.html' with field=form.specific_budget label='Specific budget (USD, optional)' %}
+                    </div>
+                    {% include 'frontend/partials/_form_field.html' with field=form.accommodation_preference label='Accommodation preference' %}
+                    {% include 'frontend/partials/_form_field.html' with field=form.dietary_requirements label='Dietary requirements (optional)' %}
+                </div>
+            </div>
+
+            {# ====================== STEP 4 — CONTACT ====================== #}
+            <div x-show="step === 4" x-transition x-cloak>
+                <p class="eyebrow">Step 4</p>
+                <h2 class="font-display text-display-md mt-3 text-balance">Where do we send the itinerary?</h2>
+                <p class="mt-3 text-mist max-w-md">We reply within 24 hours. No newsletter spam — promise.</p>
+
+                <div class="mt-8 space-y-6">
+                    <div class="grid sm:grid-cols-2 gap-5">
+                        {% include 'frontend/partials/_form_field.html' with field=form.customer_name label='Your name' %}
+                        {% include 'frontend/partials/_form_field.html' with field=form.customer_email label='Email' %}
+                    </div>
+                    <div class="grid sm:grid-cols-2 gap-5">
+                        {% include 'frontend/partials/_form_field.html' with field=form.customer_phone label='Phone (with country code)' %}
+                        {% include 'frontend/partials/_form_field.html' with field=form.country label='Country of residence' %}
+                    </div>
+                    {% include 'frontend/partials/_form_field.html' with field=form.source label='How did you hear about us?' %}
+                    {% include 'frontend/partials/_form_field.html' with field=form.special_requests label='Anything else we should know?' %}
+
+                    <div class="form-field">
+                        <label class="eyebrow text-mist block mb-2">Preferred contact method</label>
+                        <div class="flex flex-wrap gap-5 text-sm">
+                            <label class="flex items-center">{{ form.prefer_email }} Email</label>
+                            <label class="flex items-center">{{ form.prefer_phone }} Phone</label>
+                            <label class="flex items-center">{{ form.prefer_whatsapp }} WhatsApp</label>
                         </div>
                     </div>
                 </div>
-                {% endif %}
-                
-                <!-- Error Display -->
-                {% if form.errors %}
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        <i class="fas fa-exclamation-circle me-2"></i>
-                        <strong>Please fix the following errors:</strong>
-                        <ul class="mb-0 mt-2">
-                            {% for field in form %}
-                                {% if field.errors %}
-                                    {% for error in field.errors %}
-                                        <li><strong>{{ field.label }}:</strong> {{ error }}</li>
-                                    {% endfor %}
-                                {% endif %}
-                            {% endfor %}
-                            {% if form.non_field_errors %}
-                                {% for error in form.non_field_errors %}
-                                    <li>{{ error }}</li>
-                                {% endfor %}
-                            {% endif %}
-                        </ul>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                {% endif %}
-                
-                <form method="post" id="inquiryForm">
-                    {% csrf_token %}
-                    
-                    <!-- Package Selection -->
-                    {% if not package %}
-                    <div class="mb-4">
-                        <h3 class="form-section-title">
-                            <i class="fas fa-box"></i> Package Selection
-                        </h3>
-                        <div class="mb-3">
-                            <label for="{{ form.base_package.id_for_label }}" class="form-label required-field">Package Interested In</label>
-                            {{ form.base_package }}
-                            {% if form.base_package.errors %}
-                                <div class="text-danger small mt-1">{{ form.base_package.errors }}</div>
-                            {% endif %}
-                        </div>
-                    </div>
-                    {% else %}
-                        {{ form.base_package }}
-                    {% endif %}
-                    
-                    <!-- Personal Information -->
-                    <div class="mb-4">
-                        <h3 class="form-section-title">
-                            <i class="fas fa-user"></i> Personal Information
-                        </h3>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="{{ form.customer_name.id_for_label }}" class="form-label required-field">Full Name</label>
-                                {{ form.customer_name }}
-                                {% if form.customer_name.errors %}
-                                    <div class="text-danger small mt-1">{{ form.customer_name.errors }}</div>
-                                {% endif %}
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="{{ form.customer_email.id_for_label }}" class="form-label required-field">Email Address</label>
-                                {{ form.customer_email }}
-                                {% if form.customer_email.errors %}
-                                    <div class="text-danger small mt-1">{{ form.customer_email.errors }}</div>
-                                {% endif %}
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="{{ form.customer_phone.id_for_label }}" class="form-label required-field">Phone Number</label>
-                                {{ form.customer_phone }}
-                                {% if form.customer_phone.errors %}
-                                    <div class="text-danger small mt-1">{{ form.customer_phone.errors }}</div>
-                                {% endif %}
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="{{ form.country.id_for_label }}" class="form-label">Country</label>
-                                {{ form.country }}
-                                {% if form.country.errors %}
-                                    <div class="text-danger small mt-1">{{ form.country.errors }}</div>
-                                {% endif %}
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label for="{{ form.source.id_for_label }}" class="form-label">How did you hear about us?</label>
-                            {{ form.source }}
-                            {% if form.source.errors %}
-                                <div class="text-danger small mt-1">{{ form.source.errors }}</div>
-                            {% endif %}
-                        </div>
-                    </div>
-                    
-                    <!-- Travel Details -->
-                    <div class="mb-4">
-                        <h3 class="form-section-title">
-                            <i class="fas fa-calendar-alt"></i> Travel Details
-                        </h3>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="{{ form.preferred_travel_date.id_for_label }}" class="form-label">Preferred Travel Date</label>
-                                {{ form.preferred_travel_date }}
-                                {% if form.preferred_travel_date.errors %}
-                                    <div class="text-danger small mt-1">{{ form.preferred_travel_date.errors }}</div>
-                                {% endif %}
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <div class="form-check mt-4 pt-3">
-                                    {{ form.flexible_dates }}
-                                    <label class="form-check-label" for="{{ form.flexible_dates.id_for_label }}">
-                                        My dates are flexible (±3 days)
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="{{ form.alternative_date_1.id_for_label }}" class="form-label">Alternative Date 1</label>
-                                {{ form.alternative_date_1 }}
-                                {% if form.alternative_date_1.errors %}
-                                    <div class="text-danger small mt-1">{{ form.alternative_date_1.errors }}</div>
-                                {% endif %}
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="{{ form.alternative_date_2.id_for_label }}" class="form-label">Alternative Date 2</label>
-                                {{ form.alternative_date_2 }}
-                                {% if form.alternative_date_2.errors %}
-                                    <div class="text-danger small mt-1">{{ form.alternative_date_2.errors }}</div>
-                                {% endif %}
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Travelers -->
-                    <div class="mb-4">
-                        <h3 class="form-section-title">
-                            <i class="fas fa-users"></i> Number of Travelers
-                        </h3>
-                        <div class="row">
-                            <div class="col-md-4 mb-3">
-                                <label for="{{ form.number_of_adults.id_for_label }}" class="form-label">Adults (18+)</label>
-                                {{ form.number_of_adults }}
-                                {% if form.number_of_adults.errors %}
-                                    <div class="text-danger small mt-1">{{ form.number_of_adults.errors }}</div>
-                                {% endif %}
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <label for="{{ form.number_of_children.id_for_label }}" class="form-label">Children (3-17)</label>
-                                {{ form.number_of_children }}
-                                {% if form.number_of_children.errors %}
-                                    <div class="text-danger small mt-1">{{ form.number_of_children.errors }}</div>
-                                {% endif %}
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <label for="{{ form.number_of_infants.id_for_label }}" class="form-label">Infants (0-2)</label>
-                                {{ form.number_of_infants }}
-                                {% if form.number_of_infants.errors %}
-                                    <div class="text-danger small mt-1">{{ form.number_of_infants.errors }}</div>
-                                {% endif %}
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Budget -->
-                    <div class="mb-4">
-                        <h3 class="form-section-title">
-                            <i class="fas fa-dollar-sign"></i> Budget Information
-                        </h3>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="{{ form.budget_range.id_for_label }}" class="form-label">Budget per Person (USD)</label>
-                                {{ form.budget_range }}
-                                {% if form.budget_range.errors %}
-                                    <div class="text-danger small mt-1">{{ form.budget_range.errors }}</div>
-                                {% endif %}
-                            </div>
-                            <div class="col-md-6 mb-3" id="specificBudgetField" style="display: none;">
-                                <label for="{{ form.specific_budget.id_for_label }}" class="form-label">Specific Budget Amount</label>
-                                {{ form.specific_budget }}
-                                {% if form.specific_budget.errors %}
-                                    <div class="text-danger small mt-1">{{ form.specific_budget.errors }}</div>
-                                {% endif %}
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Preferences -->
-                    <div class="mb-4">
-                        <h3 class="form-section-title">
-                            <i class="fas fa-star"></i> Preferences
-                        </h3>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="{{ form.accommodation_preference.id_for_label }}" class="form-label">Accommodation Preference</label>
-                                {{ form.accommodation_preference }}
-                                {% if form.accommodation_preference.errors %}
-                                    <div class="text-danger small mt-1">{{ form.accommodation_preference.errors }}</div>
-                                {% endif %}
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label for="{{ form.dietary_requirements.id_for_label }}" class="form-label">Dietary Requirements</label>
-                            {{ form.dietary_requirements }}
-                            {% if form.dietary_requirements.errors %}
-                                <div class="text-danger small mt-1">{{ form.dietary_requirements.errors }}</div>
-                            {% endif %}
-                            <small class="help-text-custom">Any dietary restrictions? (Vegetarian, Vegan, Halal, Allergies, etc.)</small>
-                        </div>
-                        <div class="mb-3">
-                            <label for="{{ form.special_requests.id_for_label }}" class="form-label">Special Interests & Requests</label>
-                            {{ form.special_requests }}
-                            {% if form.special_requests.errors %}
-                                <div class="text-danger small mt-1">{{ form.special_requests.errors }}</div>
-                            {% endif %}
-                            <small class="help-text-custom">Tell us about any special interests, preferences, or requirements...</small>
-                        </div>
-                    </div>
-                    
-                    <!-- Preferred Contact Method -->
-                    <div class="mb-4">
-                        <h3 class="form-section-title">
-                            <i class="fas fa-phone"></i> Preferred Contact Method
-                        </h3>
-                        <div class="contact-method-group">
-                            <div class="contact-method-item">
-                                {{ form.prefer_email }}
-                                <label class="form-check-label" for="{{ form.prefer_email.id_for_label }}">
-                                    <i class="fas fa-envelope"></i> Email
-                                </label>
-                            </div>
-                            <div class="contact-method-item">
-                                {{ form.prefer_phone }}
-                                <label class="form-check-label" for="{{ form.prefer_phone.id_for_label }}">
-                                    <i class="fas fa-phone"></i> Phone Call
-                                </label>
-                            </div>
-                            <div class="contact-method-item">
-                                {{ form.prefer_whatsapp }}
-                                <label class="form-check-label" for="{{ form.prefer_whatsapp.id_for_label }}">
-                                    <i class="fab fa-whatsapp"></i> WhatsApp
-                                </label>
-                            </div>
-                        </div>
-                        {% if form.prefer_email.errors or form.prefer_phone.errors or form.prefer_whatsapp.errors %}
-                            <div class="text-danger small mt-2">Please select at least one contact method.</div>
-                        {% endif %}
-                    </div>
-                    
-                    <!-- Submit Button -->
-                    <div class="text-center mt-4">
-                        <button type="submit" class="btn btn-primary btn-lg px-5">
-                            <i class="fas fa-paper-plane me-2"></i> Submit Inquiry
-                        </button>
-                        <p class="text-muted mt-3">
-                            <small>By submitting this form, you agree to our terms and conditions. We'll get back to you within 24 hours.</small>
-                        </p>
-                    </div>
-                </form>
             </div>
-        </div>
+
+            {% if form.non_field_errors %}
+                <div class="text-sm text-clay-600 bg-clay-50 rounded-2xl p-4">
+                    {% for err in form.non_field_errors %}<p>{{ err }}</p>{% endfor %}
+                </div>
+            {% endif %}
+
+            {# ====================== NAV BUTTONS ====================== #}
+            <div class="flex items-center justify-between pt-8 border-t border-sand-200 gap-4">
+                <button type="button" @click="step--"
+                        x-show="step > 1"
+                        class="btn btn-ghost">
+                    <i class="fal fa-arrow-left"></i> Back
+                </button>
+                <div x-show="step === 1"></div>
+
+                <button type="button" @click="step++"
+                        x-show="step < 4"
+                        class="btn btn-primary">
+                    Next
+                    <i class="fal fa-arrow-right"></i>
+                </button>
+                <button type="submit"
+                        x-show="step === 4"
+                        x-cloak
+                        class="btn btn-primary">
+                    Submit Inquiry
+                    <i class="fal fa-paper-plane"></i>
+                </button>
+            </div>
+        </form>
+
+        {# Trust line #}
+        <p class="mt-10 text-xs text-mist text-center flex items-center justify-center gap-2">
+            <i class="fal fa-lock"></i> Your details are shared only with our Arusha team. We typically reply within 24 hours.
+        </p>
     </div>
-</div>
-{% endblock %}
+</section>
 
-{% block extra_js %}
-<script>
-    // Show/hide specific budget field based on budget range selection
-    document.addEventListener('DOMContentLoaded', function() {
-        const budgetRange = document.getElementById('{{ form.budget_range.id_for_label }}');
-        const specificBudgetField = document.getElementById('specificBudgetField');
-        
-        function toggleSpecificBudget() {
-            if (budgetRange.value === 'specific') {
-                specificBudgetField.style.display = 'block';
-                document.getElementById('{{ form.specific_budget.id_for_label }}').required = true;
-            } else {
-                specificBudgetField.style.display = 'none';
-                document.getElementById('{{ form.specific_budget.id_for_label }}').required = false;
-            }
-        }
-        
-        budgetRange.addEventListener('change', toggleSpecificBudget);
-        toggleSpecificBudget(); // Check on page load
-    });
-</script>
 {% endblock %}
-
