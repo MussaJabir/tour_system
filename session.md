@@ -505,7 +505,7 @@ tailwindcss -i static/frontend/src/tailwind.css \
 - Django renders `500.html` **without RequestContext**, so it can't use `{% url %}`, `{% load static %}` requires explicit re-load (which we do), and context-processor vars (`request`, `messages`, etc.) won't be available. Keep that template self-contained — verified working.
 
 ### PR
-- (opening next…)
+- https://github.com/MussaJabir/tour_system/pull/18
 
 ---
 
