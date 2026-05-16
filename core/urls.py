@@ -10,6 +10,9 @@ urlpatterns = [
     path('dashboard/logout/', views.staff_logout, name='staff_logout'),
 
     # ==================== PUBLIC URLS ====================
+    # About
+    path('about/', views.about_page, name='about_page'),
+
     # Contact
     path('contact/', views.contact_page, name='contact_page'),
     

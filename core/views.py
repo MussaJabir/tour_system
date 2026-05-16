@@ -282,6 +282,11 @@ def newsletter_unsubscribe(request, token):
         return redirect('public_home')
 
 
+def about_page(request):
+    """Public about-us page. Static — no DB queries needed."""
+    return render(request, 'core/public/about.html')
+
+
 def faq_page(request):
     """
     Public FAQ page.

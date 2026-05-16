@@ -164,11 +164,12 @@ Branch: `feature/frontend-conversion` → PR → `develop`
 - [x] Shared `_form_field.html` partial + base styles for all inputs/selects/textareas (Tailwind component layer)
 
 ### Phase 6.5 — Static Pages + Auth (1 day)
-Branch: `feature/frontend-static`
-- [ ] About us — story-driven, team grid
-- [ ] FAQ — accordion with smooth GSAP reveal
-- [ ] 404 / 500 error pages — branded
-- [ ] Staff dashboard login page — clean, separate from marketing aesthetic
+Branch: `feature/frontend-static` → PR → `develop`
+- [x] **About us** — new `/about/` route + template. Cinematic hero, story section, 3 values cards (Local / Bespoke / Honest pricing), team grid placeholder, bush-green final CTA. Wired into nav + footer.
+- [x] **FAQ** — category filter chips (with counts), Alpine.js accordion with single-open behaviour and smooth `x-transition`, "still stuck" CTA strip
+- [x] **404** — branded "That trail's overgrown" page with helpful nav links
+- [x] **500** — self-contained branded server-error page (doesn't extend base_modern since RequestContext isn't guaranteed)
+- [x] **Staff dashboard login** — clean 2-col split (brand panel left with safari image + pull-quote, form right), Safari Editorial palette but utility-app feel
 
 ### Phase 6.6 — Polish & Performance (2 days)
 Branch: `feature/frontend-polish`
