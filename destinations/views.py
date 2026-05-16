@@ -208,38 +208,39 @@ def dashboard_delete_gallery_image(request, pk):
 
 def public_home(request):
     """
-    Public homepage
+    Public homepage — Safari Editorial.
+    Provides featured content for every section of the new index.html.
     """
     from activities.models import Activity
     from accommodations.models import Accommodation
-    
-    # Fetch featured destinations
-    featured_destinations = Destination.objects.filter(is_active=True, is_featured=True)[:6]
-    
-    # Fetch featured activities
+    from packages.models import Package
+    from core.models import Testimonial
+
+    featured_destinations = Destination.objects.filter(is_active=True, is_featured=True)[:5]
+    featured_packages = Package.objects.filter(is_active=True, is_featured=True)[:3]
     featured_activities = Activity.objects.filter(is_active=True, is_featured=True)[:8]
-    
-    # Fetch featured accommodations  
     featured_accommodations = Accommodation.objects.filter(is_active=True, is_featured=True)[:6]
-    
-    # Get counts for stats/counters
+    featured_testimonials = Testimonial.objects.filter(is_active=True, is_featured=True)[:6]
+
     total_destinations = Destination.objects.filter(is_active=True).count()
     total_activities = Activity.objects.filter(is_active=True).count()
     total_accommodations = Accommodation.objects.filter(is_active=True).count()
-    
-    # Get footer destinations (for footer links)
+    total_packages = Package.objects.filter(is_active=True).count()
+
     footer_destinations = Destination.objects.filter(is_active=True, is_featured=True)[:4]
-    
+
     context = {
         'featured_destinations': featured_destinations,
+        'featured_packages': featured_packages,
         'featured_activities': featured_activities,
         'featured_accommodations': featured_accommodations,
+        'featured_testimonials': featured_testimonials,
         'total_destinations': total_destinations,
         'total_activities': total_activities,
         'total_accommodations': total_accommodations,
+        'total_packages': total_packages,
         'footer_destinations': footer_destinations,
     }
-    
     return render(request, 'frontend/index.html', context)
 
 

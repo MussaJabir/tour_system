@@ -125,16 +125,16 @@ Branch: `feature/frontend-foundation` → PR → `develop`
 - [x] Built `_styleguide.html` at `/styleguide/` (DEBUG-only, returns 404 in production)
 
 ### Phase 6.1 — Homepage (3 days)
-Branch: `feature/frontend-homepage`
-- [ ] Cinematic hero — full-bleed photo/video, Ken Burns zoom, staggered headline fade
-- [ ] Sticky nav that morphs on scroll (transparent → solid)
-- [ ] Featured destinations magazine grid with hover zoom + caption reveal
-- [ ] Featured packages large cards (price, duration, parallax photo)
-- [ ] Activities preview — horizontal scroll showcase
-- [ ] Why us / trust strip with scroll-triggered stats counter
-- [ ] Testimonials quote slider with real photos
-- [ ] Newsletter CTA — bold full-bleed section
-- [ ] Restructured footer with premium feel
+Branch: `feature/frontend-homepage` → PR → `develop`
+- [x] Cinematic hero — full-bleed Tanzania photo, Ken Burns zoom, GSAP staggered headline fade, scroll cue
+- [x] Sticky nav that morphs on scroll (transparent → solid) — already done in Phase 6.0 partial
+- [x] Featured destinations asymmetric magazine grid (1 hero card + 4 secondary) with hover zoom + caption reveal
+- [x] Featured packages large editorial cards with price, duration, category eyebrow, hover arrow
+- [x] Activities preview — horizontal scroll showcase with difficulty badge + category eyebrow
+- [x] Stats trust strip — 4 scroll-triggered GSAP counters (destinations, tours, activities, lodges)
+- [x] Testimonials section — 3-up quote cards with photo, location, star rating
+- [x] Editorial pull-quote section (charcoal background) — "Why us" + 3 value pillars
+- [x] Final CTA strip — full-bleed bush-green with mix-blend overlay, double CTA
 
 ### Phase 6.2 — Listing Pages (2 days)
 Branch: `feature/frontend-listings`

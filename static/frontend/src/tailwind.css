@@ -248,6 +248,13 @@
   .text-balance { text-wrap: balance; }
   .text-pretty  { text-wrap: pretty; }
 
+  /* Hide scrollbar but keep scrolling — for horizontal-scroll showcases */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
+
   /* Lenis smooth scroll attaches html.lenis */
   html.lenis,
   html.lenis body { height: auto; }
