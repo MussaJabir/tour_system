@@ -509,4 +509,58 @@ tailwindcss -i static/frontend/src/tailwind.css \
 
 ---
 
+## Session 018 — 2026-05-16
+
+**Type:** Phase 6.6 — Polish & Performance · **closes Phase 6**
+**Branch:** `feature/frontend-polish` → PR → `develop`
+
+### What we did
+1. **Migrated the last 3 public templates** off `frontend/base.html`:
+   - `reviews/public/list.html` — package reviews list with rating breakdown sidebar
+   - `reviews/public/submit.html` — review submission form (eligibility-gated)
+   - `core/public/unsubscribe.html` — newsletter unsubscribe confirmation
+2. **Deleted legacy Ravelo bundle** — `static/frontend/assets/` shrank from **17 MB → 1.2 MB** (93% reduction):
+   - All legacy CSS removed (bootstrap, aos, slick, magnific-popup, nice-select, jquery-ui, flaticon, style.css) — only `fontawesome-5.14.0.min.css` kept
+   - **All legacy JS removed** — jquery, bootstrap, slick, magnific-popup, nice-select, jquery-ui, isotope, appear, skill.bars, imagesloaded, form-validator, contact-form-script, ajaxchimp, aos.js, script.js
+   - Whole `assets/php/` and `assets/sass/` dirs removed
+   - `assets/images/` reduced to just `logos/` (everything else was Ravelo demo content)
+   - Flaticon fonts removed entirely
+   - **Font Awesome 5: kept only `.woff2`** — dropped `.eot`, `.svg`, `.ttf`, `.woff` variants. Modern browsers (>97% support) handle `.woff2` natively; the CSS still references the others but browsers fall back silently.
+3. **Deleted orphan templates** — `templates/frontend/base.html`, `templates/frontend/partials/header.html`, `templates/frontend/partials/footer.html` (legacy Ravelo header + footer that no template extends anymore)
+4. **Accessibility quick-wins**:
+   - **Skip-to-content link** in `base_modern.html` — `sr-only` by default, `focus:not-sr-only` reveals as a pill chip at top-left when tabbed
+   - `<main id="content" tabindex="-1">` so the skip link's focus actually lands
+5. **`robots.txt`** route in `config/urls.py` — allows everything except `/admin/`, `/dashboard/`, `/api/`, `/custom/`; cites `SITE_URL/sitemap.xml`
+6. **Mobile pass** via Playwright at iPhone 14 width (390×844) — verified homepage renders cleanly on mobile
+7. **Performance budget audit** via in-browser `fetch()` from the live homepage:
+   - HTML body: **20 KB**
+   - Tailwind compiled CSS: **55 KB** (well under the 100 KB target)
+   - Vendor JS: **171 KB** total (Alpine 44 + GSAP 71 + ScrollTrigger 42 + Lenis 14)
+   - Total payload (uncompressed): ~246 KB — typical safari image is bigger than the entire chrome
+8. **Tailwind rebuild** — 56 KB minified
+9. **Cache-bust** bumped to `v=20260516g`
+10. **All 232 tests still pass** — no test regressions from the asset purge
+
+### What we deferred
+- Lighthouse audit — not run in this session (no CLI installed); user can run from Chrome DevTools and report any reds
+- Cross-browser (Safari + Firefox) — Playwright only ships Chromium in this MCP setup; user-side spot-check recommended
+- WebP/AVIF image optimization pipeline via django-imagekit — wired in Phase 6.0 but not yet exercised because real photos haven't been uploaded; spec-fields will run automatically once content goes live
+
+### Phase 6 complete
+All 9 public route groups live on `base_modern.html` with the Safari Editorial system:
+1. `/` (homepage)
+2. `/destinations/*` (list + detail)
+3. `/packages/*` (list + detail)
+4. `/activities/*` (list + detail)
+5. `/accommodations/*` (list + detail)
+6. `/contact/` · `/inquiry/*` · `/custom/<token>/`
+7. `/about/` · `/faq/`
+8. `/dashboard/login/`
+9. `/404` · `/500` · `/robots.txt` · `/sitemap.xml` · `/styleguide/` (DEBUG)
+
+### PR
+- https://github.com/MussaJabir/tour_system/pull/19
+
+---
+
 _Add new sessions above this line._
