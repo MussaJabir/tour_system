@@ -318,7 +318,7 @@ tailwindcss -i static/frontend/src/tailwind.css \
 - `static/frontend/vendor/` is committed; no CDN dependency
 
 ### PR
-- (opening next…)
+- https://github.com/MussaJabir/tour_system/pull/13
 
 ---
 
