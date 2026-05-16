@@ -137,14 +137,15 @@ Branch: `feature/frontend-homepage` → PR → `develop`
 - [x] Final CTA strip — full-bleed bush-green with mix-blend overlay, double CTA
 
 ### Phase 6.2 — Listing Pages (2 days)
-Branch: `feature/frontend-listings`
-- [ ] `destinations/list.html`
-- [ ] `packages/list.html`
-- [ ] `activities/list.html`
-- [ ] `accommodations/list.html`
-- [ ] Sticky filter sidebar (desktop) / slide-up sheet (mobile)
-- [ ] Grid ↔ list view toggle
-- [ ] Filter pills with clear-all
+Branch: `feature/frontend-listings` → PR → `develop`
+- [x] `destinations/list.html` — Safari Editorial, sticky filter sidebar, country + search filters
+- [x] `packages/list.html` — 6-filter sidebar (search, category, difficulty, destination, price range, days range, sort)
+- [x] `activities/list.html` — search + category + difficulty + destination filters; difficulty badge on each card
+- [x] `accommodations/list.html` — search + type + star rating + destination; star-rating badge on each card
+- [x] Sticky filter sidebar (desktop, `lg:sticky top-28`) + Alpine.js mobile toggle slide-up
+- [x] Active-filter pills with × dismiss (destination list — pattern reusable)
+- [x] Shared `_listing_hero`, `_listing_pagination`, `_listing_empty` partials
+- [ ] Grid ↔ list view toggle (deferred — not needed for v1)
 
 ### Phase 6.3 — Detail Pages (3 days)
 Branch: `feature/frontend-detail-pages`

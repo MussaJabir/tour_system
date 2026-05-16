@@ -1,0 +1,40 @@
+{% comment %}
+Listing-page hero banner.
+Usage:
+    {% include 'frontend/partials/_listing_hero.html' with eyebrow='01' title='Destinations' lede='Hand-picked Tanzania parks…' image='https://…' breadcrumb='Destinations' %}
+
+Vars:
+    eyebrow    — small badge (e.g. '01 — Destinations')
+    title      — H1 (required)
+    lede       — supporting paragraph (optional)
+    image      — background image URL (optional; falls back to bone)
+    breadcrumb — current page name in the breadcrumb (defaults to title)
+{% endcomment %}
+<section class="relative pt-40 pb-20 lg:pt-48 lg:pb-28 overflow-hidden bg-bone">
+    {% if image %}
+        <div class="absolute inset-0">
+            <img src="{{ image }}" alt="" class="w-full h-full object-cover">
+            <div class="absolute inset-0 bg-charcoal/55"></div>
+        </div>
+    {% endif %}
+
+    <div class="container-editorial relative {% if image %}text-ivory{% endif %}">
+        <nav aria-label="Breadcrumb" class="text-xs tracking-wider uppercase opacity-80">
+            <a href="{% url 'public_home' %}" class="hover:underline">Home</a>
+            <span class="mx-2">/</span>
+            <span class="opacity-70">{{ breadcrumb|default:title }}</span>
+        </nav>
+
+        {% if eyebrow %}
+            <p class="eyebrow mt-6 {% if image %}text-sand-200{% endif %}">{{ eyebrow }}</p>
+        {% endif %}
+        <h1 class="font-display text-display-lg lg:text-display-xl mt-4 text-balance max-w-4xl leading-[1.05]">
+            {{ title }}
+        </h1>
+        {% if lede %}
+            <p class="mt-6 max-w-2xl text-lg lg:text-xl {% if image %}text-ivory/80{% else %}text-mist{% endif %} leading-relaxed">
+                {{ lede }}
+            </p>
+        {% endif %}
+    </div>
+</section>

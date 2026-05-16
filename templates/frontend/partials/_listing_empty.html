@@ -1,0 +1,18 @@
+{% comment %}
+Empty-state shown when a listing has zero matches.
+Usage:
+    {% include 'frontend/partials/_listing_empty.html' with title='No tours match these filters.' subtitle='Try widening the search or clearing filters.' reset_url=request.path %}
+{% endcomment %}
+<div class="col-span-full text-center py-20 lg:py-28">
+    <i class="fal fa-binoculars text-mist text-5xl"></i>
+    <h3 class="font-display text-2xl lg:text-3xl mt-6 text-balance">{{ title|default:"Nothing matches just yet." }}</h3>
+    {% if subtitle %}
+        <p class="text-mist mt-3 max-w-md mx-auto">{{ subtitle }}</p>
+    {% endif %}
+    {% if reset_url %}
+        <a href="{{ reset_url }}" class="btn btn-secondary mt-8 inline-flex">
+            <i class="fal fa-redo"></i>
+            Reset filters
+        </a>
+    {% endif %}
+</div>

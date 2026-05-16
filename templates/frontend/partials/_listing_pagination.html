@@ -1,0 +1,40 @@
+{% comment %}
+Editorial pagination control.
+Usage:
+    {% include 'frontend/partials/_listing_pagination.html' with page_obj=page_obj querystring=querystring %}
+
+Vars:
+    page_obj    — Django Page instance (required)
+    querystring — pre-built query string (without page= param) e.g. "search=foo&category=bar"
+                  optional; falls back to empty
+
+The querystring is prepended so filter state persists across page navigation.
+{% endcomment %}
+{% if page_obj.paginator.num_pages > 1 %}
+{% with qs=querystring|default:"" %}
+<nav aria-label="Pagination" class="mt-16 lg:mt-20 flex justify-center items-center gap-2 text-sm">
+    {% if page_obj.has_previous %}
+        <a href="?{% if qs %}{{ qs }}&{% endif %}page={{ page_obj.previous_page_number }}"
+           class="px-4 py-2 rounded-full border border-sand-300 hover:bg-charcoal hover:text-ivory hover:border-charcoal transition">
+            <i class="fal fa-arrow-left mr-1"></i> Prev
+        </a>
+    {% endif %}
+
+    {% for num in page_obj.paginator.page_range %}
+        {% if num == page_obj.number %}
+            <span class="px-4 py-2 rounded-full bg-charcoal text-ivory font-medium">{{ num }}</span>
+        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+            <a href="?{% if qs %}{{ qs }}&{% endif %}page={{ num }}"
+               class="px-4 py-2 rounded-full hover:bg-sand-100 transition">{{ num }}</a>
+        {% endif %}
+    {% endfor %}
+
+    {% if page_obj.has_next %}
+        <a href="?{% if qs %}{{ qs }}&{% endif %}page={{ page_obj.next_page_number }}"
+           class="px-4 py-2 rounded-full border border-sand-300 hover:bg-charcoal hover:text-ivory hover:border-charcoal transition">
+            Next <i class="fal fa-arrow-right ml-1"></i>
+        </a>
+    {% endif %}
+</nav>
+{% endwith %}
+{% endif %}

@@ -365,4 +365,37 @@ tailwindcss -i static/frontend/src/tailwind.css \
 
 ---
 
+## Session 014 — 2026-05-16
+
+**Type:** Phase 6.2 — Listing Pages (Safari Editorial)
+**Branch:** `feature/frontend-listings` → PR → `develop`
+
+### What we did
+1. **Three new shared partials** (`templates/frontend/partials/`):
+   - `_listing_hero.html` — page banner with optional hero image, breadcrumb, eyebrow, display-lg title, lede
+   - `_listing_pagination.html` — pill-style numbered pager with prev/next; preserves filter querystring across pages
+   - `_listing_empty.html` — empty-state card with reset-filters CTA
+2. **Rewrote all 4 public listing templates** to extend `base_modern.html`:
+   - **`destinations/templates/destinations/public/list.html`** — search + country filter, sticky 260px sidebar, asymmetric overlay cards
+   - **`packages/templates/packages/public/list.html`** — full 6-filter sidebar (search, category, difficulty, destination, price min/max, days min/max, sort), editorial card grid
+   - **`activities/templates/activities/public/list.html`** — search + category + difficulty + destination filters; difficulty badge top-right of each card
+   - **`accommodations/templates/accommodations/public/list.html`** — search + type + star rating + destination filters; star-rating badge top-right (5-star template loop)
+3. **Filter sidebar pattern** — sticky on desktop (`lg:sticky lg:top-28`), Alpine.js `x-data="{ open: false }"` collapsible button on mobile; pill-rounded inputs/selects with `border-sand-300 focus:border-bush-600`
+4. **Active filter pills** (destination list) — display current search/country selection as removable pills, each `×` link strips its own query param while preserving the rest
+5. **Empty-state UX** — `_listing_empty.html` partial with binoculars icon, friendly copy, and reset-filters CTA; shown on every list when the result set is empty
+6. **Tailwind rebuild** — 44 KB minified (still well under 100 KB budget)
+7. **25 new tests** (`core/tests_frontend_listings.py`):
+   - 5 tests per list page (status 200, uses `base_modern.html`, filter form fields present, result count renders, item names present)
+   - 1 search-filter test on destinations
+   - 4 empty-state tests (one per list)
+8. **All 194 tests pass** (169 prior + 25 new)
+
+### Factory cleanup
+- `make_destination` in `destinations/tests_homepage.py` now accepts `country`, `description`, `latitude`, `longitude` as kwargs (with sensible defaults) so listing tests can reuse it.
+
+### PR
+- (opening next…)
+
+---
+
 _Add new sessions above this line._
