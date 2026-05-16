@@ -148,11 +148,12 @@ Branch: `feature/frontend-listings` → PR → `develop`
 - [ ] Grid ↔ list view toggle (deferred — not needed for v1)
 
 ### Phase 6.3 — Detail Pages (3 days)
-Branch: `feature/frontend-detail-pages`
-- [ ] `packages/detail.html` — sticky booking sidebar, image gallery, itinerary timeline, inclusions checklist, reviews
-- [ ] `destinations/detail.html` — magazine-style long form
-- [ ] `activities/detail.html`
-- [ ] `accommodations/detail.html`
+Branch: `feature/frontend-detail-pages` → PR → `develop`
+- [x] `packages/detail.html` — sticky booking sidebar (price + departures + facts), itinerary timeline with day markers, inclusions/exclusions, gallery, in-page CTA, related tours
+- [x] `destinations/detail.html` — magazine-style long form (about, wildlife, climate, gallery), sticky quick-facts card, Leaflet map, activities + accommodations grids, related destinations
+- [x] `activities/detail.html` — hero with difficulty + duration + min age, sticky price card, requirements/included/excluded, gallery, related activities
+- [x] `accommodations/detail.html` — hero with star rating, sticky stay-here card, rooms list with prices + bed/occupancy/size, amenities, gallery, related lodges
+- [x] Shared partials added: `_detail_hero.html`, `_gallery.html`, `_related_grid.html`
 
 ### Phase 6.4 — Conversion Flows (2 days)
 Branch: `feature/frontend-conversion`

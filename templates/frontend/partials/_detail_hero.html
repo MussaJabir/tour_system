@@ -1,0 +1,56 @@
+{% comment %}
+Cinematic detail-page hero — full-bleed image with gradient overlay,
+breadcrumb, eyebrow, headline, optional meta strip below.
+
+Usage:
+    {% include 'frontend/partials/_detail_hero.html' with image=obj.featured_image fallback='https://...' eyebrow='Tanzania' title=obj.name lede=obj.short_description meta_html='<some inline markup>' breadcrumb_parent='Destinations' breadcrumb_parent_url=parent_url %}
+
+Vars:
+    image                   — ImageField (uses .url) — optional
+    fallback                — fallback image URL when no image is set
+    eyebrow                 — small text above title
+    title                   — H1 (required)
+    lede                    — supporting paragraph
+    meta_html               — pre-rendered inline meta (icons / facts) — optional
+    breadcrumb_parent       — listing-page name (e.g., "Tours")
+    breadcrumb_parent_url   — URL to the listing page
+{% endcomment %}
+<section class="relative min-h-[70vh] lg:min-h-[80vh] flex items-end overflow-hidden bg-charcoal">
+    <div class="absolute inset-0">
+        {% if image %}
+            <img src="{{ image.url }}" alt="{{ title }}" class="w-full h-full object-cover">
+        {% else %}
+            <img src="{{ fallback|default:'https://images.unsplash.com/photo-1516426122078-c23e76319801?w=2400&q=80' }}" alt="{{ title }}" class="w-full h-full object-cover">
+        {% endif %}
+        <div class="absolute inset-0 bg-gradient-to-t from-charcoal/95 via-charcoal/40 to-charcoal/30"></div>
+    </div>
+
+    <div class="container-editorial relative pt-40 pb-16 lg:pb-20 text-ivory w-full">
+        <nav aria-label="Breadcrumb" class="text-xs tracking-wider uppercase opacity-70">
+            <a href="{% url 'public_home' %}" class="hover:underline">Home</a>
+            <span class="mx-2">/</span>
+            {% if breadcrumb_parent and breadcrumb_parent_url %}
+                <a href="{{ breadcrumb_parent_url }}" class="hover:underline">{{ breadcrumb_parent }}</a>
+                <span class="mx-2">/</span>
+            {% endif %}
+            <span class="opacity-70">{{ title }}</span>
+        </nav>
+
+        {% if eyebrow %}
+            <p class="eyebrow text-sand-200 mt-6">{{ eyebrow }}</p>
+        {% endif %}
+        <h1 class="font-display text-display-lg lg:text-display-xl mt-4 text-balance max-w-5xl leading-[1.02] text-ivory">
+            {{ title }}
+        </h1>
+        {% if lede %}
+            <p class="mt-6 max-w-2xl text-lg lg:text-xl text-ivory/85 leading-relaxed">
+                {{ lede }}
+            </p>
+        {% endif %}
+        {% if meta_html %}
+            <div class="mt-8 flex flex-wrap gap-x-8 gap-y-3 text-sm text-ivory/85">
+                {{ meta_html|safe }}
+            </div>
+        {% endif %}
+    </div>
+</section>
