@@ -427,7 +427,7 @@ tailwindcss -i static/frontend/src/tailwind.css \
 - Bump the `?v=` querystring in `base_modern.html` after every Tailwind rebuild
 
 ### PR
-- (opening next…)
+- https://github.com/MussaJabir/tour_system/pull/16
 
 ---
 
