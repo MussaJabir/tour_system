@@ -563,4 +563,58 @@ All 9 public route groups live on `base_modern.html` with the Safari Editorial s
 
 ---
 
+## Session 019 — 2026-05-16
+
+**Type:** Strategic Planning — Dashboard Visual Overhaul (Phase 7)
+**Branch:** `docs/phase-7-plan` → PR → `develop` (planning only, no implementation)
+
+### What we did
+1. **Decided to overhaul the staff dashboard** — same level of design lift as Phase 6 did for the public site. The dashboard is where staff live 8+ hours a day; the Bootstrap admin UI is friction on every action.
+2. **Designed a parallel design system named "Operations Slate"** — distinct from Safari Editorial because productivity tools need different ergonomics than marketing sites.
+3. **Locked the palette**:
+   - Cool slate neutrals (`slate-50` → `slate-900`) for backgrounds + text
+   - Single brand accent: `bush-600` (carried from Safari Editorial — brand continuity)
+   - Semantic status colours: `emerald-500` (success), `amber-500` (warning), `rose-500` (danger), `sky-500` (info)
+   - **Dark mode deferred** to Phase 8 — light-first is the right starting point
+4. **Locked the stack**:
+   - Keep: Tailwind v4, Alpine.js, Font Awesome 5
+   - Add: **Chart.js** (~60 KB) for analytics-dashboard charts
+   - Drop in dashboard context: GSAP, ScrollTrigger, Lenis (no cinematic motion in productivity tools)
+   - Typography: **Inter only** — no Fraunces in dashboard; 14px base body (denser than public site's 16px)
+5. **Defined design principles** for every dashboard page:
+   - Information density over whitespace
+   - Single accent colour; no decorative gradients
+   - Transitions 150–250ms only — no scroll-triggered reveals
+   - Semantic status badges always use semantic palette, not brand accent
+   - Inline edit / quick actions preferred over modal flows
+   - Every list page has: search, filter pills, bulk-action bar, empty state, pagination
+6. **Planned 7 sub-phases** (mirrors Phase 6's structure) totalling 13–17 focused days:
+   - 7.0 Foundation + `/dashboard/styleguide/`
+   - 7.1 Dashboard home (stats + recent activity + quick actions + charts)
+   - 7.2 Dashboard listings (biggest sub-phase — 11+ list pages)
+   - 7.3 Dashboard forms (create/edit, tabs for multi-section forms)
+   - 7.4 Dashboard detail pages
+   - 7.5 Special workflows (reviews moderation, custom-package builder, AI Assistant pages)
+   - 7.6 Polish + a11y + cleanup
+7. **Documented the design system in `CLAUDE.md`** — new "Frontend Design Systems" section explaining the two parallel systems (Safari Editorial public, Operations Slate dashboard), their stacks, their rules, and the shared Tailwind build.
+8. **Updated `todo.md`** with the full Phase 7 plan: stack decisions, design principles, per-phase checklists.
+
+### Decisions made
+- One Tailwind build serves both design systems (shared `@theme` block; namespace dashboard-only utilities with a prefix if needed).
+- New base template: `templates/backend/base_dashboard.html` — sidebar + topbar shell. Existing dashboard templates will migrate to it phase-by-phase, same playbook as Phase 6.
+- New shared partials: `_dashboard_sidebar`, `_dashboard_topbar`, `_stat_card`, `_data_table`, `_status_badge`, `_page_header`, `_breadcrumb`, `_empty_state`.
+- Phase 7.0 = foundation + dashboard styleguide. User can visually approve the styleguide before any real dashboard pages migrate.
+- Same dev-loop reminders apply (recorded in Session 014):
+  - After Tailwind rebuild → `collectstatic --noinput --clear` inside the container
+  - After template edit → `kill -HUP 1` on the django container to reload gunicorn workers
+  - Bump the `?v=` cache-bust query in `base_dashboard.html` after each Tailwind rebuild
+
+### Next step
+- Phase 7.0 — Foundation. Branch `feature/dashboard-foundation`. Build `base_dashboard.html` shell, all shared partials, extend tailwind.css with Operations Slate tokens, and ship the `/dashboard/styleguide/` reference page. No real dashboard pages migrate yet — that starts in 7.1.
+
+### PR
+- (opening next…)
+
+---
+
 _Add new sessions above this line._

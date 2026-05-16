@@ -64,6 +64,49 @@ Email helpers live in `<app>/emails.py` (e.g., `packages/emails.py`).
 Staff notification lists are pulled from `User.objects.filter(is_staff=True)`.
 Console backend used in dev; SMTP in production via `.env`.
 
+## Frontend Design Systems
+
+This project has **two parallel design systems** — one for the public marketing site, one for the internal staff dashboard. They share the Tailwind v4 build pipeline and one accent colour (`bush-600`) but are otherwise distinct.
+
+### Safari Editorial — public site (Phase 6, complete)
+
+- **Where**: any template that extends `templates/frontend/base_modern.html`
+- **Feel**: cinematic, magazine-grade, editorial. Slow motion, generous whitespace.
+- **Stack**: Tailwind v4 + Alpine.js + GSAP + ScrollTrigger + Lenis + variable fonts (Fraunces + Inter)
+- **Palette**: warm earth tones — `sand` / `bush` / `clay` ramps + `ivory` / `bone` / `mist` / `charcoal` / `graphite`
+- **Typography**: Fraunces (display, serif) for headings, Inter for body
+- **Reference**: `/styleguide/` (DEBUG-only)
+- **Rule**: every new public page extends `base_modern.html` and uses utilities defined in `static/frontend/src/tailwind.css`. Do NOT extend the deleted legacy `frontend/base.html`.
+
+### Operations Slate — staff dashboard (Phase 7, planned)
+
+- **Where**: any template that will extend `templates/backend/base_dashboard.html` (to be built in Phase 7.0)
+- **Feel**: dense, fast, functional. Stripe-meets-Linear. Productivity tool, not a brochure.
+- **Stack**: Tailwind v4 + Alpine.js + Chart.js + Font Awesome (no GSAP, no Lenis)
+- **Palette**: cool neutrals — `slate-50` → `slate-900` for backgrounds/text + `bush-600` (carried from Safari Editorial) for primary actions + `emerald-500` / `amber-500` / `rose-500` / `sky-500` for semantic statuses
+- **Typography**: **Inter only** — no Fraunces in the dashboard. Tighter scale (14px base body vs 16px on public).
+- **Reference**: `/dashboard/styleguide/` (DEBUG-only, to be built in Phase 7.0)
+- **Rules**:
+  1. Every new dashboard page extends `base_dashboard.html` (NOT `base_modern.html`)
+  2. No cinematic motion. Transitions are 150–250ms ease, no scroll-triggered reveals.
+  3. Use the shared dashboard partials (`_dashboard_sidebar`, `_dashboard_topbar`, `_stat_card`, `_data_table`, `_status_badge`, `_page_header`, `_breadcrumb`, `_empty_state`).
+  4. Status badges always use the semantic colour scale, not the brand accent.
+  5. Inline edit / quick actions are preferred over modal flows where possible.
+
+### Shared infrastructure
+
+Both systems share one Tailwind build (`static/frontend/src/tailwind.css` → `static/frontend/css/tailwind.css`). Add new tokens inside the same `@theme` block; namespace dashboard-only utilities with the `dashboard-` prefix if a token only makes sense in one context.
+
+**Build command** (run after editing `tailwind.css` or adding utilities to any template):
+
+```bash
+tailwindcss -i static/frontend/src/tailwind.css \
+            -o static/frontend/css/tailwind.css \
+            --minify
+# Then bump the ?v= querystring on the link tag in both base templates
+# and re-run `docker compose exec django python manage.py collectstatic --noinput --clear`
+```
+
 ## Environment Variables
 All config via `.env` using `python-decouple`. See `.env.example`.
 Key vars: `SECRET_KEY`, `DB_*`, `REDIS_*`, `OPENAI_API_KEY`, `EMAIL_*`, `STAFF_NOTIFICATION_EMAILS`, `SITE_URL`.
