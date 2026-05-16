@@ -394,7 +394,8 @@ tailwindcss -i static/frontend/src/tailwind.css \
 - `make_destination` in `destinations/tests_homepage.py` now accepts `country`, `description`, `latitude`, `longitude` as kwargs (with sensible defaults) so listing tests can reuse it.
 
 ### PR
-- (opening next…)
+- https://github.com/MussaJabir/tour_system/pull/15
+- Follow-up commit `3f66d11` — `.listing-grid` component class (replaces broken arbitrary class), cache-busting `?v=` on tailwind.css link, x-cloak base rule, hero H1 text-ivory override
 
 ---
 
