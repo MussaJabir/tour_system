@@ -613,7 +613,7 @@ All 9 public route groups live on `base_modern.html` with the Safari Editorial s
 - Phase 7.0 — Foundation. Branch `feature/dashboard-foundation`. Build `base_dashboard.html` shell, all shared partials, extend tailwind.css with Operations Slate tokens, and ship the `/dashboard/styleguide/` reference page. No real dashboard pages migrate yet — that starts in 7.1.
 
 ### PR
-- (opening next…)
+- https://github.com/MussaJabir/tour_system/pull/20
 
 ---
 
