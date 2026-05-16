@@ -1,111 +1,120 @@
-{% extends 'frontend/base.html' %}
+{% extends 'frontend/base_modern.html' %}
 {% load static %}
 
-{% block title %}Destinations | Tour System{% endblock %}
-
-{% block meta_description %}Explore our amazing destinations around the world. Find your next adventure!{% endblock %}
+{% block title %}Destinations — Tour System{% endblock %}
+{% block meta_description %}Tanzania's parks, coast, and culture. Hand-picked destinations across East Africa.{% endblock %}
 
 {% block content %}
-<!-- Page Banner Start -->
-<section class="page-banner-area pt-245 rpt-150 pb-170 rpb-100 rel z-1 bgc-lighter text-center">
-    <div class="container">
-        <div class="banner-inner rpt-10">
-            <h1 class="page-title" data-aos="fade-up" data-aos-duration="1500" data-aos-offset="50">
-                Explore Destinations
-            </h1>
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb justify-content-center" data-aos="fade-up" data-aos-delay="200" data-aos-duration="1500" data-aos-offset="50">
-                    <li class="breadcrumb-item"><a href="{% url 'public_home' %}">Home</a></li>
-                    <li class="breadcrumb-item active">Destinations</li>
-                </ol>
-            </nav>
-        </div>
-    </div>
-    <div class="wave-shapes">
-        <img class="shape one" src="{% static 'frontend/assets/images/shapes/page-banner-wave1.png' %}" alt="Wave Shape">
-        <img class="shape two" src="{% static 'frontend/assets/images/shapes/page-banner-wave2.png' %}" alt="Wave Shape">
-    </div>
-</section>
-<!-- Page Banner End -->
 
-<!-- Destinations Grid Area start -->
-<section class="destinations-page-area py-100">
-    <div class="container">
-        {% if destinations %}
-        <div class="row">
-            {% for destination in destinations %}
-            <div class="col-xl-3 col-lg-4 col-sm-6" data-aos="fade-up" data-aos-duration="1500" data-aos-offset="50">
-                <div class="destination-item style-two">
-                    <div class="image">
-                        {% if destination.featured_image %}
-                        <img src="{{ destination.featured_image.url }}" alt="{{ destination.name }}">
-                        {% else %}
-                        <img src="{% static 'frontend/assets/images/destinations/destination-default.jpg' %}" alt="{{ destination.name }}">
-                        {% endif %}
-                        {% if destination.is_featured %}
-                        <span class="badge">Featured</span>
-                        {% endif %}
+{% include 'frontend/partials/_listing_hero.html' with eyebrow='01 — Destinations' title='Tanzania, on its own terms.' lede='From the Serengeti to Zanzibar — the places we keep coming back to, and a few you should too.' image='https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?w=2000&q=80' %}
+
+<section class="py-16 lg:py-24">
+    <div class="container-editorial">
+        <div class="listing-grid">
+
+            {# =========================== FILTERS =========================== #}
+            <aside x-data="{ open: false }" class="lg:sticky lg:top-28 lg:self-start">
+                <button type="button"
+                        class="lg:hidden btn btn-secondary w-full"
+                        @click="open = !open">
+                    <i class="fal fa-sliders-h"></i>
+                    <span x-text="open ? 'Hide filters' : 'Filters'"></span>
+                </button>
+
+                <form method="get"
+                      class="mt-4 lg:mt-0 space-y-7"
+                      :class="open ? 'block' : 'hidden lg:block'"
+                      x-cloak>
+                    <div>
+                        <label class="eyebrow text-mist block mb-2" for="search">Search</label>
+                        <input id="search" type="search" name="search" value="{{ search_query }}"
+                               placeholder="Park, region…"
+                               class="w-full bg-transparent border border-sand-300 focus:border-bush-600 rounded-full px-5 py-3 text-sm outline-none transition">
                     </div>
-                    <div class="content">
-                        <span class="location"><i class="fal fa-map-marker-alt"></i> {{ destination.country }}</span>
-                        <h5><a href="{% url 'public_destination_detail' destination.slug %}">{{ destination.name }}</a></h5>
-                        {% if destination.short_description %}
-                        <p>{{ destination.short_description|truncatewords:15 }}</p>
-                        {% endif %}
-                        <a href="{% url 'public_destination_detail' destination.slug %}" class="read-more">
-                            Explore More <i class="fal fa-angle-right"></i>
-                        </a>
+
+                    {% if countries %}
+                    <div>
+                        <label class="eyebrow text-mist block mb-2" for="country">Country</label>
+                        <select id="country" name="country"
+                                class="w-full bg-transparent border border-sand-300 focus:border-bush-600 rounded-full px-5 py-3 text-sm outline-none transition appearance-none">
+                            <option value="">All countries</option>
+                            {% for c in countries %}
+                                <option value="{{ c }}" {% if c == selected_country %}selected{% endif %}>{{ c }}</option>
+                            {% endfor %}
+                        </select>
                     </div>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-
-        <!-- Pagination -->
-        {% if is_paginated %}
-        <div class="pagination-area pt-20" data-aos="fade-up" data-aos-duration="1500" data-aos-offset="50">
-            <ul class="pagination justify-content-center">
-                {% if page_obj.has_previous %}
-                <li class="page-item">
-                    <a class="page-link" href="?page=1"><i class="fas fa-angle-double-left"></i></a>
-                </li>
-                <li class="page-item">
-                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}"><i class="fas fa-angle-left"></i></a>
-                </li>
-                {% endif %}
-
-                {% for num in page_obj.paginator.page_range %}
-                    {% if page_obj.number == num %}
-                    <li class="page-item active"><span class="page-link">{{ num }}</span></li>
-                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-                    <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
                     {% endif %}
-                {% endfor %}
 
-                {% if page_obj.has_next %}
-                <li class="page-item">
-                    <a class="page-link" href="?page={{ page_obj.next_page_number }}"><i class="fas fa-angle-right"></i></a>
-                </li>
-                <li class="page-item">
-                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}"><i class="fas fa-angle-double-right"></i></a>
-                </li>
-                {% endif %}
-            </ul>
-        </div>
-        {% endif %}
+                    <div class="flex gap-3 pt-2">
+                        <button type="submit" class="btn btn-primary flex-1">Apply</button>
+                        {% if search_query or selected_country %}
+                            <a href="{% url 'public_destination_list' %}" class="btn btn-secondary flex-1 text-center">Reset</a>
+                        {% endif %}
+                    </div>
+                </form>
+            </aside>
 
-        {% else %}
-        <div class="row">
-            <div class="col-12">
-                <div class="alert alert-info text-center" role="alert">
-                    <h4>No destinations found.</h4>
-                    <p>Check back soon for exciting new destinations!</p>
+            {# =========================== RESULTS =========================== #}
+            <div>
+                <header class="mb-8 lg:mb-10 flex flex-wrap items-end justify-between gap-4">
+                    <div>
+                        <p class="eyebrow text-mist">Showing</p>
+                        <p class="font-display text-2xl lg:text-3xl mt-1">
+                            {{ destinations.paginator.count }} destination{{ destinations.paginator.count|pluralize }}
+                        </p>
+                    </div>
+
+                    {% if search_query or selected_country %}
+                    <div class="flex flex-wrap items-center gap-2 text-sm">
+                        {% if search_query %}
+                            <span class="inline-flex items-center gap-2 bg-bone rounded-full pl-4 pr-2 py-1.5">
+                                "{{ search_query }}"
+                                <a href="?{% if selected_country %}country={{ selected_country }}{% endif %}"
+                                   class="w-6 h-6 rounded-full bg-sand-200 hover:bg-clay-300 hover:text-ivory flex items-center justify-center transition"
+                                   aria-label="Remove search filter">×</a>
+                            </span>
+                        {% endif %}
+                        {% if selected_country %}
+                            <span class="inline-flex items-center gap-2 bg-bone rounded-full pl-4 pr-2 py-1.5">
+                                {{ selected_country }}
+                                <a href="?{% if search_query %}search={{ search_query }}{% endif %}"
+                                   class="w-6 h-6 rounded-full bg-sand-200 hover:bg-clay-300 hover:text-ivory flex items-center justify-center transition"
+                                   aria-label="Remove country filter">×</a>
+                            </span>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </header>
+
+                <div class="grid sm:grid-cols-2 xl:grid-cols-3 gap-6">
+                    {% for dest in destinations %}
+                        <a href="{% url 'public_destination_detail' dest.slug %}" class="card group block">
+                            <div class="card-media aspect-[4/5]">
+                                {% if dest.featured_image %}
+                                    <img src="{{ dest.featured_image.url }}" alt="{{ dest.name }}" loading="lazy">
+                                {% else %}
+                                    <img src="https://images.unsplash.com/photo-1535941339077-2dd1c7963098?w=900&q=80" alt="{{ dest.name }}" loading="lazy">
+                                {% endif %}
+                                <div class="hero-overlay opacity-55 group-hover:opacity-75 transition-opacity duration-500"></div>
+                                <div class="absolute bottom-0 inset-x-0 p-6 text-ivory">
+                                    <p class="eyebrow text-sand-200">{{ dest.country }}</p>
+                                    <h2 class="font-display text-2xl mt-2 leading-tight text-balance">{{ dest.name }}</h2>
+                                    {% if dest.short_description %}
+                                        <p class="text-sm text-ivory/80 mt-2 line-clamp-2">{{ dest.short_description }}</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </a>
+                    {% empty %}
+                        {% include 'frontend/partials/_listing_empty.html' with title='No destinations match those filters.' subtitle='Try clearing the search or picking a different country.' reset_url=request.path %}
+                    {% endfor %}
                 </div>
+
+                {% include 'frontend/partials/_listing_pagination.html' with page_obj=destinations querystring=request.GET.urlencode %}
             </div>
+
         </div>
-        {% endif %}
     </div>
 </section>
-<!-- Destinations Grid Area end -->
-{% endblock %}
 
+{% endblock %}

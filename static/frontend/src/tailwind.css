@@ -87,6 +87,9 @@
    Base layer — typography defaults
    ============================================================= */
 @layer base {
+  /* Alpine.js: hide elements with x-cloak until Alpine initialises */
+  [x-cloak] { display: none !important; }
+
   html {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -225,6 +228,21 @@
   }
   @media (min-width: 1280px) {
     .container-editorial { padding-inline: 4rem; }
+  }
+
+  /* --- Listing page grid ----------------------------------- */
+  /* Filter sidebar (fixed width) + results column.
+     Stacks on mobile, splits at lg breakpoint. */
+  .listing-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+  }
+  @media (min-width: 1024px) {
+    .listing-grid {
+      grid-template-columns: 270px 1fr;
+      gap: 4rem;
+    }
   }
 
   /* --- Hero image overlay ----------------------------------- */

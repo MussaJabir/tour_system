@@ -69,3 +69,4 @@ celerybeat.pid
 *.sql
 
 .playwright-mcp/
+phase*.png

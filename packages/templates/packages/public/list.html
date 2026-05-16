@@ -1,726 +1,169 @@
-{% extends "frontend/base.html" %}
+{% extends 'frontend/base_modern.html' %}
 {% load static %}
 
-{% block title %}Tour Packages - Explore Our Amazing Adventures{% endblock %}
-
-{% block extra_css %}
-<style>
-    .page-hero {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        padding: 80px 0 60px;
-        color: white;
-        margin-top: -30px;
-    }
-    
-    .filter-sidebar {
-        background: white;
-        border-radius: 10px;
-        padding: 25px;
-        box-shadow: 0 2px 15px rgba(0,0,0,0.1);
-        position: sticky;
-        top: 100px;
-    }
-    
-    .filter-section {
-        margin-bottom: 25px;
-        padding-bottom: 20px;
-        border-bottom: 1px solid #e9ecef;
-    }
-    
-    .filter-section:last-child {
-        border-bottom: none;
-        margin-bottom: 0;
-    }
-    
-    .filter-section h6 {
-        font-weight: 600;
-        color: #2c3e50;
-        margin-bottom: 15px;
-        font-size: 0.95rem;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-    
-    .filter-option {
-        display: flex;
-        align-items: center;
-        padding: 8px 0;
-    }
-    
-    .filter-option input {
-        margin-right: 10px;
-        cursor: pointer;
-    }
-    
-    .filter-option label {
-        margin: 0;
-        cursor: pointer;
-        flex: 1;
-        font-size: 0.9rem;
-    }
-    
-    .package-card {
-        background: white;
-        border-radius: 15px;
-        overflow: hidden;
-        box-shadow: 0 5px 20px rgba(0,0,0,0.08);
-        transition: all 0.3s ease;
-        margin-bottom: 30px;
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-    }
-    
-    .package-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-    }
-    
-    .package-image-container {
-        position: relative;
-        height: 250px;
-        overflow: hidden;
-    }
-    
-    .package-image {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        transition: transform 0.3s ease;
-    }
-    
-    .package-card:hover .package-image {
-        transform: scale(1.1);
-    }
-    
-    .package-badge {
-        position: absolute;
-        top: 15px;
-        left: 15px;
-        background: rgba(255,255,255,0.95);
-        padding: 5px 15px;
-        border-radius: 20px;
-        font-size: 0.8rem;
-        font-weight: 600;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-    
-    .featured-badge {
-        position: absolute;
-        top: 15px;
-        right: 15px;
-        background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
-        color: white;
-        padding: 5px 15px;
-        border-radius: 20px;
-        font-size: 0.75rem;
-        font-weight: 600;
-        display: flex;
-        align-items: center;
-        gap: 5px;
-    }
-    
-    .discount-badge {
-        position: absolute;
-        top: 60px;
-        right: 15px;
-        background: #dc3545;
-        color: white;
-        padding: 5px 12px;
-        border-radius: 20px;
-        font-size: 0.8rem;
-        font-weight: 700;
-    }
-    
-    .package-content {
-        padding: 25px;
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-    }
-    
-    .package-title {
-        font-size: 1.3rem;
-        font-weight: 700;
-        color: #2c3e50;
-        margin-bottom: 12px;
-        line-height: 1.4;
-    }
-    
-    .package-title a {
-        color: #2c3e50;
-        text-decoration: none;
-        transition: color 0.3s;
-    }
-    
-    .package-title a:hover {
-        color: #667eea;
-    }
-    
-    .package-description {
-        color: #6c757d;
-        font-size: 0.9rem;
-        margin-bottom: 15px;
-        line-height: 1.6;
-    }
-    
-    .package-meta {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 15px;
-        margin-bottom: 15px;
-        padding-top: 15px;
-        border-top: 1px solid #e9ecef;
-    }
-    
-    .meta-item {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        font-size: 0.85rem;
-        color: #6c757d;
-    }
-    
-    .meta-item i {
-        color: #667eea;
-        font-size: 1rem;
-    }
-    
-    .package-destinations {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        margin-bottom: 15px;
-    }
-    
-    .destination-tag {
-        background: #e7f1ff;
-        color: #0056b3;
-        padding: 4px 12px;
-        border-radius: 15px;
-        font-size: 0.75rem;
-        font-weight: 500;
-    }
-    
-    .package-footer {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding-top: 15px;
-        border-top: 1px solid #e9ecef;
-        margin-top: auto;
-    }
-    
-    .package-price {
-        display: flex;
-        flex-direction: column;
-        gap: 5px;
-    }
-    
-    .original-price {
-        text-decoration: line-through;
-        color: #999;
-        font-size: 0.9rem;
-    }
-    
-    .current-price {
-        font-size: 1.8rem;
-        font-weight: 700;
-        color: #28a745;
-    }
-    
-    .price-label {
-        font-size: 0.75rem;
-        color: #6c757d;
-    }
-    
-    .btn-view-package {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        padding: 10px 25px;
-        border-radius: 25px;
-        text-decoration: none;
-        font-weight: 600;
-        font-size: 0.9rem;
-        transition: all 0.3s;
-        border: none;
-    }
-    
-    .btn-view-package:hover {
-        transform: translateX(5px);
-        color: white;
-        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-    }
-    
-    .sort-filter-bar {
-        background: white;
-        padding: 20px 25px;
-        border-radius: 10px;
-        box-shadow: 0 2px 15px rgba(0,0,0,0.1);
-        margin-bottom: 30px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 15px;
-    }
-    
-    .results-count {
-        font-weight: 600;
-        color: #2c3e50;
-    }
-    
-    .sort-dropdown {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-    
-    .empty-state {
-        text-align: center;
-        padding: 80px 20px;
-        background: white;
-        border-radius: 15px;
-        box-shadow: 0 2px 15px rgba(0,0,0,0.1);
-    }
-    
-    .empty-state i {
-        font-size: 80px;
-        color: #dee2e6;
-        margin-bottom: 20px;
-    }
-    
-    .empty-state h4 {
-        color: #2c3e50;
-        margin-bottom: 15px;
-    }
-    
-    .empty-state p {
-        color: #6c757d;
-        margin-bottom: 25px;
-    }
-    
-    .pagination {
-        margin-top: 40px;
-        justify-content: center;
-    }
-    
-    .page-link {
-        color: #667eea;
-        border: 1px solid #dee2e6;
-        padding: 10px 16px;
-    }
-    
-    .page-link:hover {
-        background: #667eea;
-        color: white;
-        border-color: #667eea;
-    }
-    
-    .page-item.active .page-link {
-        background: #667eea;
-        border-color: #667eea;
-    }
-    
-    .difficulty-badge {
-        padding: 4px 10px;
-        border-radius: 12px;
-        font-size: 0.75rem;
-        font-weight: 600;
-    }
-    
-    .difficulty-easy {
-        background: #d4edda;
-        color: #155724;
-    }
-    
-    .difficulty-moderate {
-        background: #fff3cd;
-        color: #856404;
-    }
-    
-    .difficulty-challenging {
-        background: #f8d7da;
-        color: #721c24;
-    }
-    
-    .difficulty-extreme {
-        background: #d6d8d9;
-        color: #1b1e21;
-    }
-    
-    @media (max-width: 991px) {
-        .filter-sidebar {
-            position: relative;
-            top: 0;
-            margin-bottom: 30px;
-        }
-        
-        .page-hero {
-            padding: 60px 0 40px;
-        }
-    }
-</style>
-{% endblock %}
+{% block title %}Tours — Tour System{% endblock %}
+{% block meta_description %}Curated Tanzania safari packages — game drives, Kilimanjaro climbs, Zanzibar beach extensions and bespoke itineraries.{% endblock %}
 
 {% block content %}
-<!-- Hero Section -->
-<section class="page-hero">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-8 mx-auto text-center">
-                <h1 class="display-4 fw-bold mb-3">Tour Packages</h1>
-                <p class="lead mb-4">
-                    Discover our curated collection of unforgettable adventures. 
-                    From wildlife safaris to cultural expeditions, find your perfect journey.
-                </p>
-                
-                <!-- Search Bar -->
-                <form method="get" action="" class="d-flex gap-2 justify-content-center">
-                    <input type="text" 
-                           name="search" 
-                           class="form-control form-control-lg" 
-                           placeholder="Search packages by name, description..." 
-                           value="{{ search_query }}"
-                           style="max-width: 500px; border-radius: 50px;">
-                    <button type="submit" class="btn btn-light btn-lg px-4" style="border-radius: 50px;">
-                        <i class="fas fa-search"></i>
-                    </button>
-                </form>
-            </div>
-        </div>
-    </div>
-</section>
 
-<!-- Main Content -->
-<section class="py-5">
-    <div class="container">
-        <div class="row">
-            <!-- Filters Sidebar -->
-            <div class="col-lg-3">
-                <div class="filter-sidebar">
-                    <h5 class="mb-4">
-                        <i class="fas fa-filter"></i> Filter Packages
-                    </h5>
-                    
-                    <form method="get" id="filterForm">
-                        <!-- Category Filter -->
-                        <div class="filter-section">
-                            <h6>Category</h6>
-                            {% for value, label in categories %}
-                                <div class="filter-option">
-                                    <input type="checkbox" 
-                                           name="category" 
-                                           value="{{ value }}" 
-                                           id="cat-{{ value }}"
-                                           {% if value in selected_categories %}checked{% endif %}
-                                           onchange="this.form.submit()">
-                                    <label for="cat-{{ value }}">{{ label }}</label>
-                                </div>
-                            {% endfor %}
-                        </div>
-                        
-                        <!-- Difficulty Filter -->
-                        <div class="filter-section">
-                            <h6>Difficulty Level</h6>
-                            {% for value, label in difficulty_levels %}
-                                <div class="filter-option">
-                                    <input type="checkbox" 
-                                           name="difficulty" 
-                                           value="{{ value }}" 
-                                           id="diff-{{ value }}"
-                                           {% if value in selected_difficulties %}checked{% endif %}
-                                           onchange="this.form.submit()">
-                                    <label for="diff-{{ value }}">{{ label }}</label>
-                                </div>
-                            {% endfor %}
-                        </div>
-                        
-                        <!-- Destination Filter -->
-                        <div class="filter-section">
-                            <h6>Destinations</h6>
-                            {% for destination in all_destinations %}
-                                <div class="filter-option">
-                                    <input type="checkbox" 
-                                           name="destination" 
-                                           value="{{ destination.id }}" 
-                                           id="dest-{{ destination.id }}"
-                                           {% if destination.id|stringformat:"s" in selected_destinations %}checked{% endif %}
-                                           onchange="this.form.submit()">
-                                    <label for="dest-{{ destination.id }}">{{ destination.name }}</label>
-                                </div>
-                            {% endfor %}
-                        </div>
-                        
-                        <!-- Price Range Filter -->
-                        <div class="filter-section">
-                            <h6>Price Range (USD)</h6>
-                            <div class="filter-option">
-                                <input type="radio" 
-                                       name="price_range" 
-                                       value="0-500" 
-                                       id="price-1"
-                                       {% if price_range == '0-500' %}checked{% endif %}
-                                       onchange="this.form.submit()">
-                                <label for="price-1">Under $500</label>
-                            </div>
-                            <div class="filter-option">
-                                <input type="radio" 
-                                       name="price_range" 
-                                       value="500-1000" 
-                                       id="price-2"
-                                       {% if price_range == '500-1000' %}checked{% endif %}
-                                       onchange="this.form.submit()">
-                                <label for="price-2">$500 - $1,000</label>
-                            </div>
-                            <div class="filter-option">
-                                <input type="radio" 
-                                       name="price_range" 
-                                       value="1000-2000" 
-                                       id="price-3"
-                                       {% if price_range == '1000-2000' %}checked{% endif %}
-                                       onchange="this.form.submit()">
-                                <label for="price-3">$1,000 - $2,000</label>
-                            </div>
-                            <div class="filter-option">
-                                <input type="radio" 
-                                       name="price_range" 
-                                       value="2000-99999" 
-                                       id="price-4"
-                                       {% if price_range == '2000-99999' %}checked{% endif %}
-                                       onchange="this.form.submit()">
-                                <label for="price-4">$2,000+</label>
-                            </div>
-                        </div>
-                        
-                        <!-- Duration Filter -->
-                        <div class="filter-section">
-                            <h6>Duration</h6>
-                            <div class="filter-option">
-                                <input type="radio" 
-                                       name="duration" 
-                                       value="1-3" 
-                                       id="dur-1"
-                                       {% if duration == '1-3' %}checked{% endif %}
-                                       onchange="this.form.submit()">
-                                <label for="dur-1">1-3 days</label>
-                            </div>
-                            <div class="filter-option">
-                                <input type="radio" 
-                                       name="duration" 
-                                       value="4-7" 
-                                       id="dur-2"
-                                       {% if duration == '4-7' %}checked{% endif %}
-                                       onchange="this.form.submit()">
-                                <label for="dur-2">4-7 days</label>
-                            </div>
-                            <div class="filter-option">
-                                <input type="radio" 
-                                       name="duration" 
-                                       value="8-14" 
-                                       id="dur-3"
-                                       {% if duration == '8-14' %}checked{% endif %}
-                                       onchange="this.form.submit()">
-                                <label for="dur-3">8-14 days</label>
-                            </div>
-                            <div class="filter-option">
-                                <input type="radio" 
-                                       name="duration" 
-                                       value="15-999" 
-                                       id="dur-4"
-                                       {% if duration == '15-999' %}checked{% endif %}
-                                       onchange="this.form.submit()">
-                                <label for="dur-4">15+ days</label>
-                            </div>
-                        </div>
-                        
-                        <!-- Hidden field to preserve search -->
-                        {% if search_query %}
-                            <input type="hidden" name="search" value="{{ search_query }}">
-                        {% endif %}
-                        
-                        <!-- Clear Filters Button -->
-                        <a href="{% url 'packages:public_package_list' %}" class="btn btn-outline-secondary w-100 mt-3">
-                            <i class="fas fa-times"></i> Clear All Filters
-                        </a>
-                    </form>
-                </div>
-            </div>
-            
-            <!-- Packages Grid -->
-            <div class="col-lg-9">
-                <!-- Sort and Results Bar -->
-                <div class="sort-filter-bar">
-                    <div class="results-count">
-                        <i class="fas fa-box"></i> 
-                        {{ page_obj.paginator.count }} Package{{ page_obj.paginator.count|pluralize }} Found
+{% include 'frontend/partials/_listing_hero.html' with eyebrow='02 — Tours' title='Curated journeys, end to end.' lede='Hand-built itineraries, refined over a decade of guiding. Browse below or write to us for a tailor-made trip.' image='https://images.unsplash.com/photo-1516426122078-c23e76319801?w=2000&q=80' %}
+
+<section class="py-16 lg:py-24">
+    <div class="container-editorial">
+        <div class="listing-grid">
+
+            {# =========================== FILTERS =========================== #}
+            <aside x-data="{ open: false }" class="lg:sticky lg:top-28 lg:self-start">
+                <button type="button"
+                        class="lg:hidden btn btn-secondary w-full"
+                        @click="open = !open">
+                    <i class="fal fa-sliders-h"></i>
+                    <span x-text="open ? 'Hide filters' : 'Filters'"></span>
+                </button>
+
+                <form method="get"
+                      class="mt-4 lg:mt-0 space-y-6"
+                      :class="open ? 'block' : 'hidden lg:block'"
+                      x-cloak>
+                    <div>
+                        <label class="eyebrow text-mist block mb-2" for="search">Search</label>
+                        <input id="search" type="search" name="search" value="{{ search_query }}"
+                               placeholder="Serengeti, Kili…"
+                               class="w-full bg-transparent border border-sand-300 focus:border-bush-600 rounded-full px-5 py-3 text-sm outline-none transition">
                     </div>
-                    
-                    <div class="sort-dropdown">
-                        <label for="sortSelect" class="mb-0">Sort by:</label>
-                        <select class="form-select form-select-sm" id="sortSelect" onchange="applySorting(this.value)" style="width: auto;">
-                            <option value="">Default</option>
-                            <option value="price_low" {% if sort_by == 'price_low' %}selected{% endif %}>Price: Low to High</option>
-                            <option value="price_high" {% if sort_by == 'price_high' %}selected{% endif %}>Price: High to Low</option>
-                            <option value="duration" {% if sort_by == 'duration' %}selected{% endif %}>Duration</option>
-                            <option value="newest" {% if sort_by == 'newest' %}selected{% endif %}>Newest First</option>
-                            <option value="popular" {% if sort_by == 'popular' %}selected{% endif %}>Most Popular</option>
+
+                    {% if categories %}
+                    <div>
+                        <label class="eyebrow text-mist block mb-2" for="category">Category</label>
+                        <select id="category" name="category"
+                                class="w-full bg-transparent border border-sand-300 focus:border-bush-600 rounded-full px-5 py-3 text-sm outline-none transition appearance-none">
+                            <option value="">All categories</option>
+                            {% for val, label in categories %}
+                                <option value="{{ val }}" {% if val == category_filter %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
                         </select>
                     </div>
-                </div>
-                
-                <!-- Packages Grid -->
-                {% if page_obj %}
-                    <div class="row">
-                        {% for package in page_obj %}
-                            <div class="col-md-6 col-lg-4">
-                                <div class="package-card">
-                                    <div class="package-image-container">
-                                        {% if package.featured_image %}
-                                            <img src="{{ package.featured_image.url }}" 
-                                                 alt="{{ package.name }}" 
-                                                 class="package-image">
-                                        {% else %}
-                                            <img src="{% static 'images/placeholder-package.jpg' %}" 
-                                                 alt="{{ package.name }}" 
-                                                 class="package-image">
-                                        {% endif %}
-                                        
-                                        <span class="package-badge difficulty-{{ package.difficulty_level }}">
-                                            {{ package.get_difficulty_level_display }}
-                                        </span>
-                                        
-                                        {% if package.is_featured %}
-                                            <span class="featured-badge">
-                                                <i class="fas fa-star"></i> Featured
-                                            </span>
-                                        {% endif %}
-                                        
-                                        {% if package.discount_percentage > 0 %}
-                                            <span class="discount-badge">
-                                                -{{ package.discount_percentage|floatformat:0 }}% OFF
-                                            </span>
-                                        {% endif %}
-                                    </div>
-                                    
-                                    <div class="package-content">
-                                        <h3 class="package-title">
-                                            <a href="{% url 'packages:public_package_detail' package.slug %}">
-                                                {{ package.name }}
-                                            </a>
-                                        </h3>
-                                        
-                                        <p class="package-description">
-                                            {{ package.short_description|truncatewords:20 }}
-                                        </p>
-                                        
-                                        <div class="package-destinations">
-                                            {% for destination in package.destinations.all|slice:":3" %}
-                                                <span class="destination-tag">
-                                                    <i class="fas fa-map-marker-alt"></i> {{ destination.name }}
-                                                </span>
-                                            {% endfor %}
-                                            {% if package.destinations.count > 3 %}
-                                                <span class="destination-tag">
-                                                    +{{ package.destinations.count|add:"-3" }} more
-                                                </span>
-                                            {% endif %}
-                                        </div>
-                                        
-                                        <div class="package-meta">
-                                            <div class="meta-item">
-                                                <i class="fas fa-calendar-alt"></i>
-                                                <span>{{ package.duration_display }}</span>
-                                            </div>
-                                            <div class="meta-item">
-                                                <i class="fas fa-users"></i>
-                                                <span>Max {{ package.group_size_max }} people</span>
-                                            </div>
-                                            <div class="meta-item">
-                                                <i class="fas fa-eye"></i>
-                                                <span>{{ package.view_count }} views</span>
-                                            </div>
-                                        </div>
-                                        
-                                        <div class="package-footer">
-                                            <div class="package-price">
-                                                {% if package.discount_percentage > 0 %}
-                                                    <span class="original-price">{{ package.currency }} {{ package.price_per_person|floatformat:2 }}</span>
-                                                {% endif %}
-                                                <span class="current-price">
-                                                    {{ package.currency }} {{ package.final_price|floatformat:2 }}
-                                                </span>
-                                                <span class="price-label">per person</span>
-                                            </div>
-                                            
-                                            <a href="{% url 'packages:public_package_detail' package.slug %}" 
-                                               class="btn-view-package">
-                                                View Details <i class="fas fa-arrow-right"></i>
-                                            </a>
-                                        </div>
-                                    </div>
+                    {% endif %}
+
+                    {% if difficulties %}
+                    <div>
+                        <label class="eyebrow text-mist block mb-2" for="difficulty">Difficulty</label>
+                        <select id="difficulty" name="difficulty"
+                                class="w-full bg-transparent border border-sand-300 focus:border-bush-600 rounded-full px-5 py-3 text-sm outline-none transition appearance-none">
+                            <option value="">Any</option>
+                            {% for val, label in difficulties %}
+                                <option value="{{ val }}" {% if val == difficulty_filter %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    {% endif %}
+
+                    {% if available_destinations %}
+                    <div>
+                        <label class="eyebrow text-mist block mb-2" for="destination">Destination</label>
+                        <select id="destination" name="destination"
+                                class="w-full bg-transparent border border-sand-300 focus:border-bush-600 rounded-full px-5 py-3 text-sm outline-none transition appearance-none">
+                            <option value="">Any destination</option>
+                            {% for dest in available_destinations %}
+                                <option value="{{ dest.slug }}" {% if dest.slug == destination_filter %}selected{% endif %}>{{ dest.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    {% endif %}
+
+                    <div>
+                        <label class="eyebrow text-mist block mb-2">Price (USD)</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <input type="number" name="min_price" value="{{ min_price }}" placeholder="Min"
+                                   class="bg-transparent border border-sand-300 focus:border-bush-600 rounded-full px-4 py-3 text-sm outline-none transition">
+                            <input type="number" name="max_price" value="{{ max_price }}" placeholder="Max"
+                                   class="bg-transparent border border-sand-300 focus:border-bush-600 rounded-full px-4 py-3 text-sm outline-none transition">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="eyebrow text-mist block mb-2">Duration (days)</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <input type="number" name="min_days" value="{{ min_days }}" placeholder="Min"
+                                   class="bg-transparent border border-sand-300 focus:border-bush-600 rounded-full px-4 py-3 text-sm outline-none transition">
+                            <input type="number" name="max_days" value="{{ max_days }}" placeholder="Max"
+                                   class="bg-transparent border border-sand-300 focus:border-bush-600 rounded-full px-4 py-3 text-sm outline-none transition">
+                        </div>
+                    </div>
+
+                    {% if sort_by is not None %}
+                    <div>
+                        <label class="eyebrow text-mist block mb-2" for="sort_by">Sort</label>
+                        <select id="sort_by" name="sort_by"
+                                class="w-full bg-transparent border border-sand-300 focus:border-bush-600 rounded-full px-5 py-3 text-sm outline-none transition appearance-none">
+                            <option value="">Featured</option>
+                            <option value="price_asc" {% if sort_by == 'price_asc' %}selected{% endif %}>Price — low to high</option>
+                            <option value="price_desc" {% if sort_by == 'price_desc' %}selected{% endif %}>Price — high to low</option>
+                            <option value="duration_asc" {% if sort_by == 'duration_asc' %}selected{% endif %}>Duration — shortest</option>
+                            <option value="duration_desc" {% if sort_by == 'duration_desc' %}selected{% endif %}>Duration — longest</option>
+                            <option value="newest" {% if sort_by == 'newest' %}selected{% endif %}>Newest</option>
+                        </select>
+                    </div>
+                    {% endif %}
+
+                    <div class="flex gap-3 pt-2">
+                        <button type="submit" class="btn btn-primary flex-1">Apply</button>
+                        <a href="{% url 'packages:public_package_list' %}" class="btn btn-secondary flex-1 text-center">Reset</a>
+                    </div>
+                </form>
+            </aside>
+
+            {# =========================== RESULTS =========================== #}
+            <div>
+                <header class="mb-8 lg:mb-10 flex flex-wrap items-end justify-between gap-4">
+                    <div>
+                        <p class="eyebrow text-mist">Showing</p>
+                        <p class="font-display text-2xl lg:text-3xl mt-1">
+                            {{ total_count }} tour{{ total_count|pluralize }}
+                        </p>
+                    </div>
+                </header>
+
+                <div class="grid sm:grid-cols-2 xl:grid-cols-3 gap-6 lg:gap-8">
+                    {% for pkg in packages %}
+                        <a href="{% url 'packages:public_package_detail' pkg.slug %}" class="group block">
+                            <div class="card-media aspect-[4/5] rounded-2xl overflow-hidden bg-sand-100">
+                                {% if pkg.featured_image %}
+                                    <img src="{{ pkg.featured_image.url }}" alt="{{ pkg.name }}" loading="lazy">
+                                {% else %}
+                                    <img src="https://images.unsplash.com/photo-1535941339077-2dd1c7963098?w=900&q=80" alt="{{ pkg.name }}" loading="lazy">
+                                {% endif %}
+                            </div>
+                            <div class="pt-5">
+                                <div class="flex items-center justify-between text-sm">
+                                    <p class="eyebrow">{{ pkg.get_category_display|default:pkg.category }}</p>
+                                    <p class="text-mist">{{ pkg.duration_days }}D · {{ pkg.duration_nights }}N</p>
+                                </div>
+                                <h3 class="font-display text-xl lg:text-2xl mt-3 text-balance group-hover:text-bush-700 transition-colors">{{ pkg.name }}</h3>
+                                {% if pkg.short_description %}
+                                    <p class="mt-2 text-mist text-sm leading-relaxed line-clamp-2">{{ pkg.short_description }}</p>
+                                {% endif %}
+                                <div class="mt-4 flex items-baseline justify-between">
+                                    <p class="text-charcoal">
+                                        <span class="text-sm text-mist">from</span>
+                                        <span class="font-display text-xl ml-1">{{ pkg.currency }} {{ pkg.get_final_price|floatformat:0 }}</span>
+                                    </p>
+                                    <span class="text-bush-600 group-hover:translate-x-1 transition-transform">
+                                        <i class="fal fa-arrow-right"></i>
+                                    </span>
                                 </div>
                             </div>
-                        {% endfor %}
-                    </div>
-                    
-                    <!-- Pagination -->
-                    {% if page_obj.has_other_pages %}
-                        <nav aria-label="Package pagination">
-                            <ul class="pagination">
-                                {% if page_obj.has_previous %}
-                                    <li class="page-item">
-                                        <a class="page-link" href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}{% for cat in selected_categories %}&category={{ cat }}{% endfor %}{% for diff in selected_difficulties %}&difficulty={{ diff }}{% endfor %}{% for dest in selected_destinations %}&destination={{ dest }}{% endfor %}{% if price_range %}&price_range={{ price_range }}{% endif %}{% if duration %}&duration={{ duration }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}">First</a>
-                                    </li>
-                                    <li class="page-item">
-                                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% for cat in selected_categories %}&category={{ cat }}{% endfor %}{% for diff in selected_difficulties %}&difficulty={{ diff }}{% endfor %}{% for dest in selected_destinations %}&destination={{ dest }}{% endfor %}{% if price_range %}&price_range={{ price_range }}{% endif %}{% if duration %}&duration={{ duration }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}">Previous</a>
-                                    </li>
-                                {% endif %}
-                                
-                                <li class="page-item active">
-                                    <span class="page-link">{{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
-                                </li>
-                                
-                                {% if page_obj.has_next %}
-                                    <li class="page-item">
-                                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% for cat in selected_categories %}&category={{ cat }}{% endfor %}{% for diff in selected_difficulties %}&difficulty={{ diff }}{% endfor %}{% for dest in selected_destinations %}&destination={{ dest }}{% endfor %}{% if price_range %}&price_range={{ price_range }}{% endif %}{% if duration %}&duration={{ duration }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}">Next</a>
-                                    </li>
-                                    <li class="page-item">
-                                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}{% for cat in selected_categories %}&category={{ cat }}{% endfor %}{% for diff in selected_difficulties %}&difficulty={{ diff }}{% endfor %}{% for dest in selected_destinations %}&destination={{ dest }}{% endfor %}{% if price_range %}&price_range={{ price_range }}{% endif %}{% if duration %}&duration={{ duration }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}">Last</a>
-                                    </li>
-                                {% endif %}
-                            </ul>
-                        </nav>
-                    {% endif %}
-                {% else %}
-                    <!-- Empty State -->
-                    <div class="empty-state">
-                        <i class="fas fa-box-open"></i>
-                        <h4>No Packages Found</h4>
-                        <p>We couldn't find any packages matching your criteria. Try adjusting your filters or search terms.</p>
-                        <a href="{% url 'packages:public_package_list' %}" class="btn btn-primary">
-                            <i class="fas fa-redo"></i> Reset Filters
                         </a>
-                    </div>
-                {% endif %}
+                    {% empty %}
+                        {% include 'frontend/partials/_listing_empty.html' with title='No tours match those filters.' subtitle='Try widening the price or duration range, or clear filters.' reset_url=request.path %}
+                    {% endfor %}
+                </div>
+
+                {% include 'frontend/partials/_listing_pagination.html' with page_obj=page_obj querystring=request.GET.urlencode %}
             </div>
+
         </div>
     </div>
 </section>
-{% endblock %}
 
-{% block extra_js %}
-<script>
-    function applySorting(sortValue) {
-        const url = new URL(window.location.href);
-        if (sortValue) {
-            url.searchParams.set('sort', sortValue);
-        } else {
-            url.searchParams.delete('sort');
-        }
-        url.searchParams.delete('page'); // Reset to first page
-        window.location.href = url.toString();
-    }
-</script>
 {% endblock %}
-
