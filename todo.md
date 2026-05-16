@@ -191,6 +191,91 @@ Branch: `feature/frontend-polish` → PR → `develop`
 
 ---
 
+## Phase 7 — Dashboard Visual Overhaul (Operations Slate)
+> Apply a parallel design system to the internal staff dashboard. Built on the same Tailwind v4 + Alpine.js foundation as Phase 6, but with a denser, cooler, productivity-tool feel. Backend untouched — Django templates only.
+
+**Direction:** Operations Slate (Stripe-meets-Linear — cool neutrals, dense layouts, semantic status colours, no editorial motion)
+**Palette continuity:** keeps `bush-600` from Safari Editorial for brand consistency; everything else is fresh
+**Dev environment:** existing Docker stack at `http://localhost:8080/dashboard/`
+
+### Stack decisions
+- Keep: Tailwind v4, Alpine.js, Font Awesome
+- Add: **Chart.js** (~60 KB) for analytics dashboard charts
+- Drop in dashboard context: GSAP, ScrollTrigger, Lenis (no cinematic motion in productivity tools)
+- Typography: **Inter only** (no Fraunces); 14px base body (vs 16px on public)
+
+### Operations Slate tokens (full list)
+- **Backgrounds**: `slate-50` page bg, `white` cards, `slate-100` hover rows, `slate-200/300` borders
+- **Text**: `slate-900` headings, `slate-700` body, `slate-500` labels/secondary
+- **Brand**: `bush-600` for primary actions, active nav, focus rings; `bush-50` for primary hover
+- **Semantic**: `emerald-500` success, `amber-500` warning, `rose-500` danger, `sky-500` info
+- **Dark mode**: deferred to Phase 8
+
+### Design principles (enforced on every dashboard page)
+- Information density over whitespace
+- Single accent colour (`bush-600`); no decorative gradients
+- Transitions 150–250ms only — no scroll-triggered reveals
+- Semantic status badges always use the semantic colour scale, never the brand accent
+- Inline edit / quick actions preferred over modal flows
+- Every list page has: search, filter pills, bulk-action bar, empty state, pagination
+
+### Phase 7.0 — Foundation & Dashboard Styleguide (2 days)
+Branch: `feature/dashboard-foundation` → PR → `develop`
+- [ ] Extend `tailwind.css` `@theme` with Operations Slate tokens (no second CSS file — both systems share the build)
+- [ ] Add Chart.js to `static/frontend/vendor/`
+- [ ] Build new `templates/backend/base_dashboard.html` — sidebar + topbar + main shell
+- [ ] Reusable partials: `_dashboard_sidebar.html`, `_dashboard_topbar.html`, `_stat_card.html`, `_data_table.html`, `_status_badge.html`, `_page_header.html`, `_breadcrumb.html`, `_empty_state.html`
+- [ ] `/dashboard/styleguide/` page (DEBUG-only) — full visual reference
+
+### Phase 7.1 — Dashboard home (1–2 days)
+Branch: `feature/dashboard-home` → PR → `develop`
+- [ ] Stat-card grid (revenue, inquiries, bookings, conversion %)
+- [ ] Recent-activity feed (latest inquiries, bookings, reviews)
+- [ ] Quick actions row (New booking / New package / New destination / New inquiry)
+- [ ] Mini Chart.js charts for booking trends + revenue by month
+
+### Phase 7.2 — Dashboard listings (3–4 days · biggest sub-phase)
+Branch: `feature/dashboard-listings` → PR → `develop`
+- [ ] Unified `_data_table.html` partial: sortable columns, sticky header, row hover, bulk-action toolbar, top filter bar with search
+- [ ] Migrate: packages, destinations, activities, accommodations, inquiries, bookings, reviews, contacts, newsletter, FAQs, testimonials
+- [ ] Status badge column (semantic colours)
+- [ ] Per-row action menu (Alpine dropdown)
+- [ ] Empty states with helpful CTAs
+
+### Phase 7.3 — Dashboard forms (2–3 days)
+Branch: `feature/dashboard-forms` → PR → `develop`
+- [ ] 2-column layout: form left, sticky sidebar right (save / status / delete / publish actions)
+- [ ] Section cards within forms
+- [ ] **Tabs for multi-section forms** — package edit (details / images / itinerary / inclusions / departures), accommodation edit (details / images / rooms), etc.
+- [ ] Inline validation; error chips beside each field
+- [ ] Migrate every dashboard create/edit template
+
+### Phase 7.4 — Dashboard detail pages (2 days)
+Branch: `feature/dashboard-detail-pages` → PR → `develop`
+- [ ] Booking detail: header with actions, tabs for passengers / payments / timeline, activity log
+- [ ] Inquiry detail: full customer info, link to custom-package builder, response composer
+- [ ] Custom-package detail: itinerary preview, status, send-link action
+- [ ] Each model's dashboard detail page
+
+### Phase 7.5 — Special workflows (2 days)
+Branch: `feature/dashboard-workflows` → PR → `develop`
+- [ ] Reviews moderation (approve / reject / feature; bulk single-click actions)
+- [ ] Custom-package builder (staff-side multi-step form)
+- [ ] AI Assistant pages — brochure parser, itinerary generator, quote suggestion, route optimization
+- [ ] Booking status workflow with transition guards
+
+### Phase 7.6 — Polish + a11y + cleanup (1–2 days)
+Branch: `feature/dashboard-polish` → PR → `develop`
+- [ ] Audit every dashboard page on tablet (768px) + mobile (390px)
+- [ ] Keyboard navigation pass — focus rings, tab order, skip-to-content
+- [ ] Toast notifications via Alpine where they help (vs full-page reload + django messages)
+- [ ] Delete any leftover `static/backend/` legacy assets
+- [ ] Lighthouse pass on `/dashboard/` (with auth) — fix any reds
+
+**Total estimate:** 13–17 focused days, 7 PRs to `develop`.
+
+---
+
 ## Priority Order (Impact vs Effort)
 
 | # | Item | Impact | Effort |
