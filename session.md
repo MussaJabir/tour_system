@@ -468,7 +468,7 @@ tailwindcss -i static/frontend/src/tailwind.css \
 - The `_listing_hero` partial expects `image` as a string URL. Calling `package.featured_image.url` blows up when no image is set. Inquiry-create template now branches: `{% if package.featured_image %}` → pass `.url`; `{% else %}` → pass a stock fallback URL. Apply this pattern elsewhere if you reuse `_listing_hero` with optional images.
 
 ### PR
-- (opening next…)
+- https://github.com/MussaJabir/tour_system/pull/17
 
 ---
 
