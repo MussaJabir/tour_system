@@ -245,6 +245,66 @@
     }
   }
 
+  /* --- Form fields ----------------------------------------- */
+  /* Inputs, selects, textareas inside .form-field get pill-rounded
+     borders and Safari Editorial focus colour. Pre-existing Django
+     widget attrs (class="form-control", "form-select", etc.) keep
+     working — these rules win by element specificity. */
+  .form-field input[type="text"],
+  .form-field input[type="email"],
+  .form-field input[type="tel"],
+  .form-field input[type="number"],
+  .form-field input[type="search"],
+  .form-field input[type="date"],
+  .form-field input[type="datetime-local"],
+  .form-field input[type="url"],
+  .form-field input[type="password"],
+  .form-field select,
+  .form-field textarea {
+    width: 100%;
+    background-color: transparent;
+    border: 1px solid var(--color-sand-300);
+    border-radius: 9999px;
+    padding: 0.85rem 1.25rem;
+    font-family: var(--font-sans);
+    font-size: 0.95rem;
+    color: var(--color-charcoal);
+    outline: none;
+    transition: border-color 0.25s var(--ease-soft-in),
+                box-shadow 0.25s var(--ease-soft-in);
+  }
+  .form-field textarea {
+    border-radius: 1.25rem;
+    min-height: 7rem;
+    font-family: var(--font-sans);
+    resize: vertical;
+  }
+  .form-field input::placeholder,
+  .form-field textarea::placeholder { color: var(--color-mist); }
+
+  .form-field input:focus,
+  .form-field select:focus,
+  .form-field textarea:focus {
+    border-color: var(--color-bush-600);
+    box-shadow: 0 0 0 3px rgb(44 95 45 / 0.12);
+  }
+
+  .form-field--error input,
+  .form-field--error select,
+  .form-field--error textarea {
+    border-color: var(--color-clay-500);
+  }
+
+  /* Checkbox row inside form-field gets sensible alignment */
+  .form-field input[type="checkbox"],
+  .form-field input[type="radio"] {
+    width: 1.125rem;
+    height: 1.125rem;
+    accent-color: var(--color-bush-600);
+    margin-right: 0.5rem;
+    vertical-align: middle;
+  }
+
   /* --- Hero image overlay ----------------------------------- */
   .hero-overlay {
     position: absolute;
