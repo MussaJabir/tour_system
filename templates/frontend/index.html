@@ -20,18 +20,18 @@
     </div>
     <div class="hero-overlay"></div>
 
-    {# Hero copy #}
+    {# Hero copy — content is visible by default; GSAP hides it before animating it in #}
     <div class="relative h-full flex flex-col justify-end pb-24 lg:pb-32">
         <div class="container-editorial">
-            <p data-hero-stagger class="eyebrow text-sand-200 opacity-0">East African Journeys · Since 2014</p>
-            <h1 data-hero-stagger class="font-display text-display-xl text-ivory mt-4 leading-[1.02] text-balance max-w-5xl opacity-0">
+            <p data-hero-stagger class="eyebrow text-sand-200">East African Journeys · Since 2014</p>
+            <h1 data-hero-stagger class="font-display text-display-xl text-ivory mt-4 leading-[1.02] text-balance max-w-5xl">
                 Wild seasons.<br>Quiet wonders.
             </h1>
-            <p data-hero-stagger class="mt-6 text-ivory/85 text-lg lg:text-xl max-w-xl leading-relaxed opacity-0">
+            <p data-hero-stagger class="mt-6 text-ivory/85 text-lg lg:text-xl max-w-xl leading-relaxed">
                 Tanzania safaris, Kilimanjaro climbs, and slow journeys through the parks
                 you came for and the ones nobody told you about.
             </p>
-            <div data-hero-stagger class="mt-10 flex flex-wrap gap-3 opacity-0">
+            <div data-hero-stagger class="mt-10 flex flex-wrap gap-3">
                 <a href="{% url 'packages:public_package_list' %}" class="btn btn-primary bg-ivory text-charcoal hover:bg-sand-300">
                     Explore Tours
                     <i class="fal fa-arrow-right"></i>
@@ -44,7 +44,7 @@
     </div>
 
     {# Scroll cue #}
-    <div data-hero-stagger class="absolute bottom-8 left-1/2 -translate-x-1/2 text-ivory/70 text-xs tracking-[0.3em] uppercase opacity-0">
+    <div data-hero-stagger class="absolute bottom-8 left-1/2 -translate-x-1/2 text-ivory/70 text-xs tracking-[0.3em] uppercase">
         <div class="flex flex-col items-center gap-3">
             <span>Scroll</span>
             <span class="w-px h-12 bg-ivory/40 animate-pulse"></span>
@@ -59,19 +59,19 @@
     <div class="container-editorial">
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-6 text-center">
             <div data-stat>
-                <p class="font-display text-display-md text-bush-700" data-counter data-to="{{ total_destinations }}">0</p>
+                <p class="font-display text-display-md text-bush-700" data-counter data-to="{{ total_destinations }}">{{ total_destinations }}</p>
                 <p class="eyebrow text-mist mt-2">Destinations</p>
             </div>
             <div data-stat>
-                <p class="font-display text-display-md text-bush-700" data-counter data-to="{{ total_packages }}">0</p>
+                <p class="font-display text-display-md text-bush-700" data-counter data-to="{{ total_packages }}">{{ total_packages }}</p>
                 <p class="eyebrow text-mist mt-2">Curated Tours</p>
             </div>
             <div data-stat>
-                <p class="font-display text-display-md text-bush-700" data-counter data-to="{{ total_activities }}">0</p>
+                <p class="font-display text-display-md text-bush-700" data-counter data-to="{{ total_activities }}">{{ total_activities }}</p>
                 <p class="eyebrow text-mist mt-2">Activities</p>
             </div>
             <div data-stat>
-                <p class="font-display text-display-md text-bush-700" data-counter data-to="{{ total_accommodations }}">0</p>
+                <p class="font-display text-display-md text-bush-700" data-counter data-to="{{ total_accommodations }}">{{ total_accommodations }}</p>
                 <p class="eyebrow text-mist mt-2">Lodges &amp; Camps</p>
             </div>
         </div>
@@ -332,25 +332,22 @@
 <script defer>
 document.addEventListener('DOMContentLoaded', () => {
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (!window.gsap || reducedMotion) {
-        // Make hero copy visible without animation if GSAP unavailable
-        document.querySelectorAll('[data-hero-stagger]').forEach(el => el.style.opacity = 1);
-        document.querySelectorAll('[data-reveal]').forEach(el => el.style.opacity = 1);
-        return;
-    }
+    // Progressive enhancement: content renders visible by default.
+    // GSAP only hides + animates it when both available + motion is OK.
+    if (!window.gsap || reducedMotion) return;
     const { gsap, ScrollTrigger } = window;
 
+    // Hide everything we're about to animate, before paint
+    gsap.set('[data-hero-stagger], [data-reveal]', { opacity: 0, y: 30 });
+
     // --- Hero stagger reveal -------------------------------------------
-    gsap.fromTo('[data-hero-stagger]',
-        { y: 30, opacity: 0 },
-        {
-            y: 0, opacity: 1,
-            duration: 1.4,
-            ease: 'expo.out',
-            stagger: 0.18,
-            delay: 0.3,
-        }
-    );
+    gsap.to('[data-hero-stagger]', {
+        y: 0, opacity: 1,
+        duration: 1.4,
+        ease: 'expo.out',
+        stagger: 0.18,
+        delay: 0.3,
+    });
 
     // --- Hero Ken Burns zoom -------------------------------------------
     gsap.fromTo('[data-hero-image]',
