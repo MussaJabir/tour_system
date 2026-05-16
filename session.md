@@ -322,4 +322,47 @@ tailwindcss -i static/frontend/src/tailwind.css \
 
 ---
 
+## Session 013 — 2026-05-16
+
+**Type:** Phase 6.1 — Homepage (Safari Editorial)
+**Branch:** `feature/frontend-homepage` → PR → `develop`
+
+### What we did
+1. **Extended `public_home` view** (`destinations/views.py`) — now passes `featured_packages` (3), `featured_testimonials` (6), and `total_packages` to the template alongside the existing destination/activity/accommodation context
+2. **Rewrote `templates/frontend/index.html` from scratch** — extends `base_modern.html` (no Ravelo dependency). New section structure:
+   - **Hero** — full-bleed Tanzania safari photo (Unsplash placeholder), Ken Burns slow-zoom via GSAP, eyebrow + balanced display-xl headline + lede + double CTA + scroll cue. All hero copy enters via staggered fade (`expo.out`, 0.18s stagger).
+   - **Stats trust strip** — bone-coloured band, 4 GSAP `ScrollTrigger`-driven counters (destinations, tours, activities, lodges) that count up on viewport entry. Honour `prefers-reduced-motion`.
+   - **Featured destinations** — asymmetric editorial grid (12-col): 1 oversized hero card (col-span-7, row-span-2) + 4 secondary cards (col-span-5/sm-6) using the `card-media` overlay treatment.
+   - **Featured packages** — 3-up large editorial cards with `card-media` aspect-4/5 image, category eyebrow, duration, balanced display title, short description (`line-clamp-2`), price with `get_final_price`, hover arrow.
+   - **Activities horizontal showcase** — full-bleed overflow-x-auto row of 8 cards with difficulty badge (top-right) and category eyebrow, smooth-scroll handled by Lenis.
+   - **Editorial pull-quote** — charcoal-on-ivory full-width quote section with 3 value pillars (Local / Bespoke / Honest).
+   - **Testimonials** — 3-up bone-card layout with star rating (5-star template loop), customer photo (or initial monogram), name, location.
+   - **Final CTA** — full-bleed bush-700 background with safari image at 30% `mix-blend-overlay`, eyebrow + display-lg + double CTA.
+3. **Page-specific GSAP boot** (`extra_js` block) — hero stagger, hero Ken Burns zoom, stat counters, generic `[data-reveal]` fade-up; respects `prefers-reduced-motion` with graceful fallback (sets `opacity: 1` if GSAP absent).
+4. **Added `scrollbar-hide` utility** to `tailwind.css` for the activities row.
+5. **Star rating loop fix** — replaced placeholder `t.rating|rjust:t.rating` with proper `{% for i in "12345"|make_list %}{% if forloop.counter <= t.rating %}` pattern.
+6. **Rebuilt Tailwind output** — 42KB minified (still well under 100KB budget).
+7. **12 new homepage tests** (`destinations/tests_homepage.py`) — view 200, uses `base_modern.html`, hero markers present, all 5 section anchors render, featured filter respected, testimonial renders with star rating, 4 stat counters present, view context exposes new keys, count keys are integers.
+8. **All 169 tests pass** (157 prior + 12 new) — full suite run inside `tour_django`, 120s.
+
+### Operational notes (dev env)
+- The Docker images had to be rebuilt with `--no-cache` because previous celery containers were running off a stale image without `imagekit`.
+- Dev postgres DB `tour_system` had to be dropped + recreated because the migration history was inconsistent (admin migrated before accounts — predates Session 004's wipe). Superuser was recreated.
+- Phase 6.0 stack additions (Tailwind, Alpine, GSAP, Lenis, django-imagekit) all confirmed working in the rebuilt Docker image.
+
+### Visual review checklist (live preview at `http://localhost:8080/`)
+- [ ] Hero copy fades in with 4 staggered elements
+- [ ] Hero image slowly zooms (Ken Burns)
+- [ ] Stat counters animate from 0 → final number when scrolled into view
+- [ ] Hover on destination cards: image scales 1.04, overlay darkens
+- [ ] Activities row scrolls horizontally (drag or wheel)
+- [ ] Final CTA section uses bush-green with overlaid safari image
+- [ ] All page transitions feel smooth thanks to Lenis
+
+### PR
+- https://github.com/MussaJabir/tour_system/pull/14
+- Follow-up commit `46a7fbb` — progressive-enhanced hero copy + stat counters so content renders without JS / under reduced-motion / when GSAP fails to load
+
+---
+
 _Add new sessions above this line._
