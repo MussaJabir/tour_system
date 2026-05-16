@@ -1,0 +1,84 @@
+{% load static %}<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="{% block meta_description %}Bespoke East African safaris, cultural journeys, and tailor-made tours. Crafted by Tanzania experts.{% endblock %}">
+    <meta name="keywords" content="{% block meta_keywords %}Tanzania safari, Serengeti tours, Ngorongoro, Kilimanjaro climbs, East Africa travel{% endblock %}">
+
+    <title>{% block title %}Tour System — East African Journeys{% endblock %}</title>
+
+    {% block canonical %}{% endblock %}
+
+    {# Open Graph #}
+    <meta property="og:type" content="{% block og_type %}website{% endblock %}">
+    <meta property="og:title" content="{% block og_title %}{% block title2 %}Tour System — East African Journeys{% endblock %}{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}Bespoke East African safaris and curated tours.{% endblock %}">
+    <meta property="og:image" content="{% block og_image %}{% endblock %}">
+    <meta property="og:url" content="{% block og_url %}{{ request.build_absolute_uri }}{% endblock %}">
+
+    {% block meta_tags %}{% endblock %}
+
+    <link rel="shortcut icon" href="{% static 'frontend/assets/images/logos/favicon.png' %}" type="image/x-icon">
+
+    {# Google variable fonts — Fraunces (display) + Inter (body) #}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300..600&family=Inter:wght@300..600&display=swap" rel="stylesheet">
+
+    {# Tailwind compiled CSS — Safari Editorial design system #}
+    <link rel="stylesheet" href="{% static 'frontend/css/tailwind.css' %}">
+
+    {# Font Awesome (kept — icons used throughout) #}
+    <link rel="stylesheet" href="{% static 'frontend/assets/css/fontawesome-5.14.0.min.css' %}">
+
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body class="bg-ivory text-charcoal antialiased">
+
+    {% include 'frontend/partials/_nav.html' %}
+
+    <main id="content">
+        {% block content %}{% endblock %}
+    </main>
+
+    {% include 'frontend/partials/_footer.html' %}
+
+    {# Vendor scripts — defer so they don't block render #}
+    <script src="{% static 'frontend/vendor/alpine.min.js' %}" defer></script>
+    <script src="{% static 'frontend/vendor/gsap.min.js' %}" defer></script>
+    <script src="{% static 'frontend/vendor/scrolltrigger.min.js' %}" defer></script>
+    <script src="{% static 'frontend/vendor/lenis.min.js' %}" defer></script>
+
+    {# Boot: Lenis smooth scroll synced to GSAP ScrollTrigger #}
+    <script defer>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+            const lenis = new Lenis({
+                lerp: 0.1,
+                wheelMultiplier: 0.9,
+                smoothWheel: true,
+            });
+
+            function raf(time) {
+                lenis.raf(time);
+                requestAnimationFrame(raf);
+            }
+            requestAnimationFrame(raf);
+
+            // Sync ScrollTrigger
+            if (window.gsap && window.ScrollTrigger) {
+                gsap.registerPlugin(ScrollTrigger);
+                lenis.on('scroll', ScrollTrigger.update);
+                gsap.ticker.add((t) => lenis.raf(t * 1000));
+                gsap.ticker.lagSmoothing(0);
+            }
+        });
+    </script>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

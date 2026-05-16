@@ -1,6 +1,6 @@
 # Tour System — Product Roadmap & TODO
 
-Last updated: 2026-05-14
+Last updated: 2026-05-16
 Status key: `[ ]` not started · `[~]` in progress · `[x]` done
 
 ---
@@ -88,6 +88,95 @@ Status key: `[ ]` not started · `[~]` in progress · `[x]` done
   - Follow-up if no staff reply in 48 hours
   - Escalation alert to manager at 72 hours
 - [ ] **Newsletter campaigns** — use the existing `NewsletterSubscriber` list to send targeted promotions (new packages, seasonal offers)
+
+---
+
+## Phase 6 — Frontend Visual Overhaul (Safari Editorial)
+> Replace the Ravelo Bootstrap template with a modern, cinematic Safari-editorial UI built on Tailwind + Alpine + GSAP + Lenis. Backend untouched — Django templates only.
+
+**Direction:** Safari Editorial (National Geographic vibe — warm earth tones, serif headlines, magazine-style layouts)
+**Photography:** Stock/Unsplash to start, swap to commissioned later
+**Dev environment:** Docker stack at `http://localhost:8080`
+
+### Stack decisions
+- Keep: Django 5.2 templates, Leaflet (maps), Font Awesome (icons)
+- Add: Tailwind CSS (PostCSS build), Alpine.js, GSAP + ScrollTrigger, Lenis (smooth scroll), django-imagekit (responsive images), variable fonts (Fraunces + Inter)
+- Remove (gradually as pages are migrated): jQuery, Bootstrap JS, AOS, Slick, Magnific Popup, nice-select, jquery-ui
+
+### Design principles (enforced on every page)
+- One hero per page, full-bleed, real photography
+- Generous whitespace
+- Display serif (Fraunces) for headings, Inter for body
+- Slow, deliberate motion (0.6–1.2s eases)
+- Mobile-first
+- Progressive enhancement (works without JS)
+- Perf budget: LCP <2s, CSS <100kb, JS <80kb (excl GSAP)
+- Accessibility WCAG AA (keyboard nav, contrast 4.5:1, alt text)
+
+### Phase 6.0 — Foundation & Design System (2 days)
+Branch: `feature/frontend-foundation` → PR → `develop`
+- [x] Install Tailwind CSS via `pytailwindcss` (standalone CLI v4, no Node) — uses inline `@theme` instead of `tailwind.config.js`
+- [x] Configure Safari Editorial tokens — full sand/bush/clay 50–900 ramps + ivory, bone, mist, charcoal, graphite
+- [x] Install Alpine.js (3.14.3) + GSAP (3.12.5) + ScrollTrigger + Lenis (1.1.20) to `static/frontend/vendor/`
+- [x] Add Google variable fonts — Fraunces (display) + Inter (body), preconnect tuned
+- [x] Built new `base_modern.html` from scratch (legacy `base.html` left untouched; pages migrate one-by-one in 6.1+)
+- [x] Created reusable partials: `_nav.html`, `_footer.html`, `_button.html`, `_card.html`, `_section_header.html`
+- [x] Installed + configured `django-imagekit` (`imagekit` in INSTALLED_APPS)
+- [x] Built `_styleguide.html` at `/styleguide/` (DEBUG-only, returns 404 in production)
+
+### Phase 6.1 — Homepage (3 days)
+Branch: `feature/frontend-homepage`
+- [ ] Cinematic hero — full-bleed photo/video, Ken Burns zoom, staggered headline fade
+- [ ] Sticky nav that morphs on scroll (transparent → solid)
+- [ ] Featured destinations magazine grid with hover zoom + caption reveal
+- [ ] Featured packages large cards (price, duration, parallax photo)
+- [ ] Activities preview — horizontal scroll showcase
+- [ ] Why us / trust strip with scroll-triggered stats counter
+- [ ] Testimonials quote slider with real photos
+- [ ] Newsletter CTA — bold full-bleed section
+- [ ] Restructured footer with premium feel
+
+### Phase 6.2 — Listing Pages (2 days)
+Branch: `feature/frontend-listings`
+- [ ] `destinations/list.html`
+- [ ] `packages/list.html`
+- [ ] `activities/list.html`
+- [ ] `accommodations/list.html`
+- [ ] Sticky filter sidebar (desktop) / slide-up sheet (mobile)
+- [ ] Grid ↔ list view toggle
+- [ ] Filter pills with clear-all
+
+### Phase 6.3 — Detail Pages (3 days)
+Branch: `feature/frontend-detail-pages`
+- [ ] `packages/detail.html` — sticky booking sidebar, image gallery, itinerary timeline, inclusions checklist, reviews
+- [ ] `destinations/detail.html` — magazine-style long form
+- [ ] `activities/detail.html`
+- [ ] `accommodations/detail.html`
+
+### Phase 6.4 — Conversion Flows (2 days)
+Branch: `feature/frontend-conversion`
+- [ ] Inquiry form — multi-step wizard feel (single POST), trust badges, progress bar
+- [ ] Contact page — split layout with map and multiple contact methods
+- [ ] Custom package builder — interactive form with real-time pricing
+
+### Phase 6.5 — Static Pages + Auth (1 day)
+Branch: `feature/frontend-static`
+- [ ] About us — story-driven, team grid
+- [ ] FAQ — accordion with smooth GSAP reveal
+- [ ] 404 / 500 error pages — branded
+- [ ] Staff dashboard login page — clean, separate from marketing aesthetic
+
+### Phase 6.6 — Polish & Performance (2 days)
+Branch: `feature/frontend-polish`
+- [ ] Lighthouse audit — fix all reds
+- [ ] Image optimization pass (WebP, AVIF, srcset everywhere)
+- [ ] Mobile pass on every page via Playwright
+- [ ] Accessibility audit with axe-core
+- [ ] Cross-browser test (Chrome, Safari, Firefox)
+- [ ] Loading states / skeleton screens
+- [ ] Final perf budget check
+
+**Total estimate:** 13–15 focused days, 7 PRs to `develop`.
 
 ---
 

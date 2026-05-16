@@ -19,6 +19,9 @@ urlpatterns = [
     
     # FAQ
     path('faq/', views.faq_page, name='faq_page'),
+
+    # Styleguide (DEBUG only)
+    path('styleguide/', views.styleguide, name='styleguide'),
     
     # ==================== DASHBOARD URLS ====================
     # Dashboard Home

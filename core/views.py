@@ -878,3 +878,22 @@ def dashboard_testimonial_delete(request, pk):
     testimonial.delete()
     messages.success(request, '✅ Testimonial deleted successfully.')
     return redirect('dashboard_testimonial_list')
+
+
+# ============================================================================
+# STYLEGUIDE — Safari Editorial design system reference (Phase 6.0)
+# ============================================================================
+
+from django.http import Http404
+
+
+def styleguide(request):
+    """
+    Renders the Safari Editorial design system reference.
+    Only available when settings.DEBUG is True — production returns 404.
+    """
+    if not settings.DEBUG:
+        raise Http404("Styleguide is only available in DEBUG mode.")
+    return render(request, 'frontend/_styleguide.html', {
+        'shades': ['50', '100', '200', '300', '400', '500', '600', '700', '800', '900'],
+    })
