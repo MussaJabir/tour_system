@@ -10,7 +10,7 @@
 
 <section class="py-16 lg:py-24">
     <div class="container-editorial">
-        <div class="grid lg:grid-cols-[280px_1fr] gap-10 lg:gap-16">
+        <div class="listing-grid">
 
             {# =========================== FILTERS =========================== #}
             <aside x-data="{ open: false }" class="lg:sticky lg:top-28 lg:self-start">
@@ -22,8 +22,8 @@
                 </button>
 
                 <form method="get"
-                      class="lg:block mt-4 lg:mt-0 space-y-6"
-                      :class="open ? 'block' : 'hidden'"
+                      class="mt-4 lg:mt-0 space-y-6"
+                      :class="open ? 'block' : 'hidden lg:block'"
                       x-cloak>
                     <div>
                         <label class="eyebrow text-mist block mb-2" for="search">Search</label>
