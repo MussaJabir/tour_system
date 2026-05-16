@@ -67,3 +67,5 @@ celerybeat.pid
 *.bak
 *.backup
 *.sql
+
+.playwright-mcp/

@@ -1,0 +1,192 @@
+{% extends 'frontend/base_modern.html' %}
+{% load static %}
+
+{% block title %}Styleguide — Safari Editorial · Tour System{% endblock %}
+
+{% block content %}
+<section class="pt-40 pb-20">
+    <div class="container-editorial">
+
+        <p class="eyebrow">Phase 6.0 · Foundation</p>
+        <h1 class="font-display text-display-xl mt-4 text-balance">Safari Editorial.</h1>
+        <p class="mt-6 text-mist text-xl max-w-2xl leading-relaxed">
+            The design system that powers every page of the Tour System frontend.
+            National Geographic gravitas, modern web craft.
+        </p>
+
+    </div>
+</section>
+
+{# ============================================================ #}
+{# COLOR PALETTE #}
+{# ============================================================ #}
+<section class="py-20 bg-bone">
+    <div class="container-editorial">
+        {% include 'frontend/partials/_section_header.html' with eyebrow='01 — Palette' title='Earth-tone colors' lede='Hand-mixed for warmth and contrast. Each ramp is a 50–900 scale.' %}
+
+        <div class="space-y-12">
+            {# Sand #}
+            <div>
+                <h3 class="text-xl font-display mb-4">Sand</h3>
+                <div class="grid grid-cols-5 lg:grid-cols-10 gap-2 text-xs">
+                    {% for n in shades %}
+                        <div>
+                            <div class="aspect-square rounded-lg" style="background-color: var(--color-sand-{{ n }});"></div>
+                            <p class="mt-2 text-mist">{{ n }}</p>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            {# Bush #}
+            <div>
+                <h3 class="text-xl font-display mb-4">Bush</h3>
+                <div class="grid grid-cols-5 lg:grid-cols-10 gap-2 text-xs">
+                    {% for n in shades %}
+                        <div>
+                            <div class="aspect-square rounded-lg" style="background-color: var(--color-bush-{{ n }});"></div>
+                            <p class="mt-2 text-mist">{{ n }}</p>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            {# Clay #}
+            <div>
+                <h3 class="text-xl font-display mb-4">Clay</h3>
+                <div class="grid grid-cols-5 lg:grid-cols-10 gap-2 text-xs">
+                    {% for n in shades %}
+                        <div>
+                            <div class="aspect-square rounded-lg" style="background-color: var(--color-clay-{{ n }});"></div>
+                            <p class="mt-2 text-mist">{{ n }}</p>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            {# Neutrals #}
+            <div>
+                <h3 class="text-xl font-display mb-4">Neutrals</h3>
+                <div class="grid grid-cols-2 lg:grid-cols-5 gap-2 text-xs">
+                    <div><div class="aspect-square rounded-lg bg-ivory border border-sand-200"></div><p class="mt-2 text-mist">ivory</p></div>
+                    <div><div class="aspect-square rounded-lg" style="background-color: var(--color-bone);"></div><p class="mt-2 text-mist">bone</p></div>
+                    <div><div class="aspect-square rounded-lg" style="background-color: var(--color-mist);"></div><p class="mt-2 text-mist">mist</p></div>
+                    <div><div class="aspect-square rounded-lg" style="background-color: var(--color-graphite);"></div><p class="mt-2 text-mist">graphite</p></div>
+                    <div><div class="aspect-square rounded-lg bg-charcoal"></div><p class="mt-2 text-mist">charcoal</p></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{# ============================================================ #}
+{# TYPOGRAPHY #}
+{# ============================================================ #}
+<section class="py-20">
+    <div class="container-editorial">
+        {% include 'frontend/partials/_section_header.html' with eyebrow='02 — Typography' title='Display & body' lede='Fraunces (display) is paired with Inter (body) for an editorial, magazine-grade feel.' %}
+
+        <div class="space-y-12 max-w-5xl">
+            <div>
+                <p class="eyebrow text-mist">display-xl · clamp(3rem, 6vw+1rem, 7.5rem) · Fraunces 500</p>
+                <h1 class="font-display text-display-xl mt-2 text-balance">Wild seasons.</h1>
+            </div>
+            <div>
+                <p class="eyebrow text-mist">display-lg · ~5rem · section titles</p>
+                <h2 class="font-display text-display-lg mt-2">Curated journeys</h2>
+            </div>
+            <div>
+                <p class="eyebrow text-mist">display-md · ~3.5rem · page titles</p>
+                <h3 class="font-display text-display-md mt-2">A morning in Tarangire</h3>
+            </div>
+            <div>
+                <p class="eyebrow text-mist">display-sm · ~2.25rem · card titles</p>
+                <h4 class="font-display text-display-sm mt-2">Ngorongoro Crater</h4>
+            </div>
+            <div>
+                <p class="eyebrow text-mist">body · Inter 16–18px · paragraph</p>
+                <p class="mt-2 text-lg leading-relaxed max-w-prose">
+                    Dawn breaks slowly over the acacia. A martial eagle settles in the upper canopy.
+                    Twelve metres below, an elephant family drinks at the seasonal pan — the matriarch
+                    older than your father, calmer than the sky.
+                </p>
+            </div>
+            <div>
+                <p class="eyebrow text-mist">eyebrow · 12px · 0.18em letter-spacing</p>
+                <p class="eyebrow mt-2">Trail Notes — Issue 014</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+{# ============================================================ #}
+{# BUTTONS #}
+{# ============================================================ #}
+<section class="py-20 bg-bone">
+    <div class="container-editorial">
+        {% include 'frontend/partials/_section_header.html' with eyebrow='03 — Buttons' title='Pills, soft hovers' lede='All buttons are pill-rounded. Hover state lifts slightly and adds a soft shadow.' %}
+
+        <div class="flex flex-wrap gap-4 items-center">
+            {% include 'frontend/partials/_button.html' with label='Plan Your Trip' href='#' variant='primary' icon='arrow-right' %}
+            {% include 'frontend/partials/_button.html' with label='Browse Tours' href='#' variant='secondary' icon='binoculars' %}
+            {% include 'frontend/partials/_button.html' with label='View itinerary' href='#' variant='ghost' icon='arrow-right' %}
+        </div>
+    </div>
+</section>
+
+{# ============================================================ #}
+{# CARDS #}
+{# ============================================================ #}
+<section class="py-20">
+    <div class="container-editorial">
+        {% include 'frontend/partials/_section_header.html' with eyebrow='04 — Cards' title='Image-first cards' lede='Hover lifts the card, slowly zooms the image, and intensifies the dark overlay.' %}
+
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% include 'frontend/partials/_card.html' with image='https://images.unsplash.com/photo-1516426122078-c23e76319801?w=900' href='#' eyebrow='Tanzania' title='Serengeti — Endless plains' meta='Best Jul–Oct · from $2,400' %}
+            {% include 'frontend/partials/_card.html' with image='https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?w=900' href='#' eyebrow='Tanzania' title='Ngorongoro Crater' meta='Big Five · day trips' %}
+            {% include 'frontend/partials/_card.html' with image='https://images.unsplash.com/photo-1535941339077-2dd1c7963098?w=900' href='#' eyebrow='Tanzania' title='Tarangire River' meta='Elephants & baobabs' %}
+        </div>
+    </div>
+</section>
+
+{# ============================================================ #}
+{# SHADOWS #}
+{# ============================================================ #}
+<section class="py-20 bg-bone">
+    <div class="container-editorial">
+        {% include 'frontend/partials/_section_header.html' with eyebrow='05 — Shadows' title='Three editorial elevations' %}
+
+        <div class="grid sm:grid-cols-3 gap-6">
+            <div class="bg-white rounded-2xl p-10 text-center" style="box-shadow: var(--shadow-soft);">
+                <p class="font-display text-xl">Soft</p>
+                <p class="text-sm text-mist mt-1">resting cards</p>
+            </div>
+            <div class="bg-white rounded-2xl p-10 text-center" style="box-shadow: var(--shadow-lifted);">
+                <p class="font-display text-xl">Lifted</p>
+                <p class="text-sm text-mist mt-1">hover state</p>
+            </div>
+            <div class="bg-white rounded-2xl p-10 text-center" style="box-shadow: var(--shadow-frame);">
+                <p class="font-display text-xl">Frame</p>
+                <p class="text-sm text-mist mt-1">premium hero CTAs</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+{# ============================================================ #}
+{# MOTION #}
+{# ============================================================ #}
+<section class="py-20">
+    <div class="container-editorial">
+        {% include 'frontend/partials/_section_header.html' with eyebrow='06 — Motion' title='Slow, deliberate, editorial' lede='Hover any element below. Easings are tuned for warmth — never bouncy.' %}
+
+        <ul class="space-y-3 text-mist text-sm max-w-xl">
+            <li>– <code class="text-charcoal">--ease-editorial</code> · cubic-bezier(0.22, 1, 0.36, 1)</li>
+            <li>– <code class="text-charcoal">--ease-soft-in</code> · cubic-bezier(0.4, 0, 0.2, 1)</li>
+            <li>– durations: 0.5s (hover), 0.9s (image), 1.2s (entrance reveals)</li>
+            <li>– <code class="text-charcoal">prefers-reduced-motion</code> disables Lenis + GSAP entrance</li>
+        </ul>
+    </div>
+</section>
+
+{% endblock %}

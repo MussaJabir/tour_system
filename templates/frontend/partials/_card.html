@@ -1,0 +1,30 @@
+{% comment %}
+Reusable editorial card.
+Usage:
+    {% include 'frontend/partials/_card.html' with image=obj.featured_image href=obj.get_absolute_url eyebrow='Tanzania' title=obj.name meta='5 days · from $1,200' %}
+
+Vars:
+    image    — ImageField or string URL (required)
+    href     — destination link (required)
+    eyebrow  — small text above title (optional)
+    title    — card title (required)
+    meta     — small line below title (optional)
+    ratio    — aspect-ratio class (default: aspect-[4/5])
+{% endcomment %}
+<a href="{{ href }}" class="card block group">
+    <div class="card-media {{ ratio|default:'aspect-[4/5]' }}">
+        {% if image %}
+            <img src="{% if image.url %}{{ image.url }}{% else %}{{ image }}{% endif %}" alt="{{ title }}" loading="lazy">
+        {% else %}
+            <div class="w-full h-full bg-sand-100 flex items-center justify-center">
+                <i class="fal fa-image text-mist text-4xl"></i>
+            </div>
+        {% endif %}
+        <div class="hero-overlay opacity-60 group-hover:opacity-80 transition-opacity duration-500"></div>
+        <div class="absolute bottom-0 inset-x-0 p-6 lg:p-8 text-ivory">
+            {% if eyebrow %}<p class="eyebrow text-sand-200">{{ eyebrow }}</p>{% endif %}
+            <h3 class="font-display text-2xl lg:text-3xl leading-tight mt-2 text-balance">{{ title }}</h3>
+            {% if meta %}<p class="text-sm text-ivory/80 mt-2">{{ meta }}</p>{% endif %}
+        </div>
+    </div>
+</a>

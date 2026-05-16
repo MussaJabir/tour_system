@@ -1,0 +1,25 @@
+{% comment %}
+Reusable section header (eyebrow + title + optional lede).
+Usage:
+    {% include 'frontend/partials/_section_header.html' with eyebrow='Curated journeys' title='Featured tours' lede='Hand-picked itineraries…' align='center' %}
+
+Vars:
+    eyebrow  — small uppercase pre-title (optional)
+    title    — main heading (required)
+    lede     — supporting paragraph (optional)
+    align    — start | center | end (default: start)
+    max      — title max width tailwind class (default: max-w-3xl)
+{% endcomment %}
+<header class="mb-12 lg:mb-16 text-{{ align|default:'start' }}">
+    {% if eyebrow %}
+        <p class="eyebrow">{{ eyebrow }}</p>
+    {% endif %}
+    <h2 class="font-display text-display-lg mt-3 text-balance {{ max|default:'max-w-3xl' }} {% if align == 'center' %}mx-auto{% endif %}">
+        {{ title }}
+    </h2>
+    {% if lede %}
+        <p class="mt-5 text-mist text-lg leading-relaxed max-w-2xl {% if align == 'center' %}mx-auto{% endif %}">
+            {{ lede }}
+        </p>
+    {% endif %}
+</header>

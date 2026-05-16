@@ -216,4 +216,110 @@ Running record of every working session. Most recent at the top.
 
 ---
 
+## Session 010 — 2026-05-16
+
+**Type:** Bug Fix — CSRF Trusted Origins
+**Branch:** `fix/csrf-trusted-origins` → PR #12 → `develop`
+
+### What we did
+1. **Diagnosed CSRF failure on staff login** — `Forbidden (403) CSRF verification failed... Origin checking failed - http://localhost:8080 does not match any trusted origins`
+2. **Root cause** — Django 4.0+ requires explicit `CSRF_TRUSTED_ORIGINS` for any non-default origin. Nginx serves the app on `:8080` but settings had no trusted origins entry.
+3. **Fix** (`config/settings.py`) — added `CSRF_TRUSTED_ORIGINS` setting reading from env, with defaults for `localhost:8080`, `localhost:8000`, `127.0.0.1:8080`, `127.0.0.1:8000`. Also added `ALLOWED_HOSTS` env-driven.
+4. **`.env.example` updated** — documented both new env vars.
+5. **Manual verification via Playwright** — logged in successfully at `http://localhost:8080/dashboard/login/`, redirected to `/dashboard/` (200 OK).
+
+### PR
+- https://github.com/MussaJabir/tour_system/pull/12
+
+---
+
+## Session 011 — 2026-05-16
+
+**Type:** Strategic Planning — Frontend Visual Overhaul
+**Branch:** _planning only, no code changes_
+
+### What we did
+1. **Researched stack options** — Django templates vs Next.js/React for a tourism SaaS. Concluded migration is wrong move for solo dev with Flutter mobile app and zero customers yet.
+2. **Locked stack decision** — Keep Django templates. Add Tailwind CSS + Alpine.js + GSAP + ScrollTrigger + Lenis + django-imagekit + variable fonts (Fraunces + Inter).
+3. **Brand direction** — Safari Editorial (National Geographic vibe, warm earth tones: sand `#D4B896`, deep green `#2C5F2D`, ivory `#F5F1E8`).
+4. **Photography plan** — start with Unsplash/stock, swap to commissioned later.
+5. **Dev environment** — existing Docker stack at `http://localhost:8080`.
+6. **Defined 7 sub-phases** (6.0 → 6.6) totalling 13–15 days, one feature branch and PR per phase.
+7. **Updated `todo.md`** — full Phase 6 plan with stack decisions, design principles, and per-phase checklists.
+
+### Decisions made
+- No framework migration. Django templates stay.
+- Tailwind replaces Bootstrap progressively (not in one shot).
+- Alpine.js replaces jQuery progressively.
+- GSAP + Lenis replace AOS for all motion.
+- Removed/legacy CSS-JS files are deleted only after the pages using them are migrated.
+- Each Phase 6.x = its own feature branch and PR to `develop`.
+
+### Next step
+- Phase 6.0 — Foundation. Branch `feature/frontend-foundation`. No user-visible changes; sets up the build pipeline and base shell.
+
+---
+
+## Session 012 — 2026-05-16
+
+**Type:** Phase 6.0 — Frontend Foundation (Safari Editorial design system)
+**Branch:** `feature/frontend-foundation` → PR → `develop`
+
+### What we did
+1. **Tailwind CSS via `pytailwindcss`** — standalone Tailwind v4 CLI (no Node required); source CSS at `static/frontend/src/tailwind.css`, compiled output at `static/frontend/css/tailwind.css` (committed to repo so the Docker image needs no build tooling)
+2. **Safari Editorial design tokens** — Tailwind v4 inline `@theme` block defines the full system:
+   - **Sand** (50–900): warm earth tan, surface accent
+   - **Bush** (50–900): deep safari green, primary brand
+   - **Clay** (50–900): terracotta, secondary accent
+   - **Neutrals**: ivory, bone, mist, charcoal, graphite
+   - **Typography**: Fraunces (display) + Inter (body) variable fonts with fluid `display-xl/lg/md/sm` clamp scale
+   - **Shadows**: soft, lifted, frame — editorial elevations
+   - **Easings**: `--ease-editorial`, `--ease-soft-in`
+3. **Vendor scripts** — Alpine.js 3.14.3, GSAP 3.12.5, ScrollTrigger 3.12.5, Lenis 1.1.20 downloaded to `static/frontend/vendor/` (~175 KB total)
+4. **`django-imagekit` 5.0.0** added; `imagekit` registered in `INSTALLED_APPS`
+5. **`requirements.txt`** updated — `pytailwindcss==0.2.0` and `django-imagekit==5.0.0`
+6. **New base shell** (`templates/frontend/base_modern.html`) — clean Tailwind-only template. **Legacy `base.html` left untouched** so all existing pages still render via the old Ravelo CSS; pages migrate to `base_modern.html` one-by-one in Phase 6.1+
+7. **Reusable partials**:
+   - `partials/_nav.html` — sticky transparent nav that morphs to glass-blur on scroll (Alpine.js)
+   - `partials/_footer.html` — editorial footer with newsletter band + 4-col grid
+   - `partials/_button.html` — variant include (primary / secondary / ghost)
+   - `partials/_card.html` — image-first editorial card with hover zoom
+   - `partials/_section_header.html` — eyebrow + title + lede include
+8. **Smooth-scroll + GSAP boot** — `base_modern.html` initialises Lenis tied into GSAP's `ScrollTrigger.update` ticker; respects `prefers-reduced-motion`
+9. **Styleguide page** (`/styleguide/`) — 30+ color swatches, typography scale, button variants, card examples, shadows, motion notes. Guarded by `DEBUG=True` (returns 404 in production via `Http404`)
+10. **URL namespacing fix** — `packages` app uses `app_name='packages'`; nav + footer reference `packages:public_package_list`
+11. **14 new tests** (`core/tests_frontend_foundation.py`) — styleguide DEBUG/non-DEBUG, base template required-block coverage, vendor script presence, partials render, Tailwind output validity, vendor files are real JS (not HTML errors)
+12. **All 157 tests pass** (143 prior + 14 new) — full suite run inside `tour_django` container, 129s
+
+### Build pipeline (for future contributors)
+```bash
+# One-shot rebuild after editing tailwind.css or adding utility classes
+tailwindcss -i static/frontend/src/tailwind.css \
+            -o static/frontend/css/tailwind.css \
+            --minify
+
+# Watch mode during development
+tailwindcss -i static/frontend/src/tailwind.css \
+            -o static/frontend/css/tailwind.css \
+            --watch
+```
+
+### Stack lock-in (for Phase 6.1+)
+- All new pages extend `frontend/base_modern.html`, never `frontend/base.html`
+- All new styles use Tailwind utilities or `@layer components` in `tailwind.css`
+- All new interactive behaviour uses Alpine.js — no jQuery
+- All new motion uses GSAP/Lenis — no AOS/Slick
+- All new images use `django-imagekit` `ImageSpecField` for responsive WebP variants
+- Rebuild `tailwind.css` and commit the artifact after every Phase 6.x commit
+
+### Operations notes
+- The legacy Ravelo CSS/JS bundle remains loaded by `base.html`. Removal happens in Phase 6.6, after every page has migrated to `base_modern.html`
+- Compiled `tailwind.css` is committed; CI does not need Node or pytailwindcss
+- `static/frontend/vendor/` is committed; no CDN dependency
+
+### PR
+- (opening next…)
+
+---
+
 _Add new sessions above this line._

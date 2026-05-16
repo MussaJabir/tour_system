@@ -1,0 +1,257 @@
+@import "tailwindcss";
+
+/* =============================================================
+   Safari Editorial — design system
+   Tour System frontend, Phase 6.0 foundation
+   Tailwind v4 inline theme. No tailwind.config.js needed.
+   ============================================================= */
+
+@source "../../../templates/**/*.html";
+@source "../../../**/templates/**/*.html";
+
+@theme {
+  /* -- Color palette ----------------------------------------- */
+  /* Earth tones — sand, deep green, terracotta, ivory, charcoal */
+  --color-sand-50:  #FBF7EE;
+  --color-sand-100: #F5EDD8;
+  --color-sand-200: #EBDDB4;
+  --color-sand-300: #DFC98A;
+  --color-sand-400: #D4B896;
+  --color-sand-500: #C9A36B;
+  --color-sand-600: #A07F4B;
+  --color-sand-700: #7A6038;
+  --color-sand-800: #564325;
+  --color-sand-900: #382C18;
+
+  --color-bush-50:  #EFF4EE;
+  --color-bush-100: #D7E2D4;
+  --color-bush-200: #AFC4AA;
+  --color-bush-300: #7DA075;
+  --color-bush-400: #4F7C49;
+  --color-bush-500: #2C5F2D;
+  --color-bush-600: #234C24;
+  --color-bush-700: #1B3B1C;
+  --color-bush-800: #142914;
+  --color-bush-900: #0A1A0B;
+
+  --color-clay-50:  #FBEFEA;
+  --color-clay-100: #F5D7C7;
+  --color-clay-200: #ECB39C;
+  --color-clay-300: #DD8865;
+  --color-clay-400: #C46538;
+  --color-clay-500: #A04E27;
+  --color-clay-600: #7E3B1D;
+  --color-clay-700: #5C2A14;
+  --color-clay-800: #3F1C0D;
+  --color-clay-900: #260F07;
+
+  --color-ivory:    #F5F1E8;
+  --color-bone:     #EBE5D4;
+  --color-charcoal: #1F1B16;
+  --color-graphite: #3A342B;
+  --color-mist:     #8C8478;
+
+  /* -- Typography -------------------------------------------- */
+  --font-display: "Fraunces", "Cormorant Garamond", Georgia, serif;
+  --font-sans:    "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono:    "JetBrains Mono", ui-monospace, "SF Mono", monospace;
+
+  /* Fluid display sizes — premium magazine scale */
+  --text-display-xl: clamp(3rem, 6vw + 1rem, 7.5rem);   /* hero */
+  --text-display-lg: clamp(2.5rem, 4vw + 1rem, 5rem);   /* section titles */
+  --text-display-md: clamp(2rem, 2.5vw + 1rem, 3.5rem); /* page titles */
+  --text-display-sm: clamp(1.5rem, 1.5vw + 0.75rem, 2.25rem);
+
+  /* -- Spacing rhythm ---------------------------------------- */
+  --spacing-section: 6rem;          /* default vertical section padding */
+  --spacing-section-lg: 9rem;
+
+  /* -- Borders & corners ------------------------------------- */
+  --radius-card: 1.25rem;
+  --radius-pill: 9999px;
+
+  /* -- Shadows — soft, editorial ----------------------------- */
+  --shadow-soft:    0 2px 8px -2px rgb(31 27 22 / 0.08), 0 8px 24px -8px rgb(31 27 22 / 0.12);
+  --shadow-lifted:  0 4px 16px -4px rgb(31 27 22 / 0.10), 0 24px 48px -12px rgb(31 27 22 / 0.20);
+  --shadow-frame:   0 0 0 1px rgb(31 27 22 / 0.06), 0 20px 40px -16px rgb(31 27 22 / 0.18);
+
+  /* -- Motion ------------------------------------------------- */
+  --ease-editorial: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-soft-in:   cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* -- Container widths -------------------------------------- */
+  --container-prose: 68ch;
+}
+
+/* =============================================================
+   Base layer — typography defaults
+   ============================================================= */
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    color: var(--color-charcoal);
+    background-color: var(--color-ivory);
+    font-feature-settings: "ss01", "ss02", "cv11";
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    letter-spacing: -0.015em;
+    line-height: 1.05;
+    color: var(--color-charcoal);
+  }
+
+  ::selection {
+    background: var(--color-bush-500);
+    color: var(--color-ivory);
+  }
+
+  /* Focus rings — accessible, branded */
+  *:focus-visible {
+    outline: 2px solid var(--color-bush-500);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+}
+
+/* =============================================================
+   Component utilities — reusable patterns
+   ============================================================= */
+@layer components {
+
+  /* --- Buttons ---------------------------------------------- */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.85rem 1.75rem;
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-size: 0.95rem;
+    letter-spacing: 0.02em;
+    border-radius: var(--radius-pill);
+    transition: all 0.35s var(--ease-editorial);
+    cursor: pointer;
+    text-decoration: none;
+    line-height: 1;
+  }
+
+  .btn-primary {
+    background: var(--color-charcoal);
+    color: var(--color-ivory);
+  }
+  .btn-primary:hover {
+    background: var(--color-bush-700);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-soft);
+  }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--color-charcoal);
+    border: 1px solid var(--color-charcoal);
+  }
+  .btn-secondary:hover {
+    background: var(--color-charcoal);
+    color: var(--color-ivory);
+  }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--color-charcoal);
+    padding: 0.5rem 0;
+    border-bottom: 1px solid currentColor;
+    border-radius: 0;
+  }
+  .btn-ghost:hover {
+    color: var(--color-bush-600);
+  }
+
+  /* --- Cards ------------------------------------------------- */
+  .card {
+    background: white;
+    border-radius: var(--radius-card);
+    overflow: hidden;
+    transition: transform 0.5s var(--ease-editorial),
+                box-shadow 0.5s var(--ease-editorial);
+  }
+  .card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lifted);
+  }
+
+  .card-media {
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    position: relative;
+  }
+  .card-media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.9s var(--ease-editorial);
+  }
+  .card:hover .card-media img {
+    transform: scale(1.04);
+  }
+
+  /* --- Section header --------------------------------------- */
+  .eyebrow {
+    font-family: var(--font-sans);
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-clay-500);
+  }
+
+  /* --- Container -------------------------------------------- */
+  .container-editorial {
+    width: 100%;
+    max-width: 80rem;
+    margin-inline: auto;
+    padding-inline: 1.5rem;
+  }
+  @media (min-width: 768px) {
+    .container-editorial { padding-inline: 2.5rem; }
+  }
+  @media (min-width: 1280px) {
+    .container-editorial { padding-inline: 4rem; }
+  }
+
+  /* --- Hero image overlay ----------------------------------- */
+  .hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      180deg,
+      rgb(31 27 22 / 0.25) 0%,
+      rgb(31 27 22 / 0.15) 40%,
+      rgb(31 27 22 / 0.65) 100%
+    );
+    pointer-events: none;
+  }
+}
+
+/* =============================================================
+   Utility layer — small helpers
+   ============================================================= */
+@layer utilities {
+  .text-balance { text-wrap: balance; }
+  .text-pretty  { text-wrap: pretty; }
+
+  /* Lenis smooth scroll attaches html.lenis */
+  html.lenis,
+  html.lenis body { height: auto; }
+  .lenis.lenis-smooth { scroll-behavior: auto !important; }
+  .lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
+  .lenis.lenis-stopped { overflow: clip; }
+}
