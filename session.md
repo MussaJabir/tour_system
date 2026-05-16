@@ -472,4 +472,41 @@ tailwindcss -i static/frontend/src/tailwind.css \
 
 ---
 
+## Session 017 — 2026-05-16
+
+**Type:** Phase 6.5 — Static Pages + Auth (Safari Editorial)
+**Branch:** `feature/frontend-static` → PR → `develop`
+
+### What we did
+1. **New About page** at `/about/`:
+   - `core.views.about_page` (static — no DB queries) + URL pattern + `core/templates/core/public/about.html`
+   - Cinematic hero · "Our story" long-form (3-paragraph narrative) · 3 value cards (Local / Bespoke / Honest pricing) with bush-green icon circles · 4-up team grid placeholder · bush-green final CTA
+   - **Wired into nav + footer** (`About` link added between Lodges and FAQ in both desktop + mobile menus)
+2. **Rewrote FAQ page** (`core/templates/core/public/faq.html`):
+   - Category filter chips with question-count badges, "All" reset
+   - **Alpine.js accordion** — single-open behaviour via `x-data="{ openId: null }"`, rotating + recolouring `+` icon, `x-transition` slide-fade
+   - Empty-state when a category has zero entries
+   - "Still stuck — ask a real human" closing CTA strip
+3. **Branded 404** (`templates/404.html`) — extends `base_modern.html` for nav/footer continuity. Big bush-green "404", "That trail's overgrown" headline, primary + secondary CTAs, secondary link grid (Destinations / Activities / Contact)
+4. **Branded 500** (`templates/500.html`) — **standalone HTML** (not extending base_modern) because Django renders 500 without RequestContext, so `{% url %}` and context processors are unreliable. Loads Tailwind + fonts directly, mirrors the 404 design language with a clay-red 500 number
+5. **Rewrote staff dashboard login** (`templates/backend/auth/login.html`) — standalone (no public chrome) 2-col layout:
+   - **Left**: brand panel with full-bleed Tanzania safari photo, charcoal/bush-green tint, logo at top, pull-quote at bottom ("We don't run tours...")
+   - **Right**: ivory form panel — eyebrow, "Welcome back" headline, username + password inputs styled via `.form-field` rules, Sign In CTA, lock + "staff only" trust line, back-to-public-site link
+6. **Tailwind rebuild** — 55 KB minified
+7. **Cache-bust** bumped to `v=20260516f` on `base_modern.html` and standalone 500 + login templates
+8. **10 new tests** (`core/tests_frontend_static.py`):
+   - About: 200, `base_modern.html`, key section headings render
+   - FAQ: 200, `base_modern.html`, category chips + questions + still-stuck CTA render; category-filter query narrows results
+   - Staff login: 200, form fields + brand panel pull-quote render
+   - 404: with `DEBUG=False` + `ALLOWED_HOSTS=['*']`, hitting a non-existent URL returns 404 with branded copy
+9. **All 232 tests pass** (222 prior + 10 new) — full suite ran inside `tour_django`, 113s
+
+### Defensive note
+- Django renders `500.html` **without RequestContext**, so it can't use `{% url %}`, `{% load static %}` requires explicit re-load (which we do), and context-processor vars (`request`, `messages`, etc.) won't be available. Keep that template self-contained — verified working.
+
+### PR
+- https://github.com/MussaJabir/tour_system/pull/18
+
+---
+
 _Add new sessions above this line._

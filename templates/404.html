@@ -1,0 +1,39 @@
+{% extends 'frontend/base_modern.html' %}
+{% load static %}
+
+{% block title %}Page not found — Tour System{% endblock %}
+{% block meta_description %}The page you're looking for doesn't exist. Let's get you back on track.{% endblock %}
+
+{% block content %}
+
+<section class="min-h-[85vh] flex items-center bg-bone">
+    <div class="container-editorial text-center max-w-3xl">
+
+        <p class="font-display text-[8rem] lg:text-[14rem] leading-none text-bush-700">404</p>
+
+        <h1 class="font-display text-display-md lg:text-display-lg mt-4 text-balance">
+            That trail's overgrown.
+        </h1>
+        <p class="mt-6 text-mist text-lg max-w-xl mx-auto leading-relaxed">
+            We couldn't find the page you were looking for. It might have moved, or never existed at all.
+        </p>
+
+        <div class="mt-10 flex flex-wrap justify-center gap-3">
+            <a href="{% url 'public_home' %}" class="btn btn-primary">
+                Back to home
+                <i class="fal fa-arrow-right"></i>
+            </a>
+            <a href="{% url 'packages:public_package_list' %}" class="btn btn-secondary">
+                Browse tours
+            </a>
+        </div>
+
+        <div class="mt-16 pt-12 border-t border-sand-300 grid sm:grid-cols-3 gap-4 text-sm">
+            <a href="{% url 'public_destination_list' %}" class="text-mist hover:text-bush-700 transition">→ Destinations</a>
+            <a href="{% url 'public_activity_list' %}" class="text-mist hover:text-bush-700 transition">→ Activities</a>
+            <a href="{% url 'contact_page' %}" class="text-mist hover:text-bush-700 transition">→ Contact us</a>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

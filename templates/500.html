@@ -1,0 +1,39 @@
+{% load static %}<!DOCTYPE html>
+{# 500 errors render without RequestContext, so we can't rely on context processors
+   or {% url %} tags. Keep this template self-contained. #}
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Something broke — Tour System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300..600&family=Inter:wght@300..600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'frontend/css/tailwind.css' %}?v=20260516f">
+    <link rel="shortcut icon" href="{% static 'frontend/assets/images/logos/favicon.png' %}" type="image/x-icon">
+</head>
+<body class="bg-bone text-charcoal antialiased">
+    <section class="min-h-screen flex items-center">
+        <div class="container-editorial text-center max-w-3xl mx-auto">
+            <p class="font-display text-[8rem] lg:text-[14rem] leading-none text-clay-500">500</p>
+
+            <h1 class="font-display text-display-md lg:text-display-lg mt-4 text-balance">
+                Something fell over.
+            </h1>
+            <p class="mt-6 text-mist text-lg max-w-xl mx-auto leading-relaxed">
+                Our server hit a snag handling your request. Our team has been notified — try again in a minute, or head back home.
+            </p>
+
+            <div class="mt-10 flex flex-wrap justify-center gap-3">
+                <a href="/" class="btn btn-primary">
+                    Back to home
+                    <i class="fal fa-arrow-right"></i>
+                </a>
+                <a href="/contact/" class="btn btn-secondary">
+                    Tell us what happened
+                </a>
+            </div>
+        </div>
+    </section>
+</body>
+</html>

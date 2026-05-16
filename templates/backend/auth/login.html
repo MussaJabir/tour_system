@@ -1,62 +1,100 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="en" data-bs-theme="light">
+{% load static %}<!DOCTYPE html>
+{# Staff dashboard login.
+   Standalone (does not extend base_modern.html) — minimal page,
+   no public nav/footer chrome. Uses the Safari Editorial palette
+   but in a quieter, utility-app register. #}
+<html lang="en" class="scroll-smooth">
 <head>
-    <meta charset="utf-8" />
-    <title>Staff Login | Tour Management System</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="shortcut icon" href="{% static 'backend/assets/images/favicon.ico' %}">
-    <link href="{% static 'backend/assets/css/style.min.css' %}" rel="stylesheet" type="text/css">
-    <link href="{% static 'backend/assets/css/icons.min.css' %}" rel="stylesheet" type="text/css">
-    <script src="{% static 'backend/assets/js/config.js' %}"></script>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Staff sign-in — Tour System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300..600&family=Inter:wght@300..600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'frontend/css/tailwind.css' %}?v=20260516f">
+    <link rel="stylesheet" href="{% static 'frontend/assets/css/fontawesome-5.14.0.min.css' %}">
+    <link rel="shortcut icon" href="{% static 'frontend/assets/images/logos/favicon.png' %}" type="image/x-icon">
 </head>
-<body class="authentication-bg">
+<body class="bg-charcoal text-ivory antialiased min-h-screen">
 
-<div class="account-pages mt-5 mb-5">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-md-8 col-lg-6 col-xl-4">
+    <div class="grid lg:grid-cols-2 min-h-screen">
 
-                <div class="card">
-                    <div class="card-body p-4">
-                        <div class="text-center mb-4">
-                            <h4 class="text-uppercase mt-0">Staff Login</h4>
-                            <p class="text-muted">Tour Management System</p>
-                        </div>
-
-                        {% if messages %}
-                            {% for message in messages %}
-                            <div class="alert alert-{{ message.tags|default:'danger' }} alert-dismissible fade show" role="alert">
-                                {{ message }}
-                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                            </div>
-                            {% endfor %}
-                        {% endif %}
-
-                        <form method="POST" action="{% url 'staff_login' %}{% if request.GET.next %}?next={{ request.GET.next }}{% endif %}">
-                            {% csrf_token %}
-                            <div class="mb-3">
-                                <label for="username" class="form-label">Username</label>
-                                <input class="form-control" type="text" id="username" name="username"
-                                       required placeholder="Enter your username" autofocus>
-                            </div>
-                            <div class="mb-3">
-                                <label for="password" class="form-label">Password</label>
-                                <input class="form-control" type="password" id="password" name="password"
-                                       required placeholder="Enter your password">
-                            </div>
-                            <div class="d-grid mb-0 text-center">
-                                <button class="btn btn-primary" type="submit">Log In</button>
-                            </div>
-                        </form>
-                    </div>
+        {# Left: brand panel #}
+        <aside class="hidden lg:flex relative overflow-hidden">
+            <img src="https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?w=1600&q=80"
+                 alt="Tanzania safari"
+                 class="absolute inset-0 w-full h-full object-cover">
+            <div class="absolute inset-0 bg-gradient-to-tr from-charcoal/90 via-charcoal/40 to-bush-900/40"></div>
+            <div class="relative p-12 lg:p-16 flex flex-col justify-between w-full text-ivory">
+                <a href="/" class="font-display text-3xl tracking-tight">
+                    Tour<span class="text-sand-400">.</span>
+                </a>
+                <div>
+                    <p class="eyebrow text-sand-300">Staff portal</p>
+                    <p class="font-display text-3xl lg:text-4xl mt-3 max-w-md leading-tight">
+                        "We don't run tours. We design the trip you'll still be telling stories about in twenty years."
+                    </p>
+                    <p class="text-ivory/60 text-sm mt-4">— The Field Team, Arusha</p>
                 </div>
-
             </div>
-        </div>
-    </div>
-</div>
+        </aside>
 
-<script src="{% static 'backend/assets/libs/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+        {# Right: form #}
+        <main class="flex items-center justify-center px-6 py-12 bg-ivory text-charcoal">
+            <div class="w-full max-w-md">
+
+                <a href="/" class="lg:hidden inline-block font-display text-2xl mb-10">
+                    Tour<span class="text-bush-600">.</span>
+                </a>
+
+                <p class="eyebrow text-mist">Staff sign-in</p>
+                <h1 class="font-display text-display-md mt-3 text-balance leading-tight">Welcome back.</h1>
+                <p class="mt-4 text-mist">Sign in to access the dashboard.</p>
+
+                {% if messages %}
+                    {% for m in messages %}
+                        <div class="mt-6 p-4 rounded-2xl text-sm
+                                    {% if m.tags == 'success' %}bg-bush-50 text-bush-700 border border-bush-200
+                                    {% elif m.tags == 'error' %}bg-clay-50 text-clay-700 border border-clay-200
+                                    {% else %}bg-bone text-charcoal{% endif %}">
+                            {{ m }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                <form method="post" class="mt-10 space-y-6">
+                    {% csrf_token %}
+
+                    <div class="form-field">
+                        <label class="eyebrow text-mist block mb-2" for="username">Username</label>
+                        <input id="username" type="text" name="username" required autofocus
+                               placeholder="admin"
+                               class="w-full bg-transparent border border-sand-300 focus:border-bush-600 rounded-full px-5 py-3 text-sm outline-none transition">
+                    </div>
+
+                    <div class="form-field">
+                        <label class="eyebrow text-mist block mb-2" for="password">Password</label>
+                        <input id="password" type="password" name="password" required
+                               placeholder="••••••••"
+                               class="w-full bg-transparent border border-sand-300 focus:border-bush-600 rounded-full px-5 py-3 text-sm outline-none transition">
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-full">
+                        Sign In
+                        <i class="fal fa-arrow-right"></i>
+                    </button>
+                </form>
+
+                <p class="mt-10 text-xs text-mist flex items-center gap-2">
+                    <i class="fal fa-shield-check"></i>
+                    Staff access only. Customer accounts use the mobile app.
+                </p>
+
+                <a href="/" class="mt-8 inline-flex items-center gap-2 text-sm text-mist hover:text-bush-700 transition">
+                    <i class="fal fa-arrow-left"></i> Back to the public site
+                </a>
+            </div>
+        </main>
+    </div>
 </body>
 </html>
