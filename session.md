@@ -360,7 +360,8 @@ tailwindcss -i static/frontend/src/tailwind.css \
 - [ ] All page transitions feel smooth thanks to Lenis
 
 ### PR
-- (opening next…)
+- https://github.com/MussaJabir/tour_system/pull/14
+- Follow-up commit `46a7fbb` — progressive-enhanced hero copy + stat counters so content renders without JS / under reduced-motion / when GSAP fails to load
 
 ---
 
