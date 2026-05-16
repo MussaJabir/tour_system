@@ -399,4 +399,36 @@ tailwindcss -i static/frontend/src/tailwind.css \
 
 ---
 
+## Session 015 — 2026-05-16
+
+**Type:** Phase 6.3 — Detail Pages (Safari Editorial)
+**Branch:** `feature/frontend-detail-pages` → PR → `develop`
+
+### What we did
+1. **Three new shared partials** (`templates/frontend/partials/`):
+   - `_detail_hero.html` — cinematic full-bleed hero with gradient overlay, breadcrumb, eyebrow, display-xl title, optional meta strip
+   - `_gallery.html` — asymmetric 3-col masonry grid; first image spans 2×2; smooth zoom-on-hover; lightbox-anchor ready
+   - `_related_grid.html` — 4-up "you might also like" strip with overlay cards
+2. **Four detail templates rewritten** to extend `base_modern.html`:
+   - **`packages/public/detail.html`** — cinematic hero with category eyebrow + duration/destinations/difficulty/rating meta; **sticky booking sidebar** (price, optional discount strikethrough, "Plan This Trip" CTA, quick facts dl, upcoming departures); article column: Overview → Highlights → day-by-day **itinerary timeline with circular day markers** → Inclusions/Exclusions (2-col with bush-green check / clay-red ×) → Gallery → in-page charcoal CTA; related-tours strip
+   - **`destinations/public/detail.html`** — hero with country/region eyebrow, best-time-to-visit; sticky quick-facts card + Leaflet map embed; magazine sections: About / Wildlife / Climate / Gallery; activities-at-destination grid; accommodations-at-destination grid; related-destinations strip
+   - **`activities/public/detail.html`** — hero with category + destination eyebrow, duration/difficulty/age/group-size meta; sticky price + "Add To Trip" card; About / Requirements / Included / Excluded / Gallery sections; related-activities strip
+   - **`accommodations/public/detail.html`** — hero with type + star-rating display (gold star icons); sticky stay-here card; About / Rooms (each room as a bone card with type, description, occupancy, bed config, size, price) / Amenities / Gallery sections; related-lodges strip
+3. **SEO blocks** wired on all 4 detail pages — `get_meta_title()`, `get_meta_description()`, `meta_keywords`, `canonical`, `og_type` (product/place/article/lodging), `og_image` (absolute URL via `request.scheme`)
+4. **Leaflet map** on destination detail (only renders when `latitude` and `longitude` present)
+5. **Rebuilt Tailwind** — 49 KB minified (still well under 100 KB budget)
+6. **Cache-bust version bumped** to `v=20260516d` on tailwind.css link in `base_modern.html`
+7. **16 new tests** (`core/tests_frontend_details.py`) — 4 per detail page covering status 200, base_modern.html used, hero copy + sidebar/breadcrumb/about sections render
+8. **All 210 tests pass** (194 prior + 16 new) — full suite run inside `tour_django`, 152s
+
+### Dev workflow reminder (recorded in Session 014, still applies)
+- After every Tailwind rebuild: `docker compose exec django python manage.py collectstatic --noinput --clear`
+- After every template edit: `docker compose exec django sh -c 'kill -HUP 1'` (reloads gunicorn workers; Django's cached.Loader otherwise keeps stale parsed templates)
+- Bump the `?v=` querystring in `base_modern.html` after every Tailwind rebuild
+
+### PR
+- (opening next…)
+
+---
+
 _Add new sessions above this line._
