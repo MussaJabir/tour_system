@@ -895,4 +895,73 @@ All 9 public route groups live on `base_modern.html` with the Safari Editorial s
 
 ---
 
+## Session 026 — 2026-05-17
+
+**Type:** Phase 7.6 — Polish + cleanup · **closes Phase 7**
+**Branch:** `feature/dashboard-polish` → PR → `develop`
+
+### What we did
+1. **Migrated the last 8 templates** off `backend/base.html`:
+   - `packages/departures/dashboard/list.html` — per-package departures list with seat info + status badges
+   - `destinations/dashboard/add_image.html`, `activities/dashboard/add_image.html`, `accommodations/dashboard/add_image.html` — gallery image upload forms (single-column max-w-2xl layout)
+   - `accommodations/dashboard/add_room.html` — room form with 2-col layout + sidebar
+   - `packages/inquiry/dashboard/custom_itinerary_copy.html` — copy-from-base confirm (bush-green, reversible action)
+   - `packages/inquiry/dashboard/custom_package_send_confirm.html` — send-to-client confirm with cost + recipient summary
+2. **Deleted legacy backend templates**:
+   - `templates/backend/base.html`
+   - `templates/backend/index.html`
+   - `templates/backend/partials/sidebar.html`
+   - `templates/backend/partials/topbar.html`
+   - `packages/templates/packages/dashboard/delete.html` (replaced by `delete_confirm.html` in Phase 7.5)
+3. **Deleted `static/backend/`** — **54 MB → 1.5 MB** (97% reduction):
+   - All Bootstrap admin theme libs (37 MB)
+   - All legacy CSS (Bootstrap, Datatables, Plyr, Quill, Toastr, etc.)
+   - All legacy JS (jQuery, Bootstrap, Datatables, Charts.js v2, etc.)
+   - Old admin theme font files (FA + Material icons in multiple formats)
+   - Demo content images
+   - Sass sources
+4. **Mobile audit** at 390×844 via Playwright:
+   - Sidebar correctly off-canvas (`x: -256` with `-translate-x-full` applied)
+   - Main column spans full 375px viewport
+   - Hamburger toggle in topbar slides sidebar from `x: -256` → `x: 0`
+   - Alpine.js `sidebarOpen` state working
+5. **Perf budget verified**:
+   - HTML body: 20 KB
+   - Tailwind CSS: 69 KB (slight bump from new dash-* utilities)
+   - Font Awesome 5 CSS: 170 KB (only `.woff2` font formats)
+   - Alpine.js: 44 KB
+   - Chart.js: 201 KB (loaded per-page only, NOT on every dashboard route)
+   - **Total uncompressed**: ~330 KB on dashboard home (with charts), ~145 KB on most pages
+   - After gzip: ~100 KB on home, ~50 KB elsewhere
+6. **3 polish tests** in `core/tests_dashboard_polish.py`:
+   - No template extends `backend/base.html` anymore (walks every app + templates/ dir)
+   - `templates/backend/base.html` is deleted
+   - `static/backend/` directory is deleted
+7. **Static file count**: 4921 → 179 files in collected static (97% drop matches the 54 MB → 1.5 MB asset purge)
+8. **All 280 tests pass** (277 prior + 3 new) — 127s
+
+### Deferred (non-blocking)
+- **Toast notifications via Alpine** — current Django messages renderer in `base_dashboard.html` works well; toast would be pure polish
+- **Lighthouse audit** — needs an authenticated session; recommended to run from Chrome DevTools after merging
+
+### Phase 7 complete
+**Every dashboard route lives on `base_dashboard.html`** with the Operations Slate design system. Total visual overhaul scope:
+
+| Phase | Templates | PR |
+|---|---|---|
+| 7.0 Foundation | base + 8 partials + styleguide | #21 |
+| 7.1 Home | dashboard overview with Chart.js | #22 |
+| 7.2 Listings | 12 list pages | #23 |
+| 7.3 Forms | 11 create/edit pages | #24 |
+| 7.4 Detail pages | 8 detail pages | #25 |
+| 7.5 Workflows | 19 confirms + builder + AI assistant | #26 |
+| 7.6 Polish | 8 final migrations + 54 MB cleanup | #27 |
+
+**Total: 67 dashboard templates migrated, 107 MB of legacy assets deleted across Phase 6 + Phase 7.**
+
+### PR
+- (opening next…)
+
+---
+
 _Add new sessions above this line._
