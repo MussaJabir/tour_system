@@ -1,40 +1,33 @@
-{% extends "backend/base.html" %}
+{% extends 'backend/base_dashboard.html' %}
+{% load static %}
 
-{% block title %}Delete Departure{% endblock %}
+{% block title %}Delete departure — Dashboard{% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <div class="row justify-content-center">
-        <div class="col-lg-5">
-            <div class="card border-danger">
-                <div class="card-header bg-danger text-white">
-                    <h6 class="mb-0">Confirm Deletion</h6>
-                </div>
-                <div class="card-body">
-                    <p>Are you sure you want to delete the departure on
-                        <strong>{{ departure.departure_date }}</strong> for
-                        <strong>{{ package.name }}</strong>?
-                    </p>
-                    {% if departure.booked_seats > 0 %}
-                    <div class="alert alert-warning">
-                        This departure has <strong>{{ departure.booked_seats }}</strong> confirmed booking(s).
-                        It cannot be deleted.
-                    </div>
-                    {% endif %}
-                    <form method="post">
-                        {% csrf_token %}
-                        <div class="d-flex gap-2">
-                            <button type="submit" class="btn btn-danger"
-                                {% if departure.booked_seats > 0 %}disabled{% endif %}>
-                                Yes, Delete
-                            </button>
-                            <a href="{% url 'packages:dashboard_departure_list' package_pk=package.pk %}"
-                               class="btn btn-outline-secondary">Cancel</a>
-                        </div>
-                    </form>
-                </div>
-            </div>
+
+{% include 'backend/partials/_breadcrumb.html' with crumbs=' ' %}
+
+<div class="max-w-xl mx-auto">
+    <div class="dash-card text-center py-12">
+        <span class="w-14 h-14 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center mx-auto">
+            <i class="fal fa-trash text-xl"></i>
+        </span>
+        <h1 class="font-medium text-slate-900 text-lg mt-5">Delete this departure?</h1>
+        <p class="text-sm text-slate-500 mt-2 max-w-sm mx-auto">
+            The departure slot will be removed. Bookings already linked to this date will need to be re-linked manually.
+        </p>
+
+        <div class="mt-6 px-6 py-4 bg-slate-50 rounded-lg text-left text-sm">
+            <p><strong class="text-slate-900">{{ departure.departure_date|date:'l, d M Y' }}</strong></p>
+            <p class="text-slate-500 mt-1">{{ departure.package.name }} · {{ departure.booked_seats }}/{{ departure.max_seats }} booked</p>
         </div>
+
+        <form method="post" class="mt-6 flex flex-wrap gap-2 justify-center">
+            {% csrf_token %}
+            <a href="{% url 'packages:dashboard_departure_list' departure.package.pk %}" class="dash-btn dash-btn-ghost">Cancel</a>
+            <button type="submit" class="dash-btn dash-btn-danger"><i class="fal fa-trash"></i> Delete departure</button>
+        </form>
     </div>
 </div>
+
 {% endblock %}

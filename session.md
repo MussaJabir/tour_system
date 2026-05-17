@@ -856,4 +856,43 @@ All 9 public route groups live on `base_modern.html` with the Safari Editorial s
 
 ---
 
+## Session 025 — 2026-05-17
+
+**Type:** Phase 7.5 — Special workflows (Operations Slate)
+**Branch:** `feature/dashboard-workflows` → PR → `develop`
+
+### What we did
+1. **`_confirm_action.html` partial** — reference doc for the centered confirm-action card pattern (icon + headline + context + cancel/action buttons), with 4 variant colour combos: delete/cancel (rose), reject (rose), approve (emerald), cancel-booking (amber).
+2. **3 review moderation confirms** migrated to `base_dashboard.html`:
+   - `approve_confirm.html` — emerald-tinted card, shows reviewer + star rating + title, "Approve & publish" + Cancel
+   - `reject_confirm.html` — rose-tinted card with inline reason textarea
+   - `delete_confirm.html` — rose-tinted card warning about permanent removal + rating recalc
+3. **6 catalog delete confirms** migrated:
+   - `destinations`, `activities`, `accommodations`, `packages`, `departures`, `custom_itinerary`
+   - Each surfaces the parent entity context (name, ID, parent) in a slate-50 detail panel
+   - **Bug fixed**: `packages/views.py` rendered `delete_confirm.html` but only `delete.html` existed in the dashboard directory — created the proper `delete_confirm.html` so the package delete flow actually works for the first time
+4. **Booking cancel confirm** — amber-tinted (not rose, because cancel is reversible vs delete which isn't), inline cancellation-reason textarea, "Keep booking" + "Cancel booking" actions
+5. **Custom-package builder** (`custom_package_builder.html`) — multi-section staff form on 2-col layout:
+   - **Main column**: Basics (base_package + name + duration + currency + descriptions), Pricing (original / adjusted / discount), Modifications & notes (shown-to-client modifications, designer note, internal notes), Validity & media (expires_at + featured_image)
+   - **Sticky sidebar**: "Create draft quote" CTA, Inquiry context card (ref + customer + email + link), Base-package summary (when inquiry had one), Trip-request facts (travel date, adults, children, budget)
+6. **AI Assistant home** — 4 stat cards (Brochure / Itinerary / Quote / Route counts) + 4 action tiles with bush-tinted icon circles, setup-required banner when no AI config
+7. **AI workflow forms + result pages** (7 templates):
+   - Brochure upload/result, Itinerary form/result, Quote result (read-only from inquiry detail action), Route form/result
+   - Every result page renders the status badge (Done / Failed / Processing / Pending), shows error message in rose card when failed, **auto-refreshes every 4s while job is running** (`<meta http-equiv="refresh" content="4">` in extra_css block), has "Copy" button on long-form outputs using `navigator.clipboard.writeText()`
+8. **Tailwind rebuild** — 70 KB minified (inside Docker container — host-side binary still flaky)
+9. **Cache-bust** bumped to `v=20260517g`
+10. **3 new tests** in `core/tests_dashboard_workflows.py` — subTest across all 4 AI Assistant routes (home, brochure_upload, itinerary_generate, route_optimize) verifying 200 for staff + `base_dashboard.html` used + anonymous redirect
+11. **All 277 tests pass** (274 prior + 3 new) — 130s
+
+### Bug fix sneaked in
+- Created missing `packages/templates/packages/dashboard/delete_confirm.html`. The view `dashboard_package_delete` rendered `delete_confirm.html` but only `delete.html` existed at that path — anyone hitting `/dashboard/packages/<id>/delete/` would have hit `TemplateDoesNotExist`. Now works.
+
+### Deferred to Phase 7.6
+- **Booking status workflow transition guards** — UI hides "Cancel" button when status is already cancelled, but full state-machine enforcement (e.g. can't cancel a `completed` booking) belongs in `Booking.save()` / signals, not the template. Tracked as a separate concern.
+
+### PR
+- (opening next…)
+
+---
+
 _Add new sessions above this line._

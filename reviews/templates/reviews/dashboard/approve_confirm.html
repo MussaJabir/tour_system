@@ -1,30 +1,34 @@
-{% extends "backend/base.html" %}
+{% extends 'backend/base_dashboard.html' %}
+{% load static %}
 
-{% block title %}Approve Review{% endblock %}
+{% block title %}Approve review — Dashboard{% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card border-success">
-                <div class="card-header bg-success text-white"><strong>Approve Review</strong></div>
-                <div class="card-body">
-                    <p>Approve and publish this review?</p>
-                    <dl class="row">
-                        <dt class="col-4">Package</dt><dd class="col-8">{{ review.package.name }}</dd>
-                        <dt class="col-4">Reviewer</dt><dd class="col-8">{{ review.reviewer_name|default:"Anonymous" }}</dd>
-                        <dt class="col-4">Rating</dt><dd class="col-8">{{ review.rating }}/5</dd>
-                        <dt class="col-4">Title</dt><dd class="col-8">{{ review.title }}</dd>
-                    </dl>
-                    <p class="text-muted small">This will publish the review and update the package rating.</p>
-                    <form method="post" class="d-flex gap-2">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-success">Yes, Approve</button>
-                        <a href="{% url 'reviews:dashboard_review_detail' review.pk %}" class="btn btn-outline-secondary">Cancel</a>
-                    </form>
-                </div>
-            </div>
+
+{% include 'backend/partials/_breadcrumb.html' with crumbs=' ' %}
+
+<div class="max-w-xl mx-auto">
+    <div class="dash-card text-center py-12">
+        <span class="w-14 h-14 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto">
+            <i class="fal fa-check text-xl"></i>
+        </span>
+        <h1 class="font-medium text-slate-900 text-lg mt-5">Approve and publish this review?</h1>
+        <p class="text-sm text-slate-500 mt-2 max-w-sm mx-auto">
+            The review will appear on the public package page, and the package's average rating will recalculate.
+        </p>
+
+        <div class="mt-6 px-6 py-4 bg-slate-50 rounded-lg text-left text-sm">
+            <p><strong class="text-slate-900">{{ review.reviewer_name }}</strong> <span class="text-slate-500">· {{ review.rating }} ★</span></p>
+            <p class="mt-1 text-slate-500">{{ review.package.name }}</p>
+            {% if review.title %}<p class="mt-2 text-slate-700 italic">"{{ review.title }}"</p>{% endif %}
         </div>
+
+        <form method="post" class="mt-6 flex flex-wrap gap-2 justify-center">
+            {% csrf_token %}
+            <a href="{% url 'reviews:dashboard_review_detail' review.pk %}" class="dash-btn dash-btn-ghost">Cancel</a>
+            <button type="submit" class="dash-btn dash-btn-primary"><i class="fal fa-check"></i> Approve &amp; publish</button>
+        </form>
     </div>
 </div>
+
 {% endblock %}

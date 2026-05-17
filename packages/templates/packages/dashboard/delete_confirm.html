@@ -1,7 +1,7 @@
 {% extends 'backend/base_dashboard.html' %}
 {% load static %}
 
-{% block title %}Delete {{ destination.name }} — Dashboard{% endblock %}
+{% block title %}Delete {{ package.name }} — Dashboard{% endblock %}
 
 {% block content %}
 
@@ -12,19 +12,19 @@
         <span class="w-14 h-14 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center mx-auto">
             <i class="fal fa-trash text-xl"></i>
         </span>
-        <h1 class="font-medium text-slate-900 text-lg mt-5">Delete this destination?</h1>
+        <h1 class="font-medium text-slate-900 text-lg mt-5">Delete this tour package?</h1>
         <p class="text-sm text-slate-500 mt-2 max-w-sm mx-auto">
-            This will permanently remove the destination and any linked images. Activities and packages referencing it may break.
+            This will permanently remove the package, its itinerary, inclusions, images, and departures. Bookings referencing it cannot be cascade-deleted and must be cancelled separately.
         </p>
 
         <div class="mt-6 px-6 py-4 bg-slate-50 rounded-lg text-left text-sm">
-            <p><strong class="text-slate-900">{{ destination.name }}</strong></p>
-            <p class="text-slate-500 mt-1">{{ destination.country }}{% if destination.region %} · {{ destination.region }}{% endif %}</p>
+            <p><strong class="text-slate-900">{{ package.name }}</strong></p>
+            <p class="text-slate-500 mt-1">{{ package.duration_days }}D · {{ package.duration_nights }}N · {{ package.currency }} {{ package.price_per_person|floatformat:0 }}</p>
         </div>
 
         <form method="post" class="mt-6 flex flex-wrap gap-2 justify-center">
             {% csrf_token %}
-            <a href="{% url 'dashboard_destination_list' %}" class="dash-btn dash-btn-ghost">Cancel</a>
+            <a href="{% url 'packages:dashboard_package_list' %}" class="dash-btn dash-btn-ghost">Cancel</a>
             <button type="submit" class="dash-btn dash-btn-danger"><i class="fal fa-trash"></i> Delete permanently</button>
         </form>
     </div>

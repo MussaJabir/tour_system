@@ -1,37 +1,31 @@
-{% extends "backend/base.html" %}
+{% extends 'backend/base_dashboard.html' %}
+{% load static %}
 
-{% block title %}Upload Brochure PDF{% endblock %}
+{% block title %}Brochure parser — AI Assistant{% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <div class="row justify-content-center">
-        <div class="col-md-7">
-            <div class="card">
-                <div class="card-header bg-primary text-white">
-                    <i class="mdi mdi-file-pdf-box me-1"></i>Upload Lodge Brochure
-                </div>
-                <div class="card-body">
-                    <p class="text-muted">AI will extract name, description, amenities, room types, and other details from the PDF.</p>
-                    <form method="post" enctype="multipart/form-data">
-                        {% csrf_token %}
-                        {% for field in form %}
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">{{ field.label }}</label>
-                            {{ field }}
-                            {% if field.help_text %}<div class="form-text">{{ field.help_text }}</div>{% endif %}
-                            {% for error in field.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
-                        </div>
-                        {% endfor %}
-                        <div class="d-flex gap-2">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="mdi mdi-upload me-1"></i>Upload & Parse
-                            </button>
-                            <a href="{% url 'ai_assistant:home' %}" class="btn btn-outline-secondary">Cancel</a>
-                        </div>
-                    </form>
-                </div>
+
+{% include 'backend/partials/_breadcrumb.html' with crumbs=' ' %}
+{% include 'backend/partials/_page_header.html' with title='Parse a brochure' subtitle='Upload a PDF — AI extracts amenities, rooms, prices, and policies.' %}
+
+<div class="max-w-2xl">
+    <form method="post" enctype="multipart/form-data" class="space-y-6">
+        {% csrf_token %}
+        <div class="dash-card">
+            <header class="dash-card-header"><div><p class="dash-card-title">Upload PDF</p></div></header>
+            <div class="space-y-5">
+                {% for field in form %}
+                    {% include 'backend/partials/_dash_form_field.html' with field=field %}
+                {% endfor %}
             </div>
         </div>
-    </div>
+        <div class="flex gap-2">
+            <button type="submit" class="dash-btn dash-btn-primary">
+                <i class="fal fa-magic"></i> Start parsing
+            </button>
+            <a href="{% url 'ai_assistant:home' %}" class="dash-btn dash-btn-ghost">Cancel</a>
+        </div>
+    </form>
 </div>
+
 {% endblock %}

@@ -1,34 +1,39 @@
-{% extends "backend/base.html" %}
+{% extends 'backend/base_dashboard.html' %}
+{% load static %}
 
-{% block title %}Reject Review{% endblock %}
+{% block title %}Reject review — Dashboard{% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card border-warning">
-                <div class="card-header bg-warning text-dark"><strong>Reject Review</strong></div>
-                <div class="card-body">
-                    <p>Reject this review? It will not be shown publicly.</p>
-                    <dl class="row">
-                        <dt class="col-4">Package</dt><dd class="col-8">{{ review.package.name }}</dd>
-                        <dt class="col-4">Reviewer</dt><dd class="col-8">{{ review.reviewer_name|default:"Anonymous" }}</dd>
-                        <dt class="col-4">Rating</dt><dd class="col-8">{{ review.rating }}/5</dd>
-                    </dl>
-                    <form method="post" class="d-flex flex-column gap-2">
-                        {% csrf_token %}
-                        <div>
-                            <label class="form-label">Rejection Reason (optional)</label>
-                            <textarea name="reason" class="form-control" rows="3" placeholder="Spam, inappropriate content, etc."></textarea>
-                        </div>
-                        <div class="d-flex gap-2">
-                            <button type="submit" class="btn btn-warning">Reject</button>
-                            <a href="{% url 'reviews:dashboard_review_detail' review.pk %}" class="btn btn-outline-secondary">Cancel</a>
-                        </div>
-                    </form>
-                </div>
-            </div>
+
+{% include 'backend/partials/_breadcrumb.html' with crumbs=' ' %}
+
+<div class="max-w-xl mx-auto">
+    <div class="dash-card text-center py-12">
+        <span class="w-14 h-14 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center mx-auto">
+            <i class="fal fa-times text-xl"></i>
+        </span>
+        <h1 class="font-medium text-slate-900 text-lg mt-5">Reject this review?</h1>
+        <p class="text-sm text-slate-500 mt-2 max-w-sm mx-auto">
+            The review stays in the system but won't be published. You can optionally record a reason for the team.
+        </p>
+
+        <div class="mt-6 px-6 py-4 bg-slate-50 rounded-lg text-left text-sm">
+            <p><strong class="text-slate-900">{{ review.reviewer_name }}</strong> <span class="text-slate-500">· {{ review.rating }} ★</span></p>
+            <p class="mt-1 text-slate-500">{{ review.package.name }}</p>
         </div>
+
+        <form method="post" class="mt-6 space-y-3 text-left">
+            {% csrf_token %}
+            <div class="dash-form-field">
+                <label class="dash-label" for="reason">Reason (internal, optional)</label>
+                <textarea id="reason" name="reason" placeholder="Why was this rejected? (Spam, inappropriate, etc.)"></textarea>
+            </div>
+            <div class="flex flex-wrap gap-2 justify-center pt-2">
+                <a href="{% url 'reviews:dashboard_review_detail' review.pk %}" class="dash-btn dash-btn-ghost">Cancel</a>
+                <button type="submit" class="dash-btn dash-btn-danger"><i class="fal fa-times"></i> Reject review</button>
+            </div>
+        </form>
     </div>
 </div>
+
 {% endblock %}

@@ -1,37 +1,33 @@
-{% extends "backend/base.html" %}
+{% extends 'backend/base_dashboard.html' %}
+{% load static %}
 
-{% block title %}Generate Itinerary{% endblock %}
+{% block title %}Draft itinerary — AI Assistant{% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <div class="row justify-content-center">
-        <div class="col-md-7">
-            <div class="card">
-                <div class="card-header bg-success text-white">
-                    <i class="mdi mdi-map-marker-path me-1"></i>Generate Itinerary
-                </div>
-                <div class="card-body">
-                    <p class="text-muted">AI will create a day-by-day safari itinerary in markdown format.</p>
-                    <form method="post">
-                        {% csrf_token %}
-                        {% for field in form %}
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">{{ field.label }}</label>
-                            {{ field }}
-                            {% if field.help_text %}<div class="form-text">{{ field.help_text }}</div>{% endif %}
-                            {% for error in field.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
-                        </div>
-                        {% endfor %}
-                        <div class="d-flex gap-2">
-                            <button type="submit" class="btn btn-success">
-                                <i class="mdi mdi-robot me-1"></i>Generate
-                            </button>
-                            <a href="{% url 'ai_assistant:home' %}" class="btn btn-outline-secondary">Cancel</a>
-                        </div>
-                    </form>
-                </div>
+
+{% include 'backend/partials/_breadcrumb.html' with crumbs=' ' %}
+{% include 'backend/partials/_page_header.html' with title='Draft an itinerary' subtitle='AI writes a day-by-day plan from a destination + duration + budget.' %}
+
+<div class="max-w-2xl">
+    <form method="post" class="space-y-6">
+        {% csrf_token %}
+        <div class="dash-card">
+            <header class="dash-card-header"><div><p class="dash-card-title">Trip parameters</p></div></header>
+            <div class="grid sm:grid-cols-2 gap-5">
+                {% for field in form %}
+                    <div class="{% if field.name == 'interests' or field.name == 'notes' %}sm:col-span-2{% endif %}">
+                        {% include 'backend/partials/_dash_form_field.html' with field=field %}
+                    </div>
+                {% endfor %}
             </div>
         </div>
-    </div>
+        <div class="flex gap-2">
+            <button type="submit" class="dash-btn dash-btn-primary">
+                <i class="fal fa-magic"></i> Draft itinerary
+            </button>
+            <a href="{% url 'ai_assistant:home' %}" class="dash-btn dash-btn-ghost">Cancel</a>
+        </div>
+    </form>
 </div>
+
 {% endblock %}
