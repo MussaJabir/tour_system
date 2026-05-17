@@ -1,0 +1,89 @@
+{% comment %}
+Dashboard sidebar — sticky on lg+, off-canvas on mobile.
+Highlights the current route via the `dash-nav-link` is-active class
+when {% url %} matches request.path.
+{% endcomment %}
+<aside class="h-full flex flex-col overflow-y-auto">
+
+    {# Brand + close (mobile) #}
+    <div class="flex items-center justify-between px-5 py-5 border-b border-slate-200">
+        <a href="{% url 'dashboard_home' %}" class="flex items-center gap-2 group">
+            <span class="font-display text-2xl tracking-tight text-slate-900">Tour<span class="text-bush-600">.</span></span>
+            <span class="text-xs uppercase tracking-wider text-slate-400">Staff</span>
+        </a>
+        <button @click="sidebarOpen = false"
+                class="lg:hidden w-9 h-9 rounded-md hover:bg-slate-100 flex items-center justify-center text-slate-500"
+                aria-label="Close menu">
+            <i class="fal fa-times"></i>
+        </button>
+    </div>
+
+    {# Nav sections #}
+    <nav class="flex-1 px-3 py-5 space-y-6">
+
+        <div>
+            <p class="dash-nav-section-label">Overview</p>
+            <ul class="space-y-0.5">
+                <li><a href="{% url 'dashboard_home' %}" class="dash-nav-link {% if request.path == '/dashboard/' %}is-active{% endif %}"><i class="fal fa-home"></i> Dashboard</a></li>
+            </ul>
+        </div>
+
+        <div>
+            <p class="dash-nav-section-label">Sales</p>
+            <ul class="space-y-0.5">
+                <li><a href="{% url 'packages:dashboard_inquiry_list' %}" class="dash-nav-link {% if '/dashboard/inquiries' in request.path %}is-active{% endif %}"><i class="fal fa-comment-alt-lines"></i> Inquiries</a></li>
+                <li><a href="{% url 'packages:dashboard_booking_list' %}" class="dash-nav-link {% if '/dashboard/bookings' in request.path %}is-active{% endif %}"><i class="fal fa-calendar-check"></i> Bookings</a></li>
+                <li><a href="{% url 'packages:dashboard_custom_package_list' %}" class="dash-nav-link {% if '/dashboard/custom-packages' in request.path %}is-active{% endif %}"><i class="fal fa-file-invoice"></i> Custom Quotes</a></li>
+            </ul>
+        </div>
+
+        <div>
+            <p class="dash-nav-section-label">Content</p>
+            <ul class="space-y-0.5">
+                <li><a href="{% url 'packages:dashboard_package_list' %}" class="dash-nav-link {% if '/dashboard/packages' in request.path %}is-active{% endif %}"><i class="fal fa-route"></i> Tour Packages</a></li>
+                <li><a href="{% url 'dashboard_destination_list' %}" class="dash-nav-link {% if '/dashboard/destinations' in request.path %}is-active{% endif %}"><i class="fal fa-map-marked-alt"></i> Destinations</a></li>
+                <li><a href="{% url 'dashboard_activity_list' %}" class="dash-nav-link {% if '/dashboard/activities' in request.path %}is-active{% endif %}"><i class="fal fa-binoculars"></i> Activities</a></li>
+                <li><a href="{% url 'dashboard_accommodation_list' %}" class="dash-nav-link {% if '/dashboard/accommodations' in request.path %}is-active{% endif %}"><i class="fal fa-bed"></i> Lodges &amp; Camps</a></li>
+            </ul>
+        </div>
+
+        <div>
+            <p class="dash-nav-section-label">Marketing</p>
+            <ul class="space-y-0.5">
+                <li><a href="{% url 'reviews:dashboard_review_list' %}" class="dash-nav-link {% if '/dashboard/reviews' in request.path %}is-active{% endif %}"><i class="fal fa-star"></i> Reviews</a></li>
+                <li><a href="{% url 'dashboard_testimonial_list' %}" class="dash-nav-link {% if '/dashboard/testimonials' in request.path %}is-active{% endif %}"><i class="fal fa-quote-left"></i> Testimonials</a></li>
+                <li><a href="{% url 'dashboard_faq_list' %}" class="dash-nav-link {% if '/dashboard/faqs' in request.path %}is-active{% endif %}"><i class="fal fa-question-circle"></i> FAQs</a></li>
+                <li><a href="{% url 'dashboard_newsletter_list' %}" class="dash-nav-link {% if '/dashboard/newsletter' in request.path %}is-active{% endif %}"><i class="fal fa-envelope"></i> Newsletter</a></li>
+            </ul>
+        </div>
+
+        <div>
+            <p class="dash-nav-section-label">Support</p>
+            <ul class="space-y-0.5">
+                <li><a href="{% url 'dashboard_contact_list' %}" class="dash-nav-link {% if '/dashboard/contacts' in request.path %}is-active{% endif %}"><i class="fal fa-inbox"></i> Contact Messages</a></li>
+                <li><a href="{% url 'ai_assistant:home' %}" class="dash-nav-link {% if '/dashboard/ai' in request.path %}is-active{% endif %}"><i class="fal fa-sparkles"></i> AI Assistant</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    {# Footer: user + logout #}
+    <div class="px-3 py-4 border-t border-slate-200">
+        {% if request.user.is_authenticated %}
+        <div class="flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-slate-50 transition">
+            <span class="w-9 h-9 rounded-full bg-bush-600 text-white flex items-center justify-center text-sm font-medium">
+                {{ request.user.username|slice:":1"|upper }}
+            </span>
+            <div class="flex-1 min-w-0">
+                <p class="text-sm font-medium text-slate-900 truncate">{{ request.user.username }}</p>
+                <p class="text-xs text-slate-500 truncate">{{ request.user.email }}</p>
+            </div>
+            <form method="post" action="{% url 'staff_logout' %}">
+                {% csrf_token %}
+                <button type="submit" class="w-8 h-8 rounded hover:bg-slate-200 flex items-center justify-center text-slate-500 hover:text-rose-600 transition" aria-label="Sign out">
+                    <i class="fal fa-sign-out"></i>
+                </button>
+            </form>
+        </div>
+        {% endif %}
+    </div>
+</aside>

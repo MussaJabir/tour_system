@@ -617,4 +617,62 @@ All 9 public route groups live on `base_modern.html` with the Safari Editorial s
 
 ---
 
+## Session 020 — 2026-05-17
+
+**Type:** Phase 7.0 — Dashboard Foundation (Operations Slate)
+**Branch:** `feature/dashboard-foundation` → PR → `develop`
+
+### What we did
+1. **Extended `static/frontend/src/tailwind.css`** with the Operations Slate `@theme` block:
+   - Slate ramp 50→900 for backgrounds/text/borders
+   - Semantic palette: emerald (success), amber (warning), rose (danger), sky (info) — each with 50/500/600/700 stops
+   - Bush ramp stays untouched (cross-system brand accent)
+2. **Added ~25 dashboard component classes** to the `@layer components` block, all prefixed `dash-`:
+   - Layout: `.dash-shell`, `.dash-sidebar`, `.dash-topbar`, `.dash-nav-link`, `.dash-nav-section-label`, `.dash-page-header`, `.dash-page-title`
+   - Surfaces: `.dash-card`, `.dash-card-header`, `.dash-card-title`, `.dash-stat`, `.dash-stat-label`, `.dash-stat-value`, `.dash-stat-trend--up/down`
+   - Buttons: `.dash-btn`, `.dash-btn-primary/secondary/ghost/danger`, `.dash-btn-sm`
+   - Badges: `.dash-badge`, `.dash-badge-success/warning/danger/info/neutral` (each with a coloured dot ::before)
+   - Tables: `.dash-table` (full styling including thead/td/tr:hover)
+   - Forms: `.dash-input`, `.dash-select`, `.dash-textarea`, `.dash-label` — pill-rounded with bush-600 focus glow
+3. **Downloaded Chart.js 4.4.1** (200 KB) to `static/frontend/vendor/chart.min.js` — loaded **per-page** via `extra_js` block, not globally
+4. **Built `templates/backend/base_dashboard.html`** — clean shell:
+   - 240px sidebar + flexible main column (CSS grid)
+   - Off-canvas drawer on mobile via Alpine.js `sidebarOpen` state
+   - Sticky topbar with mobile menu trigger + page-scoped search + extras slots
+   - Skip-to-content link (sr-only / focus-revealed)
+   - Inline Django messages renderer with semantic styling (success/error/warning/info)
+   - Only Alpine.js loaded globally — Chart.js stays per-page
+5. **8 reusable partials** in `templates/backend/partials/`:
+   - `_dashboard_sidebar.html` — branded nav with 5 sections (Overview / Sales / Content / Marketing / Support), active-route highlighting via `request.path` match, user footer with logout
+   - `_dashboard_topbar.html` — mobile menu trigger + search slot + "View site" link + extras block
+   - `_page_header.html` — title + subtitle + action_html slot
+   - `_breadcrumb.html` — Dashboard / Section / Current pattern, link-aware
+   - `_stat_card.html` — label + value + optional trend (up/down) + optional icon + optional href to make the whole card clickable
+   - `_status_badge.html` — semantic variant chooser
+   - `_empty_state.html` — icon + title + subtitle + optional action CTA
+   - `_data_table.html` — wrapper card with optional search/filter toolbar + count display + horizontal-scroll container
+6. **New view + URL `/dashboard/styleguide/`** (DEBUG-only) — comprehensive Operations Slate reference covering palette, typography, buttons, stat cards, status badges, data table, form inputs, empty state, motion guidance
+7. **Rebuilt Tailwind** — 66 KB minified (+11 KB over Phase 6 baseline due to dashboard components)
+8. **Cache-bust** bumped to `v=20260517a` on `base_dashboard.html` link tag
+9. **13 new tests** in `core/tests_dashboard_foundation.py`:
+   - `/dashboard/styleguide/` 200 in DEBUG, 404 otherwise, uses base_dashboard.html
+   - `base_dashboard.html` defines required blocks; renders shell elements; doesn't load Chart.js globally
+   - All 5 status badge variants render correctly
+   - `_stat_card`, `_empty_state`, `_page_header`, `_breadcrumb` render with their kwargs
+   - Compiled tailwind.css contains all 14 essential dash-* utilities
+   - Chart.js vendor file exists and is real JS
+10. **All 245 tests pass** (232 prior + 13 new) — full suite run in `tour_django` container, 124s
+11. **Visual spot-check** at `http://localhost:8080/dashboard/styleguide/` — sidebar nav, palette swatches, stat cards, mock booking table, badges, form inputs, empty state all render correctly in Operations Slate
+
+### URL namespacing gotcha
+- The AI Assistant app uses `app_name='ai_assistant'` and names its dashboard home URL just `'home'`, so the sidebar link is `{% url 'ai_assistant:home' %}` (not `:dashboard_ai_home`). Reviews uses `reviews:dashboard_review_list`. Recorded for future Phase 7.x work.
+
+### Next step
+- Phase 7.1 — Dashboard home (stats grid + recent activity feed + quick actions + Chart.js mini charts). Branch `feature/dashboard-home`.
+
+### PR
+- (opening next…)
+
+---
+
 _Add new sessions above this line._

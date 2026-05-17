@@ -51,6 +51,45 @@
   --color-graphite: #3A342B;
   --color-mist:     #8C8478;
 
+  /* =============================================================
+     Operations Slate — staff dashboard design system (Phase 7.0)
+     Cool slate neutrals + semantic status palette. Brand accent
+     stays as bush-600 above for cross-system continuity.
+     ============================================================= */
+
+  --color-slate-50:  #F8FAFC;
+  --color-slate-100: #F1F5F9;
+  --color-slate-200: #E2E8F0;
+  --color-slate-300: #CBD5E1;
+  --color-slate-400: #94A3B8;
+  --color-slate-500: #64748B;
+  --color-slate-600: #475569;
+  --color-slate-700: #334155;
+  --color-slate-800: #1E293B;
+  --color-slate-900: #0F172A;
+
+  /* Semantic status colours — used in badges, alerts, table cells.
+     NEVER use bush-* for status; that's the brand accent only. */
+  --color-emerald-50:  #ECFDF5;
+  --color-emerald-500: #10B981;
+  --color-emerald-600: #059669;
+  --color-emerald-700: #047857;
+
+  --color-amber-50:    #FFFBEB;
+  --color-amber-500:   #F59E0B;
+  --color-amber-600:   #D97706;
+  --color-amber-700:   #B45309;
+
+  --color-rose-50:     #FFF1F2;
+  --color-rose-500:    #F43F5E;
+  --color-rose-600:    #E11D48;
+  --color-rose-700:    #BE123C;
+
+  --color-sky-50:      #F0F9FF;
+  --color-sky-500:     #0EA5E9;
+  --color-sky-600:     #0284C7;
+  --color-sky-700:     #0369A1;
+
   /* -- Typography -------------------------------------------- */
   --font-display: "Fraunces", "Cormorant Garamond", Georgia, serif;
   --font-sans:    "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -316,6 +355,288 @@
       rgb(31 27 22 / 0.65) 100%
     );
     pointer-events: none;
+  }
+
+  /* =============================================================
+     Operations Slate — dashboard components
+     Prefixed `dash-` so they're easy to find and don't collide
+     with the public-site naming.
+     ============================================================= */
+
+  /* -- Page chrome ------------------------------------------- */
+  .dash-shell {
+    display: grid;
+    grid-template-columns: 1fr;
+    min-height: 100vh;
+    background-color: var(--color-slate-50);
+    color: var(--color-slate-700);
+    font-size: 0.875rem; /* 14px base — denser than public 16px */
+  }
+  @media (min-width: 1024px) {
+    .dash-shell { grid-template-columns: 240px 1fr; }
+  }
+
+  /* -- Sidebar nav ------------------------------------------- */
+  .dash-sidebar {
+    background-color: white;
+    border-right: 1px solid var(--color-slate-200);
+  }
+  .dash-nav-link {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.55rem 0.85rem;
+    border-radius: 0.5rem;
+    color: var(--color-slate-600);
+    font-weight: 500;
+    transition: background-color 0.15s, color 0.15s;
+  }
+  .dash-nav-link:hover {
+    background-color: var(--color-slate-100);
+    color: var(--color-slate-900);
+  }
+  .dash-nav-link[aria-current="page"],
+  .dash-nav-link.is-active {
+    background-color: var(--color-bush-50);
+    color: var(--color-bush-700);
+  }
+  .dash-nav-link i { width: 1rem; text-align: center; }
+
+  .dash-nav-section-label {
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-slate-400);
+    padding: 0 0.85rem;
+    margin-bottom: 0.5rem;
+  }
+
+  /* -- Topbar ------------------------------------------------ */
+  .dash-topbar {
+    background-color: white;
+    border-bottom: 1px solid var(--color-slate-200);
+    height: 4rem;
+    display: flex;
+    align-items: center;
+    padding: 0 1.25rem;
+    gap: 1rem;
+  }
+  @media (min-width: 1024px) {
+    .dash-topbar { padding: 0 2rem; }
+  }
+
+  /* -- Page header ------------------------------------------- */
+  .dash-page-header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: end;
+    gap: 1.5rem;
+    margin-bottom: 1.75rem;
+  }
+  .dash-page-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--color-slate-900);
+    letter-spacing: -0.01em;
+  }
+  @media (min-width: 768px) {
+    .dash-page-title { font-size: 1.75rem; }
+  }
+
+  /* -- Cards / surfaces --------------------------------------- */
+  .dash-card {
+    background-color: white;
+    border: 1px solid var(--color-slate-200);
+    border-radius: 0.75rem;
+    padding: 1.25rem;
+  }
+  @media (min-width: 768px) {
+    .dash-card { padding: 1.5rem; }
+  }
+
+  .dash-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--color-slate-200);
+    margin-bottom: 1.25rem;
+  }
+  .dash-card-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--color-slate-900);
+  }
+
+  /* -- Stat card --------------------------------------------- */
+  .dash-stat {
+    background-color: white;
+    border: 1px solid var(--color-slate-200);
+    border-radius: 0.75rem;
+    padding: 1.25rem;
+  }
+  .dash-stat-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-slate-500);
+    font-weight: 500;
+  }
+  .dash-stat-value {
+    font-size: 1.875rem;
+    font-weight: 600;
+    color: var(--color-slate-900);
+    margin-top: 0.5rem;
+    letter-spacing: -0.02em;
+  }
+  .dash-stat-trend {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    margin-top: 0.5rem;
+  }
+  .dash-stat-trend--up   { color: var(--color-emerald-600); }
+  .dash-stat-trend--down { color: var(--color-rose-600); }
+
+  /* -- Buttons ----------------------------------------------- */
+  .dash-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 0.5rem 0.9rem;
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-size: 0.8125rem;
+    border-radius: 0.5rem;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+    text-decoration: none;
+    line-height: 1;
+    white-space: nowrap;
+  }
+  .dash-btn-primary {
+    background-color: var(--color-bush-600);
+    color: white;
+  }
+  .dash-btn-primary:hover { background-color: var(--color-bush-700); }
+
+  .dash-btn-secondary {
+    background-color: white;
+    border-color: var(--color-slate-300);
+    color: var(--color-slate-700);
+  }
+  .dash-btn-secondary:hover {
+    background-color: var(--color-slate-50);
+    color: var(--color-slate-900);
+  }
+
+  .dash-btn-ghost {
+    background-color: transparent;
+    color: var(--color-slate-600);
+  }
+  .dash-btn-ghost:hover {
+    background-color: var(--color-slate-100);
+    color: var(--color-slate-900);
+  }
+
+  .dash-btn-danger {
+    background-color: var(--color-rose-600);
+    color: white;
+  }
+  .dash-btn-danger:hover { background-color: var(--color-rose-700); }
+
+  /* Smaller pill button used inside tables/rows */
+  .dash-btn-sm { padding: 0.3rem 0.7rem; font-size: 0.75rem; }
+
+  /* -- Status badges ----------------------------------------- */
+  .dash-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.15rem 0.55rem;
+    border-radius: 9999px;
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+  }
+  .dash-badge::before {
+    content: "";
+    width: 0.4rem;
+    height: 0.4rem;
+    border-radius: 9999px;
+    background-color: currentColor;
+  }
+  .dash-badge-success { background-color: var(--color-emerald-50); color: var(--color-emerald-700); }
+  .dash-badge-warning { background-color: var(--color-amber-50);   color: var(--color-amber-700); }
+  .dash-badge-danger  { background-color: var(--color-rose-50);    color: var(--color-rose-700); }
+  .dash-badge-info    { background-color: var(--color-sky-50);     color: var(--color-sky-700); }
+  .dash-badge-neutral { background-color: var(--color-slate-100);  color: var(--color-slate-700); }
+
+  /* -- Data table -------------------------------------------- */
+  .dash-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.8125rem;
+  }
+  .dash-table thead {
+    background-color: var(--color-slate-50);
+    border-bottom: 1px solid var(--color-slate-200);
+  }
+  .dash-table th {
+    text-align: left;
+    padding: 0.65rem 1rem;
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-slate-500);
+    font-weight: 500;
+  }
+  .dash-table td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--color-slate-100);
+    color: var(--color-slate-700);
+  }
+  .dash-table tbody tr { transition: background-color 0.12s; }
+  .dash-table tbody tr:hover { background-color: var(--color-slate-50); }
+  .dash-table tbody tr:last-child td { border-bottom: 0; }
+
+  /* -- Form fields in dashboard ------------------------------ */
+  .dash-input,
+  .dash-select,
+  .dash-textarea {
+    width: 100%;
+    background-color: white;
+    border: 1px solid var(--color-slate-300);
+    border-radius: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    font-family: var(--font-sans);
+    font-size: 0.8125rem;
+    color: var(--color-slate-900);
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .dash-input::placeholder,
+  .dash-textarea::placeholder { color: var(--color-slate-400); }
+  .dash-input:focus,
+  .dash-select:focus,
+  .dash-textarea:focus {
+    border-color: var(--color-bush-600);
+    box-shadow: 0 0 0 3px rgb(44 95 45 / 0.12);
+  }
+  .dash-textarea { min-height: 6rem; resize: vertical; }
+
+  .dash-label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--color-slate-700);
+    margin-bottom: 0.4rem;
   }
 }
 

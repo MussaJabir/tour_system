@@ -1,0 +1,23 @@
+{% comment %}
+Page header for any dashboard route.
+Usage:
+    {% include 'backend/partials/_page_header.html' with title='Tour Packages' subtitle='Manage your catalog' %}
+    or with action_html for buttons:
+    {% include 'backend/partials/_page_header.html' with title='Bookings' action_html='<a href="…" class="dash-btn dash-btn-primary">New booking</a>' %}
+
+Vars:
+    title       — required
+    subtitle    — small descriptive line
+    action_html — pre-rendered inline HTML for action buttons (use the `safe` slot)
+{% endcomment %}
+<header class="dash-page-header">
+    <div>
+        <h1 class="dash-page-title">{{ title }}</h1>
+        {% if subtitle %}
+            <p class="text-sm text-slate-500 mt-1">{{ subtitle }}</p>
+        {% endif %}
+    </div>
+    {% if action_html %}
+        <div class="flex flex-wrap gap-2">{{ action_html|safe }}</div>
+    {% endif %}
+</header>

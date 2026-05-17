@@ -1,0 +1,26 @@
+{% comment %}
+Dashboard breadcrumb.
+Usage:
+    {% include 'backend/partials/_breadcrumb.html' with crumbs=crumbs %}
+
+`crumbs` is an iterable of dicts with keys `label` and `url` (url optional;
+absent for the current page).
+
+    [
+        {"label": "Tours", "url": reverse('packages:dashboard_package_list')},
+        {"label": "7-day Serengeti Adventure"},
+    ]
+{% endcomment %}
+{% if crumbs %}
+<nav aria-label="Breadcrumb" class="text-xs text-slate-500 mb-4 flex flex-wrap items-center gap-1">
+    <a href="{% url 'dashboard_home' %}" class="hover:text-slate-900 transition">Dashboard</a>
+    {% for c in crumbs %}
+        <span class="text-slate-300">/</span>
+        {% if c.url %}
+            <a href="{{ c.url }}" class="hover:text-slate-900 transition">{{ c.label }}</a>
+        {% else %}
+            <span class="text-slate-700">{{ c.label }}</span>
+        {% endif %}
+    {% endfor %}
+</nav>
+{% endif %}

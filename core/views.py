@@ -902,3 +902,16 @@ def styleguide(request):
     return render(request, 'frontend/_styleguide.html', {
         'shades': ['50', '100', '200', '300', '400', '500', '600', '700', '800', '900'],
     })
+
+
+def dashboard_styleguide(request):
+    """
+    Renders the Operations Slate design system reference for the staff dashboard.
+    Only available when settings.DEBUG is True — production returns 404.
+    """
+    if not settings.DEBUG:
+        raise Http404("Dashboard styleguide is only available in DEBUG mode.")
+    return render(request, 'backend/_styleguide.html', {
+        'slate_shades': ['50', '100', '200', '300', '400', '500', '600', '700', '800', '900'],
+        'bush_shades': ['50', '100', '200', '300', '400', '500', '600', '700', '800', '900'],
+    })

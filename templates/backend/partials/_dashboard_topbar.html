@@ -1,0 +1,29 @@
+{% comment %}
+Dashboard topbar — sticky on scroll. Mobile menu trigger + page-level search slot + user shortcuts.
+Pages can override `{% block topbar_extras %}` to inject contextual buttons.
+{% endcomment %}
+<header class="dash-topbar sticky top-0 z-20">
+
+    {# Mobile menu trigger #}
+    <button @click="sidebarOpen = !sidebarOpen"
+            class="lg:hidden w-9 h-9 rounded-md hover:bg-slate-100 flex items-center justify-center text-slate-600"
+            aria-label="Open menu">
+        <i class="fal fa-bars"></i>
+    </button>
+
+    {# Optional inline search (pages opt in by providing block content) #}
+    <div class="flex-1 flex items-center max-w-md">
+        {% block topbar_search %}{% endblock %}
+    </div>
+
+    {# Topbar action slot (pages opt in) #}
+    <div class="flex items-center gap-2">
+        {% block topbar_extras %}{% endblock %}
+
+        <a href="{% url 'public_home' %}" target="_blank" rel="noopener"
+           class="dash-btn dash-btn-ghost" title="View public site">
+            <i class="fal fa-external-link-alt"></i>
+            <span class="hidden sm:inline">View site</span>
+        </a>
+    </div>
+</header>
