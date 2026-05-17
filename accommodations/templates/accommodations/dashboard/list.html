@@ -1,279 +1,108 @@
-{% extends "backend/base.html" %}
+{% extends 'backend/base_dashboard.html' %}
 {% load static %}
 
-{% block title %}Manage Accommodations{% endblock %}
+{% block title %}Lodges &amp; Camps — Dashboard{% endblock %}
 
-{% block extra_css %}
-<style>
-    .accommodation-thumbnail {
-        width: 60px;
-        height: 60px;
-        object-fit: cover;
-        border-radius: 5px;
-    }
-    .no-image-placeholder {
-        width: 60px;
-        height: 60px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border-radius: 5px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-size: 24px;
-    }
-    .star-rating {
-        color: #ffc107;
-    }
-</style>
+{% block topbar_extras %}
+<a href="{% url 'dashboard_accommodation_create' %}" class="dash-btn dash-btn-primary">
+    <i class="fal fa-plus"></i><span class="hidden sm:inline">New lodge</span>
+</a>
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <!-- Page Header -->
-    <div class="row mb-3">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center">
-                <h4 class="mb-0">Accommodations</h4>
-                <a href="{% url 'dashboard_accommodation_create' %}" class="btn btn-primary">
-                    <i class="mdi mdi-plus"></i> Add New Accommodation
-                </a>
-            </div>
+
+{% include 'backend/partials/_breadcrumb.html' with crumbs=' ' %}
+{% include 'backend/partials/_page_header.html' with title='Lodges &amp; Camps' subtitle='Hotels, lodges, tented camps, and other accommodations' %}
+
+<section class="bg-white border border-slate-200 rounded-xl overflow-hidden">
+
+    <form method="get" class="px-4 py-3 border-b border-slate-200 flex flex-wrap items-center gap-3">
+        <div class="relative flex-1 min-w-[200px] max-w-md">
+            <i class="fal fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm pointer-events-none"></i>
+            <input type="search" name="search" value="{{ search_query }}" placeholder="Search lodges…" class="dash-input pl-9">
         </div>
+        <select name="destination" class="dash-select w-auto" onchange="this.form.submit()">
+            <option value="">All destinations</option>
+            {% for d in destinations %}
+                <option value="{{ d.slug }}" {% if d.slug == filter_destination %}selected{% endif %}>{{ d.name }}</option>
+            {% endfor %}
+        </select>
+        <select name="type" class="dash-select w-auto" onchange="this.form.submit()">
+            <option value="">All types</option>
+            {% for val, label in types %}
+                <option value="{{ val }}" {% if val == filter_type %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+        <select name="rating" class="dash-select w-auto" onchange="this.form.submit()">
+            <option value="">All ratings</option>
+            {% for val, label in ratings %}
+                <option value="{{ val }}" {% if val|stringformat:'s' == filter_rating %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+        <span class="ml-auto text-xs text-slate-500">{{ accommodations.paginator.count }} lodge{{ accommodations.paginator.count|pluralize }}</span>
+    </form>
+
+    <div class="overflow-x-auto">
+        <table class="dash-table">
+            <thead>
+                <tr>
+                    <th>Lodge</th>
+                    <th>Destination</th>
+                    <th>Type</th>
+                    <th>Rating</th>
+                    <th>Status</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for l in accommodations %}
+                <tr>
+                    <td>
+                        <div class="flex items-center gap-3 min-w-[12rem]">
+                            {% if l.featured_image %}
+                                <img src="{{ l.featured_image.url }}" alt="" class="w-8 h-8 rounded object-cover">
+                            {% else %}
+                                <span class="w-8 h-8 rounded bg-slate-100 flex items-center justify-center text-slate-400"><i class="fal fa-bed text-xs"></i></span>
+                            {% endif %}
+                            <a href="{% url 'public_accommodation_detail' l.slug %}" target="_blank" class="text-slate-900 hover:text-bush-700 font-medium">{{ l.name }}</a>
+                        </div>
+                    </td>
+                    <td class="text-slate-500">{{ l.destination.name }}</td>
+                    <td class="text-slate-500">{{ l.get_accommodation_type_display }}</td>
+                    <td>
+                        <span class="flex items-center gap-0.5 text-clay-500 text-xs">
+                            {% for i in "12345"|make_list %}{% if forloop.counter <= l.star_rating %}<i class="fas fa-star"></i>{% endif %}{% endfor %}
+                        </span>
+                    </td>
+                    <td>
+                        {% if l.is_active %}
+                            {% if l.is_featured %}{% include 'backend/partials/_status_badge.html' with label='Featured' variant='success' %}
+                            {% else %}{% include 'backend/partials/_status_badge.html' with label='Active' variant='info' %}{% endif %}
+                        {% else %}{% include 'backend/partials/_status_badge.html' with label='Inactive' variant='neutral' %}{% endif %}
+                    </td>
+                    <td class="text-right whitespace-nowrap">
+                        <a href="{% url 'dashboard_accommodation_edit' l.pk %}" class="dash-btn dash-btn-sm dash-btn-ghost" title="Edit"><i class="fal fa-edit"></i></a>
+                        <a href="{% url 'dashboard_accommodation_delete' l.pk %}" class="dash-btn dash-btn-sm dash-btn-ghost text-rose-600" title="Delete"><i class="fal fa-trash"></i></a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="6" class="p-0">
+                    {% include 'backend/partials/_empty_state.html' with icon='bed' title='No lodges match these filters.' subtitle='Add lodges to use them in package itineraries.' action_label='Create lodge' action_url='/dashboard/accommodations/create/' %}
+                </td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 
-    <!-- Filters -->
-    <div class="row mb-3">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-body">
-                    <form method="get" class="row g-3">
-                        <div class="col-md-3">
-                            <input type="text" name="search" class="form-control" placeholder="Search accommodations..." value="{{ search_query }}">
-                        </div>
-                        <div class="col-md-3">
-                            <select name="destination" class="form-select">
-                                <option value="">All Destinations</option>
-                                {% for destination in destinations %}
-                                    <option value="{{ destination.slug }}" {% if filter_destination == destination.slug %}selected{% endif %}>
-                                        {{ destination.name }}
-                                    </option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="col-md-2">
-                            <select name="type" class="form-select">
-                                <option value="">All Types</option>
-                                {% for value, label in types %}
-                                    <option value="{{ value }}" {% if filter_type == value %}selected{% endif %}>{{ label }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="col-md-2">
-                            <select name="rating" class="form-select">
-                                <option value="">All Ratings</option>
-                                {% for value, label in ratings %}
-                                    <option value="{{ value }}" {% if filter_rating == value|stringformat:"s" %}selected{% endif %}>{{ label }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="col-md-2">
-                            <button type="submit" class="btn btn-primary w-100">
-                                <i class="mdi mdi-magnify"></i> Filter
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
+    {% if accommodations.paginator.num_pages > 1 %}
+    <nav class="px-4 py-3 border-t border-slate-200 flex items-center justify-between text-xs">
+        <p class="text-slate-500">Page {{ accommodations.number }} of {{ accommodations.paginator.num_pages }}</p>
+        <div class="flex gap-1">
+            {% if accommodations.has_previous %}<a href="?page={{ accommodations.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}" class="dash-btn dash-btn-sm dash-btn-ghost"><i class="fal fa-arrow-left"></i> Prev</a>{% endif %}
+            {% if accommodations.has_next %}<a href="?page={{ accommodations.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}" class="dash-btn dash-btn-sm dash-btn-ghost">Next <i class="fal fa-arrow-right"></i></a>{% endif %}
         </div>
-    </div>
+    </nav>
+    {% endif %}
+</section>
 
-    <!-- Accommodations Table -->
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-body">
-                    {% if accommodations %}
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>Image</th>
-                                        <th>Name</th>
-                                        <th>Destination</th>
-                                        <th>Type</th>
-                                        <th>Rating</th>
-                                        <th>Price Range</th>
-                                        <th>Status</th>
-                                        <th>Views</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for accommodation in accommodations %}
-                                        <tr>
-                                            <td>
-                                                {% if accommodation.featured_image %}
-                                                    <img src="{{ accommodation.featured_image.url }}" 
-                                                         alt="{{ accommodation.name }}" 
-                                                         class="accommodation-thumbnail">
-                                                {% else %}
-                                                    <div class="no-image-placeholder">
-                                                        <i class="mdi mdi-home"></i>
-                                                    </div>
-                                                {% endif %}
-                                            </td>
-                                            <td>
-                                                <strong>{{ accommodation.name }}</strong>
-                                                {% if accommodation.is_featured %}
-                                                    <br><span class="badge bg-warning text-dark mt-1">
-                                                        <i class="mdi mdi-star"></i> Featured
-                                                    </span>
-                                                {% endif %}
-                                            </td>
-                                            <td>
-                                                {% if accommodation.destination %}
-                                                    {{ accommodation.destination.name }}
-                                                {% else %}
-                                                    <span class="text-muted">-</span>
-                                                {% endif %}
-                                            </td>
-                                            <td>
-                                                <span class="badge bg-info">
-                                                    {{ accommodation.get_accommodation_type_display }}
-                                                </span>
-                                            </td>
-                                            <td>
-                                                {% if accommodation.star_rating %}
-                                                    <span class="star-rating">
-                                                        {% for i in "12345"|make_list %}
-                                                            {% if forloop.counter <= accommodation.star_rating %}
-                                                                <i class="mdi mdi-star"></i>
-                                                            {% else %}
-                                                                <i class="mdi mdi-star-outline"></i>
-                                                            {% endif %}
-                                                        {% endfor %}
-                                                    </span>
-                                                {% else %}
-                                                    <span class="text-muted">Not rated</span>
-                                                {% endif %}
-                                            </td>
-                                            <td>
-                                                <small>{{ accommodation.price_range_display }}</small>
-                                            </td>
-                                            <td>
-                                                {% if accommodation.is_active %}
-                                                    <span class="badge bg-success">
-                                                        <i class="mdi mdi-check-circle"></i> Active
-                                                    </span>
-                                                {% else %}
-                                                    <span class="badge bg-secondary">
-                                                        <i class="mdi mdi-close-circle"></i> Inactive
-                                                    </span>
-                                                {% endif %}
-                                            </td>
-                                            <td>
-                                                <i class="mdi mdi-eye text-muted"></i> {{ accommodation.view_count }}
-                                            </td>
-                                            <td>
-                                                <div class="btn-group" role="group">
-                                                    <a href="{% url 'dashboard_accommodation_detail' accommodation.pk %}" 
-                                                       class="btn btn-sm btn-info" 
-                                                       title="View Details">
-                                                        <i class="mdi mdi-eye"></i>
-                                                    </a>
-                                                    <a href="{% url 'dashboard_accommodation_edit' accommodation.pk %}" 
-                                                       class="btn btn-sm btn-primary" 
-                                                       title="Edit">
-                                                        <i class="mdi mdi-pencil"></i>
-                                                    </a>
-                                                    <a href="{% url 'dashboard_accommodation_delete' accommodation.pk %}" 
-                                                       class="btn btn-sm btn-danger" 
-                                                       title="Delete">
-                                                        <i class="mdi mdi-delete"></i>
-                                                    </a>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <!-- Pagination -->
-                        {% if accommodations.has_other_pages %}
-                            <nav aria-label="Page navigation">
-                                <ul class="pagination justify-content-center mt-3">
-                                    {% if accommodations.has_previous %}
-                                        <li class="page-item">
-                                            <a class="page-link" href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}{% if filter_destination %}&destination={{ filter_destination }}{% endif %}{% if filter_type %}&type={{ filter_type }}{% endif %}{% if filter_rating %}&rating={{ filter_rating }}{% endif %}">
-                                                <i class="mdi mdi-chevron-double-left"></i> First
-                                            </a>
-                                        </li>
-                                        <li class="page-item">
-                                            <a class="page-link" href="?page={{ accommodations.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if filter_destination %}&destination={{ filter_destination }}{% endif %}{% if filter_type %}&type={{ filter_type }}{% endif %}{% if filter_rating %}&rating={{ filter_rating }}{% endif %}">
-                                                <i class="mdi mdi-chevron-left"></i> Previous
-                                            </a>
-                                        </li>
-                                    {% endif %}
-                                    
-                                    <li class="page-item active">
-                                        <span class="page-link">
-                                            Page {{ accommodations.number }} of {{ accommodations.paginator.num_pages }}
-                                        </span>
-                                    </li>
-                                    
-                                    {% if accommodations.has_next %}
-                                        <li class="page-item">
-                                            <a class="page-link" href="?page={{ accommodations.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if filter_destination %}&destination={{ filter_destination }}{% endif %}{% if filter_type %}&type={{ filter_type }}{% endif %}{% if filter_rating %}&rating={{ filter_rating }}{% endif %}">
-                                                Next <i class="mdi mdi-chevron-right"></i>
-                                            </a>
-                                        </li>
-                                        <li class="page-item">
-                                            <a class="page-link" href="?page={{ accommodations.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}{% if filter_destination %}&destination={{ filter_destination }}{% endif %}{% if filter_type %}&type={{ filter_type }}{% endif %}{% if filter_rating %}&rating={{ filter_rating }}{% endif %}">
-                                                Last <i class="mdi mdi-chevron-double-right"></i>
-                                            </a>
-                                        </li>
-                                    {% endif %}
-                                </ul>
-                            </nav>
-                        {% endif %}
-
-                        <!-- Results Summary -->
-                        <div class="text-center text-muted mt-3">
-                            <small>
-                                Showing {{ accommodations.start_index }} to {{ accommodations.end_index }} of {{ accommodations.paginator.count }} accommodation{{ accommodations.paginator.count|pluralize }}
-                            </small>
-                        </div>
-                    {% else %}
-                        <!-- Empty State -->
-                        <div class="text-center py-5">
-                            <div class="mb-3">
-                                <i class="mdi mdi-home-city-outline" style="font-size: 64px; color: #ccc;"></i>
-                            </div>
-                            <h5 class="text-muted">No Accommodations Found</h5>
-                            <p class="text-muted">
-                                {% if search_query or filter_destination or filter_type or filter_rating %}
-                                    No accommodations match your current filters. Try adjusting your search criteria.
-                                {% else %}
-                                    Start building your accommodation inventory by adding your first property.
-                                {% endif %}
-                            </p>
-                            <div class="mt-3">
-                                <a href="{% url 'dashboard_accommodation_create' %}" class="btn btn-primary">
-                                    <i class="mdi mdi-plus-circle"></i> Create Your First Accommodation
-                                </a>
-                                {% if search_query or filter_destination or filter_type or filter_rating %}
-                                    <a href="{% url 'dashboard_accommodation_list' %}" class="btn btn-secondary">
-                                        <i class="mdi mdi-filter-remove"></i> Clear Filters
-                                    </a>
-                                {% endif %}
-                            </div>
-                        </div>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 {% endblock %}

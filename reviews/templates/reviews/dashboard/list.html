@@ -1,113 +1,75 @@
-{% extends "backend/base.html" %}
+{% extends 'backend/base_dashboard.html' %}
 {% load static %}
 
-{% block title %}Reviews{% endblock %}
+{% block title %}Reviews — Dashboard{% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <h4 class="mb-3">Reviews</h4>
 
-    <!-- Status tabs -->
-    <div class="d-flex gap-2 mb-3">
-        {% for value, label in status_choices %}
-            <a href="?status={{ value }}"
-               class="btn btn-sm {% if status_filter == value %}btn-primary{% else %}btn-outline-secondary{% endif %}">
-                {{ label }}
-                <span class="badge {% if value == 'pending' %}bg-warning text-dark{% elif value == 'approved' %}bg-success{% else %}bg-danger{% endif %} ms-1">
-                    {{ counts|default_if_none:0 }}
-                </span>
-            </a>
-        {% endfor %}
-        <a href="?status=" class="btn btn-sm {% if not status_filter %}btn-primary{% else %}btn-outline-secondary{% endif %}">
-            All <span class="badge bg-secondary ms-1">{{ counts.total }}</span>
-        </a>
+{% include 'backend/partials/_breadcrumb.html' with crumbs=' ' %}
+{% include 'backend/partials/_page_header.html' with title='Reviews' subtitle='Moderate customer reviews before they appear on public pages' %}
+
+<nav class="flex flex-wrap gap-2 mb-4 text-xs">
+    <a href="?status=pending" class="px-3 py-1.5 rounded-full {% if status_filter == 'pending' %}bg-charcoal text-ivory{% else %}bg-white border border-slate-200 hover:bg-slate-50{% endif %}">Pending <span class="{% if status_filter == 'pending' %}text-slate-300{% else %}text-amber-600{% endif %}">{{ counts.pending }}</span></a>
+    <a href="?status=approved" class="px-3 py-1.5 rounded-full {% if status_filter == 'approved' %}bg-charcoal text-ivory{% else %}bg-white border border-slate-200 hover:bg-slate-50{% endif %}">Approved <span class="{% if status_filter == 'approved' %}text-slate-300{% else %}text-emerald-600{% endif %}">{{ counts.approved }}</span></a>
+    <a href="?status=rejected" class="px-3 py-1.5 rounded-full {% if status_filter == 'rejected' %}bg-charcoal text-ivory{% else %}bg-white border border-slate-200 hover:bg-slate-50{% endif %}">Rejected <span class="{% if status_filter == 'rejected' %}text-slate-300{% else %}text-rose-600{% endif %}">{{ counts.rejected }}</span></a>
+    <a href="?" class="px-3 py-1.5 rounded-full {% if not status_filter %}bg-charcoal text-ivory{% else %}bg-white border border-slate-200 hover:bg-slate-50{% endif %}">All <span class="text-slate-400">({{ counts.total }})</span></a>
+</nav>
+
+<section class="bg-white border border-slate-200 rounded-xl overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="dash-table">
+            <thead>
+                <tr>
+                    <th>Reviewer</th>
+                    <th>Package</th>
+                    <th>Rating</th>
+                    <th>Submitted</th>
+                    <th>Status</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in page_obj %}
+                <tr>
+                    <td>
+                        <p class="text-slate-900">{{ r.reviewer_name }}</p>
+                        {% if r.title %}<p class="text-xs text-slate-500 truncate max-w-[20rem]">"{{ r.title }}"</p>{% endif %}
+                    </td>
+                    <td class="text-slate-500 truncate max-w-[14rem]">{{ r.package.name }}</td>
+                    <td>
+                        <span class="flex items-center gap-0.5 text-clay-500 text-xs">
+                            {% for i in "12345"|make_list %}{% if forloop.counter <= r.rating %}<i class="fas fa-star"></i>{% else %}<i class="fal fa-star text-slate-300"></i>{% endif %}{% endfor %}
+                        </span>
+                    </td>
+                    <td class="text-slate-500">{{ r.created_at|date:'d M Y' }}</td>
+                    <td>
+                        {% if r.status == 'pending' %}{% include 'backend/partials/_status_badge.html' with label='Pending' variant='warning' %}
+                        {% elif r.status == 'approved' %}{% include 'backend/partials/_status_badge.html' with label='Approved' variant='success' %}
+                        {% elif r.status == 'rejected' %}{% include 'backend/partials/_status_badge.html' with label='Rejected' variant='danger' %}
+                        {% else %}{% include 'backend/partials/_status_badge.html' with label=r.get_status_display variant='neutral' %}{% endif %}
+                    </td>
+                    <td class="text-right">
+                        <a href="{% url 'reviews:dashboard_review_detail' r.pk %}" class="dash-btn dash-btn-sm dash-btn-secondary">Review</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="6" class="p-0">
+                    {% include 'backend/partials/_empty_state.html' with icon='star' title='No reviews to moderate.' subtitle='Customer reviews from completed bookings will appear here for approval.' %}
+                </td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 
-    <div class="card">
-        <div class="card-body">
-            {% if page_obj.object_list %}
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle">
-                        <thead>
-                            <tr>
-                                <th>Package</th>
-                                <th>Reviewer</th>
-                                <th>Rating</th>
-                                <th>Title</th>
-                                <th>Status</th>
-                                <th>Submitted</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for review in page_obj %}
-                                <tr>
-                                    <td>{{ review.package.name|truncatewords:4 }}</td>
-                                    <td>
-                                        {{ review.reviewer_name|default:"Anonymous" }}
-                                        {% if review.reviewer_country %}
-                                            <br><small class="text-muted">{{ review.reviewer_country }}</small>
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        <span style="color:#f59e0b;">
-                                            {% for i in "12345" %}
-                                                {% if forloop.counter <= review.rating %}★{% else %}☆{% endif %}
-                                            {% endfor %}
-                                        </span>
-                                    </td>
-                                    <td>{{ review.title|truncatewords:6 }}</td>
-                                    <td>
-                                        {% if review.status == 'pending' %}
-                                            <span class="badge bg-warning text-dark">Pending</span>
-                                        {% elif review.status == 'approved' %}
-                                            <span class="badge bg-success">Approved</span>
-                                        {% else %}
-                                            <span class="badge bg-danger">Rejected</span>
-                                        {% endif %}
-                                    </td>
-                                    <td>{{ review.created_at|date:"M d, Y" }}</td>
-                                    <td>
-                                        <a href="{% url 'reviews:dashboard_review_detail' review.pk %}"
-                                           class="btn btn-sm btn-info">View</a>
-                                        {% if review.status == 'pending' %}
-                                            <a href="{% url 'reviews:dashboard_review_approve' review.pk %}"
-                                               class="btn btn-sm btn-success">Approve</a>
-                                            <a href="{% url 'reviews:dashboard_review_reject' review.pk %}"
-                                               class="btn btn-sm btn-warning">Reject</a>
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-
-                {% if page_obj.has_other_pages %}
-                    <nav class="mt-3">
-                        <ul class="pagination justify-content-center mb-0">
-                            {% if page_obj.has_previous %}
-                                <li class="page-item">
-                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}&status={{ status_filter }}">Previous</a>
-                                </li>
-                            {% endif %}
-                            {% for num in page_obj.paginator.page_range %}
-                                <li class="page-item {% if page_obj.number == num %}active{% endif %}">
-                                    <a class="page-link" href="?page={{ num }}&status={{ status_filter }}">{{ num }}</a>
-                                </li>
-                            {% endfor %}
-                            {% if page_obj.has_next %}
-                                <li class="page-item">
-                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}&status={{ status_filter }}">Next</a>
-                                </li>
-                            {% endif %}
-                        </ul>
-                    </nav>
-                {% endif %}
-            {% else %}
-                <div class="text-center py-5 text-muted">No reviews found.</div>
-            {% endif %}
+    {% if page_obj.paginator.num_pages > 1 %}
+    <nav class="px-4 py-3 border-t border-slate-200 flex items-center justify-between text-xs">
+        <p class="text-slate-500">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</p>
+        <div class="flex gap-1">
+            {% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}" class="dash-btn dash-btn-sm dash-btn-ghost"><i class="fal fa-arrow-left"></i> Prev</a>{% endif %}
+            {% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}" class="dash-btn dash-btn-sm dash-btn-ghost">Next <i class="fal fa-arrow-right"></i></a>{% endif %}
         </div>
-    </div>
-</div>
+    </nav>
+    {% endif %}
+</section>
+
 {% endblock %}
