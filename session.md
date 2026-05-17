@@ -719,7 +719,7 @@ All 9 public route groups live on `base_modern.html` with the Safari Editorial s
 - Bump the `?v=` on `base_dashboard.html` after each Tailwind rebuild
 
 ### PR
-- (opening next…)
+- https://github.com/MussaJabir/tour_system/pull/22
 
 ---
 
