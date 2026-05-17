@@ -1,190 +1,49 @@
-{% extends 'backend/base.html' %}
+{% extends 'backend/base_dashboard.html' %}
 {% load static %}
 
-{% block title %}{{ page_title }}{% endblock %}
+{% block title %}{{ page_title|default:'Testimonial form' }} — Dashboard{% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <!-- Back Button -->
-    <div class="mb-4">
-        <a href="{% url 'dashboard_testimonial_list' %}" class="btn btn-outline-secondary btn-sm mb-3">
-            <i class="mdi mdi-arrow-left me-1"></i>Back to Testimonials
-        </a>
-        <h1 class="h3 mb-1">
-            <i class="mdi mdi-message-circle-outline text-primary me-2"></i>
-            {{ page_title }}
-        </h1>
-        <p class="text-muted mb-0">{{ form_action }} a customer testimonial</p>
-    </div>
 
-    {% if messages %}
-        {% for message in messages %}
-            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        {% endfor %}
-    {% endif %}
+{% include 'backend/partials/_breadcrumb.html' with crumbs=' ' %}
+{% include 'backend/partials/_page_header.html' with title=page_title subtitle='Customer quote shown on the public homepage.' %}
 
-    <div class="row">
-        <div class="col-lg-8">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body p-4">
-                    <form method="post" enctype="multipart/form-data">
-                        {% csrf_token %}
-                        
-                        <h6 class="fw-semibold mb-3 text-muted">Customer Information</h6>
-                        
-                        <!-- Customer Name & Location -->
-                        <div class="row g-3 mb-4">
-                            <div class="col-md-6">
-                                <label for="{{ form.customer_name.id_for_label }}" class="form-label fw-semibold">
-                                    {{ form.customer_name.label }} <span class="text-danger">*</span>
-                                </label>
-                                {{ form.customer_name }}
-                                {% if form.customer_name.errors %}
-                                    <div class="invalid-feedback d-block">{{ form.customer_name.errors.0 }}</div>
-                                {% endif %}
-                            </div>
-                            <div class="col-md-6">
-                                <label for="{{ form.customer_location.id_for_label }}" class="form-label fw-semibold">
-                                    {{ form.customer_location.label }}
-                                </label>
-                                {{ form.customer_location }}
-                                {% if form.customer_location.errors %}
-                                    <div class="invalid-feedback d-block">{{ form.customer_location.errors.0 }}</div>
-                                {% endif %}
-                            </div>
+<form method="post" enctype="multipart/form-data" class="grid lg:grid-cols-[1fr_280px] gap-6">
+    {% csrf_token %}
+
+    <div class="space-y-6 min-w-0">
+        <div class="dash-card">
+            <header class="dash-card-header"><div><p class="dash-card-title">Testimonial</p></div></header>
+            <div class="grid sm:grid-cols-2 gap-5">
+                {% for field in form %}
+                    {% if field.name != 'is_active' and field.name != 'is_featured' and field.name != 'order' %}
+                        <div class="{% if field.name == 'quote' %}sm:col-span-2{% endif %}">
+                            {% include 'backend/partials/_dash_form_field.html' with field=field %}
                         </div>
-
-                        <!-- Customer Photo -->
-                        <div class="mb-4">
-                            <label for="{{ form.customer_image.id_for_label }}" class="form-label fw-semibold">
-                                <i class="mdi mdi-camera text-muted me-1"></i>
-                                {{ form.customer_image.label }}
-                            </label>
-                            {% if testimonial and testimonial.customer_image %}
-                                <div class="mb-2">
-                                    <img src="{{ testimonial.customer_image.url }}" alt="{{ testimonial.customer_name }}" class="rounded" style="max-width: 150px; max-height: 150px; object-fit: cover;">
-                                    <small class="d-block text-muted mt-1">Current photo</small>
-                                </div>
-                            {% endif %}
-                            {{ form.customer_image }}
-                            <small class="text-muted d-block mt-1">{{ form.customer_image.help_text }}</small>
-                            {% if form.customer_image.errors %}
-                                <div class="invalid-feedback d-block">{{ form.customer_image.errors.0 }}</div>
-                            {% endif %}
-                        </div>
-
-                        <hr class="my-4">
-                        <h6 class="fw-semibold mb-3 text-muted">Testimonial Content</h6>
-
-                        <!-- Testimonial Quote -->
-                        <div class="mb-4">
-                            <label for="{{ form.quote.id_for_label }}" class="form-label fw-semibold">
-                                <i class="mdi mdi-format-quote-close text-muted me-1"></i>
-                                {{ form.quote.label }} <span class="text-danger">*</span>
-                            </label>
-                            {{ form.quote }}
-                            <small class="text-muted d-block mt-1">Keep it authentic and specific (20-500 characters)</small>
-                            {% if form.quote.errors %}
-                                <div class="invalid-feedback d-block">{{ form.quote.errors.0 }}</div>
-                            {% endif %}
-                        </div>
-
-                        <!-- Rating & Order -->
-                        <div class="row g-3 mb-4">
-                            <div class="col-md-6">
-                                <label for="{{ form.rating.id_for_label }}" class="form-label fw-semibold">
-                                    <i class="mdi mdi-star text-muted me-1"></i>
-                                    {{ form.rating.label }} <span class="text-danger">*</span>
-                                </label>
-                                {{ form.rating }}
-                                {% if form.rating.errors %}
-                                    <div class="invalid-feedback d-block">{{ form.rating.errors.0 }}</div>
-                                {% endif %}
-                            </div>
-                            <div class="col-md-6">
-                                <label for="{{ form.order.id_for_label }}" class="form-label fw-semibold">
-                                    <i class="mdi mdi-sort-numeric-variant text-muted me-1"></i>
-                                    {{ form.order.label }}
-                                </label>
-                                {{ form.order }}
-                                <small class="text-muted d-block">{{ form.order.help_text }}</small>
-                                {% if form.order.errors %}
-                                    <div class="invalid-feedback d-block">{{ form.order.errors.0 }}</div>
-                                {% endif %}
-                            </div>
-                        </div>
-
-                        <!-- Publishing Options -->
-                        <div class="card bg-light border-0 mb-4">
-                            <div class="card-body">
-                                <h6 class="fw-semibold mb-3">
-                                    <i class="mdi mdi-eye-outline text-muted me-1"></i>
-                                    Publishing Options
-                                </h6>
-                                <div class="form-check mb-2">
-                                    {{ form.is_active }}
-                                    <label class="form-check-label" for="{{ form.is_active.id_for_label }}">
-                                        {{ form.is_active.label }}
-                                    </label>
-                                </div>
-                                <div class="form-check">
-                                    {{ form.is_featured }}
-                                    <label class="form-check-label" for="{{ form.is_featured.id_for_label }}">
-                                        {{ form.is_featured.label }}
-                                    </label>
-                                    <small class="text-muted d-block mt-1">{{ form.is_featured.help_text }}</small>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Action Buttons -->
-                        <div class="d-flex gap-2">
-                            <button type="submit" class="btn btn-primary px-4">
-                                <i class="mdi mdi-content-save me-2"></i>{{ form_action }} Testimonial
-                            </button>
-                            <a href="{% url 'dashboard_testimonial_list' %}" class="btn btn-outline-secondary px-4">
-                                <i class="mdi mdi-close me-2"></i>Cancel
-                            </a>
-                        </div>
-                    </form>
-                </div>
+                    {% endif %}
+                {% endfor %}
             </div>
         </div>
 
-        <!-- Sidebar -->
-        <div class="col-lg-4">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body">
-                    <h6 class="fw-semibold mb-3">
-                        <i class="mdi mdi-lightbulb-outline text-primary me-1"></i>
-                        Testimonial Best Practices
-                    </h6>
-                    <ul class="small mb-0">
-                        <li class="mb-2"><strong>Be authentic:</strong> Use real customer feedback whenever possible.</li>
-                        <li class="mb-2"><strong>Include specifics:</strong> Mention specific destinations, activities, or experiences.</li>
-                        <li class="mb-2"><strong>Keep it concise:</strong> 2-3 sentences is ideal for web display.</li>
-                        <li class="mb-2"><strong>Add photos:</strong> Customer photos add credibility and personality.</li>
-                        <li class="mb-2"><strong>Highlight results:</strong> Focus on outcomes and experiences, not just descriptions.</li>
-                        <li><strong>Feature the best:</strong> Mark your strongest testimonials as featured for homepage display.</li>
-                    </ul>
-                </div>
+        {% if form.non_field_errors %}
+            <div class="dash-card border-rose-200 bg-rose-50 text-rose-700 text-sm">
+                {% for err in form.non_field_errors %}<p>{{ err }}</p>{% endfor %}
             </div>
+        {% endif %}
+    </div>
 
-            <div class="card border-0 shadow-sm mt-3 bg-info bg-opacity-10">
-                <div class="card-body">
-                    <h6 class="fw-semibold mb-2 text-info">
-                        <i class="mdi mdi-shield-check me-1"></i>
-                        Trust Building
-                    </h6>
-                    <p class="small mb-0 text-muted">
-                        Testimonials are one of your most powerful marketing tools. They build trust and provide social proof that helps convert visitors into customers. Feature testimonials prominently on your homepage!
-                    </p>
-                </div>
+    <aside class="lg:sticky lg:top-20 lg:self-start space-y-4">
+        <div class="dash-card">
+            <p class="dash-card-title mb-4">Publish</p>
+            <button type="submit" class="dash-btn dash-btn-primary w-full"><i class="fal fa-check"></i> Save testimonial</button>
+            <a href="{% url 'dashboard_testimonial_list' %}" class="dash-btn dash-btn-ghost w-full mt-2 text-center justify-center">Cancel</a>
+
+            <div class="mt-5 pt-5 border-t border-slate-200 space-y-3 text-xs">
+                <label class="flex items-start gap-2 cursor-pointer">{{ form.is_active }}<span><span class="block text-slate-700 font-medium">Active</span><span class="text-slate-500">Shown publicly</span></span></label>
+                <label class="flex items-start gap-2 cursor-pointer">{{ form.is_featured }}<span><span class="block text-slate-700 font-medium">Featured</span><span class="text-slate-500">Homepage spotlight</span></span></label>
             </div>
         </div>
-    </div>
-</div>
+    </aside>
+</form>
+
 {% endblock %}
