@@ -172,6 +172,49 @@ def dashboard_home(request):
     pending_quotes = CustomPackage.objects.filter(status='pending').count()
     new_messages = ContactMessage.objects.filter(status='new').count()
 
+    total_packages = Package.objects.filter(is_active=True).count()
+    total_destinations = Destination.objects.filter(is_active=True).count()
+    total_activities = Activity.objects.filter(is_active=True).count()
+    total_accommodations = Accommodation.objects.filter(is_active=True).count()
+
+    # -- Get-started checklist (visible until all 4 catalog buckets non-empty)
+    # Order matters — destinations seed everything else, package depends on the
+    # other three. Each step carries its own resolved URL so the template
+    # stays dumb.
+    from django.urls import reverse as _reverse
+    getting_started_steps = [
+        {
+            'label': 'Add your first destination',
+            'description': 'Where do your trips go? Serengeti, Ngorongoro, Zanzibar — start with one.',
+            'icon': 'map-marked-alt',
+            'href': _reverse('dashboard_destination_create'),
+            'done': total_destinations > 0,
+        },
+        {
+            'label': 'Add an activity',
+            'description': 'Game drives, hot-air balloons, cultural visits — the experiences guests book.',
+            'icon': 'binoculars',
+            'href': _reverse('dashboard_activity_create'),
+            'done': total_activities > 0,
+        },
+        {
+            'label': 'Add a lodge or camp',
+            'description': 'The accommodations your itineraries route through.',
+            'icon': 'bed',
+            'href': _reverse('dashboard_accommodation_create'),
+            'done': total_accommodations > 0,
+        },
+        {
+            'label': 'Build your first tour package',
+            'description': 'Combine the above into a saleable multi-day itinerary with pricing.',
+            'icon': 'route',
+            'href': _reverse('packages:dashboard_package_create'),
+            'done': total_packages > 0,
+        },
+    ]
+    getting_started_visible = not all(step['done'] for step in getting_started_steps)
+    getting_started_done_count = sum(1 for step in getting_started_steps if step['done'])
+
     context = {
         # Headline KPIs
         'inquiries_30d': inquiries_30d,
@@ -196,10 +239,16 @@ def dashboard_home(request):
         'new_messages': new_messages,
 
         # Catalog totals (for the right-rail card)
-        'total_packages': Package.objects.filter(is_active=True).count(),
-        'total_destinations': Destination.objects.filter(is_active=True).count(),
-        'total_activities': Activity.objects.filter(is_active=True).count(),
-        'total_accommodations': Accommodation.objects.filter(is_active=True).count(),
+        'total_packages': total_packages,
+        'total_destinations': total_destinations,
+        'total_activities': total_activities,
+        'total_accommodations': total_accommodations,
+
+        # Get-started checklist (auto-hides when catalog is fully seeded)
+        'getting_started_steps': getting_started_steps,
+        'getting_started_visible': getting_started_visible,
+        'getting_started_done_count': getting_started_done_count,
+        'getting_started_total': len(getting_started_steps),
     }
     return render(request, 'core/dashboard/index.html', context)
 
