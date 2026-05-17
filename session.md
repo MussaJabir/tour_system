@@ -723,4 +723,55 @@ All 9 public route groups live on `base_modern.html` with the Safari Editorial s
 
 ---
 
+## Session 022 — 2026-05-17
+
+**Type:** Phase 7.2 — Dashboard listings (Operations Slate)
+**Branch:** `feature/dashboard-listings` → PR → `develop`
+
+### What we did
+1. **Migrated all 12 dashboard list templates** to `base_dashboard.html`:
+   - `destinations/dashboard/list.html` — search + country + status filter
+   - `packages/dashboard/list.html` — search + category + status, row actions for edit / departures / delete
+   - `activities/dashboard/list.html` — search + destination + category + difficulty filters
+   - `accommodations/dashboard/list.html` — search + destination + type + rating filters, gold star rating display
+   - `packages/inquiry/dashboard/list.html` — status tabs (Pending / In progress / Quote sent / Converted) with counts
+   - `packages/inquiry/dashboard/custom_package_list.html` — status tabs + search
+   - `packages/bookings/dashboard/list.html` — status filter dropdown, all 7 booking statuses mapped to semantic badges
+   - `reviews/dashboard/list.html` — status tabs (Pending / Approved / Rejected) with counts, star rating display
+   - `core/dashboard/contact_list.html` — status tabs with red-highlighted "New" count
+   - `core/dashboard/faq_list.html` — search + category + status filters
+   - `core/dashboard/newsletter_list.html` — Active / Unsubscribed tabs, Export CSV topbar action
+   - `core/dashboard/testimonial_list.html` — search + rating + status filters
+2. **Shared pattern across all 12**:
+   - Page header via `_page_header` partial (title + subtitle + optional action_html)
+   - Breadcrumb via `_breadcrumb` partial
+   - Optional status-tab nav (where applicable) — pill chips with active state via charcoal bg
+   - Filter form bar (search + selects) wrapped in card top with horizontal layout
+   - `.dash-table` for the actual table
+   - Status badges via `_status_badge` partial (success/warning/danger/info/neutral)
+   - Empty state via `_empty_state` partial with action CTA
+   - Pagination footer that preserves filter querystring
+   - Topbar "+ New X" primary CTA on every list that supports creation
+3. **Namespacing fix during browser spot-check** — `packages/dashboard/list.html` referenced `public_package_detail` without the `packages:` prefix; corrected to `packages:public_package_detail`. Other apps (destinations, activities, accommodations) are not namespaced so their `public_*` URLs work without prefix.
+4. **Tailwind rebuild** — 66 KB minified (no growth — Tailwind already had `dash-*` utilities from Phase 7.0)
+5. **Cache-bust** bumped to `v=20260517c`
+6. **5 new tests** in `core/tests_dashboard_listings.py`:
+   - All 12 list URLs return 200 for staff (subTest per route)
+   - All 12 use `base_dashboard.html`
+   - All 12 contain a `.dash-table`
+   - Destinations list renders search + country + status form fields
+   - Anonymous users redirect to login
+7. **All 266 tests pass** (261 prior + 5 new) — 128s
+8. **Visual spot-check** at `/dashboard/packages/` — sidebar nav, filter bar, package table with thumbnails + descriptions + status badges + per-row actions all render correctly
+
+### Deferred to Phase 7.6 polish (non-blocking)
+- Sortable column headers (clickable `<th>` with arrow icons)
+- Bulk-action toolbar with checkbox column (only reviews + newsletter need it)
+- Per-row Alpine dropdown menu (current inline icon buttons work for v1)
+
+### PR
+- https://github.com/MussaJabir/tour_system/pull/23
+
+---
+
 _Add new sessions above this line._

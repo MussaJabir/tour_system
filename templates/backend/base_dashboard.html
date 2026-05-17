@@ -16,7 +16,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400..600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 
     {# Tailwind compiled CSS — shared between public + dashboard #}
-    <link rel="stylesheet" href="{% static 'frontend/css/tailwind.css' %}?v=20260517b">
+    <link rel="stylesheet" href="{% static 'frontend/css/tailwind.css' %}?v=20260517d">
 
     {# Font Awesome #}
     <link rel="stylesheet" href="{% static 'frontend/assets/css/fontawesome-5.14.0.min.css' %}">
@@ -52,7 +52,7 @@
         <div class="flex flex-col min-h-screen min-w-0">
             {% include 'backend/partials/_dashboard_topbar.html' %}
 
-            <main id="dash-content" tabindex="-1" class="flex-1 px-5 py-6 lg:px-8 lg:py-8 max-w-[1400px] w-full">
+            <main id="dash-content" tabindex="-1" class="dash-main flex-1 px-5 py-6 lg:px-8 lg:py-8">
                 {# Django messages #}
                 {% if messages %}
                     <div class="space-y-2 mb-6">

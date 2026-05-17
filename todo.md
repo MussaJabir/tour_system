@@ -240,11 +240,20 @@ Branch: `feature/dashboard-home` → PR → `develop`
 
 ### Phase 7.2 — Dashboard listings (3–4 days · biggest sub-phase)
 Branch: `feature/dashboard-listings` → PR → `develop`
-- [ ] Unified `_data_table.html` partial: sortable columns, sticky header, row hover, bulk-action toolbar, top filter bar with search
-- [ ] Migrate: packages, destinations, activities, accommodations, inquiries, bookings, reviews, contacts, newsletter, FAQs, testimonials
-- [ ] Status badge column (semantic colours)
-- [ ] Per-row action menu (Alpine dropdown)
-- [ ] Empty states with helpful CTAs
+- [x] All 12 dashboard list templates migrated to `base_dashboard.html`:
+    - destinations, packages, activities, accommodations
+    - inquiries, custom quotes, bookings, reviews
+    - contacts, FAQs, newsletter, testimonials
+- [x] Every list uses `.dash-table` for the data table + `.dash-input` / `.dash-select` for filters
+- [x] Semantic status badges (via `_status_badge.html`) on every list with status
+- [x] Status filter tabs with counts on inquiries, custom quotes, bookings, reviews, contacts, newsletter
+- [x] Empty states with helpful CTAs via `_empty_state.html`
+- [x] Per-row action buttons (edit / departures / delete / open / approve etc.)
+- [x] Topbar "+ New X" CTAs on every applicable list
+- [x] Pagination preserves filter querystring
+- [ ] Sortable column headers — deferred to Phase 7.6 polish (not blocking; views still order by sensible defaults)
+- [ ] Bulk-action toolbar — deferred to Phase 7.6 (only reviews + newsletter need it)
+- [ ] Per-row Alpine dropdown menu — deferred (inline icon buttons work for v1)
 
 ### Phase 7.3 — Dashboard forms (2–3 days)
 Branch: `feature/dashboard-forms` → PR → `develop`
