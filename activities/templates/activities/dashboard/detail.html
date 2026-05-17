@@ -1,148 +1,76 @@
-{% extends 'backend/base.html' %}
+{% extends 'backend/base_dashboard.html' %}
 {% load static %}
 
-{% block content %}
-<div class="container-fluid">
-    <!-- Page Heading -->
-    <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h3 mb-0 text-gray-800">{{ page_title }}</h1>
-        <div>
-            <a href="{% url 'dashboard_activity_edit' activity.pk %}" class="btn btn-warning btn-sm">
-                <i class="fas fa-edit"></i> Edit
-            </a>
-            <a href="{% url 'dashboard_activity_list' %}" class="btn btn-secondary btn-sm">
-                <i class="fas fa-arrow-left"></i> Back
-            </a>
-        </div>
-    </div>
+{% block title %}{{ activity.name }} — Dashboard{% endblock %}
 
-    <!-- Activity Details -->
-    <div class="row">
-        <div class="col-lg-8">
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Basic Information</h6>
-                </div>
-                <div class="card-body">
-                    {% if activity.featured_image %}
-                    <img src="{{ activity.featured_image.url }}" alt="{{ activity.name }}" class="img-fluid mb-4 rounded">
-                    {% endif %}
-
-                    <h4>{{ activity.name }}</h4>
-                    <p class="text-muted">{{ activity.destination.name }}</p>
-                    
-                    <div class="row mt-3">
-                        <div class="col-md-6">
-                            <p><strong>Category:</strong> {{ activity.get_category_display }}</p>
-                        </div>
-                        <div class="col-md-6">
-                            <p><strong>Difficulty:</strong> 
-                                <span class="badge {% if activity.difficulty == 'easy' %}badge-success{% elif activity.difficulty == 'moderate' %}badge-info{% elif activity.difficulty == 'challenging' %}badge-warning{% else %}badge-danger{% endif %}">
-                                    {{ activity.get_difficulty_display }}
-                                </span>
-                            </p>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-6">
-                            <p><strong>Duration:</strong> {{ activity.duration_display }}</p>
-                        </div>
-                        <div class="col-md-6">
-                            <p><strong>Price:</strong> {{ activity.price_display }}</p>
-                        </div>
-                    </div>
-
-                    {% if activity.min_age %}
-                    <p><strong>Minimum Age:</strong> {{ activity.min_age }} years</p>
-                    {% endif %}
-
-                    {% if activity.max_group_size %}
-                    <p><strong>Maximum Group Size:</strong> {{ activity.max_group_size }} people</p>
-                    {% endif %}
-
-                    <hr>
-
-                    <h5>Description</h5>
-                    <p>{{ activity.description|linebreaks }}</p>
-
-                    {% if activity.requirements %}
-                    <hr>
-                    <h5>Requirements</h5>
-                    <p>{{ activity.requirements|linebreaks }}</p>
-                    {% endif %}
-
-                    {% if activity.included_items %}
-                    <hr>
-                    <h5>What's Included</h5>
-                    <p>{{ activity.included_items|linebreaks }}</p>
-                    {% endif %}
-
-                    {% if activity.excluded_items %}
-                    <hr>
-                    <h5>What's NOT Included</h5>
-                    <p>{{ activity.excluded_items|linebreaks }}</p>
-                    {% endif %}
-                </div>
-            </div>
-
-            <!-- Gallery -->
-            {% if gallery_images %}
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Gallery Images</h6>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        {% for image in gallery_images %}
-                        <div class="col-md-4 mb-3">
-                            <img src="{{ image.image.url }}" alt="{{ image.caption }}" class="img-fluid rounded">
-                            {% if image.caption %}
-                            <p class="mt-2"><small>{{ image.caption }}</small></p>
-                            {% endif %}
-                        </div>
-                        {% endfor %}
-                    </div>
-                </div>
-            </div>
-            {% endif %}
-        </div>
-
-        <!-- Sidebar -->
-        <div class="col-lg-4">
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Status & Stats</h6>
-                </div>
-                <div class="card-body">
-                    <p>
-                        <strong>Featured:</strong>
-                        {% if activity.is_featured %}
-                        <span class="badge badge-warning">Yes</span>
-                        {% else %}
-                        <span class="badge badge-secondary">No</span>
-                        {% endif %}
-                    </p>
-                    <p>
-                        <strong>Status:</strong>
-                        {% if activity.is_active %}
-                        <span class="badge badge-success">Active</span>
-                        {% else %}
-                        <span class="badge badge-secondary">Inactive</span>
-                        {% endif %}
-                    </p>
-                    <p><strong>Views:</strong> {{ activity.view_count }}</p>
-                    <p><strong>Display Order:</strong> {{ activity.order }}</p>
-                    <hr>
-                    <p><strong>Created:</strong> {{ activity.created_at|date:"M d, Y" }}</p>
-                    <p><strong>Updated:</strong> {{ activity.updated_at|date:"M d, Y" }}</p>
-                    {% if activity.created_by %}
-                    <p><strong>Created By:</strong> {{ activity.created_by.username }}</p>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+{% block topbar_extras %}
+<a href="{% url 'public_activity_detail' activity.slug %}" target="_blank" class="dash-btn dash-btn-ghost">
+    <i class="fal fa-external-link-alt"></i><span class="hidden sm:inline">Public page</span>
+</a>
+<a href="{% url 'dashboard_activity_edit' activity.pk %}" class="dash-btn dash-btn-primary">
+    <i class="fal fa-edit"></i><span class="hidden sm:inline">Edit</span>
+</a>
 {% endblock %}
 
+{% block content %}
+
+{% include 'backend/partials/_breadcrumb.html' with crumbs=' ' %}
+
+<div class="dash-page-header">
+    <div>
+        <p class="dash-stat-label">Activity</p>
+        <h1 class="dash-page-title flex items-center gap-3">
+            {{ activity.name }}
+            {% if activity.is_active %}
+                {% if activity.is_featured %}{% include 'backend/partials/_status_badge.html' with label='Featured' variant='success' %}
+                {% else %}{% include 'backend/partials/_status_badge.html' with label='Active' variant='info' %}{% endif %}
+            {% else %}{% include 'backend/partials/_status_badge.html' with label='Inactive' variant='neutral' %}{% endif %}
+        </h1>
+        <p class="text-sm text-slate-500 mt-1">{{ activity.get_category_display }} · {{ activity.destination.name }}</p>
+    </div>
+</div>
+
+<div class="grid lg:grid-cols-[1fr_320px] gap-6">
+
+    <div class="space-y-6 min-w-0">
+        {% if activity.featured_image %}<div class="rounded-xl overflow-hidden bg-slate-100 aspect-[16/9]"><img src="{{ activity.featured_image.url }}" alt="" class="w-full h-full object-cover"></div>{% endif %}
+
+        <div class="dash-card">
+            <header class="dash-card-header"><div><p class="dash-card-title">About</p></div></header>
+            <p class="text-sm text-slate-700 leading-relaxed whitespace-pre-line">{{ activity.description }}</p>
+        </div>
+
+        {% if activity.requirements %}<div class="dash-card"><header class="dash-card-header"><div><p class="dash-card-title">Requirements</p></div></header><p class="text-sm text-slate-700 whitespace-pre-line">{{ activity.requirements }}</p></div>{% endif %}
+        {% if activity.included_items or activity.excluded_items %}
+        <div class="grid sm:grid-cols-2 gap-6">
+            {% if activity.included_items %}<div class="dash-card"><header class="dash-card-header"><div><p class="dash-card-title text-bush-700">Included</p></div></header><p class="text-sm text-slate-700 whitespace-pre-line">{{ activity.included_items }}</p></div>{% endif %}
+            {% if activity.excluded_items %}<div class="dash-card"><header class="dash-card-header"><div><p class="dash-card-title text-rose-700">Excluded</p></div></header><p class="text-sm text-slate-700 whitespace-pre-line">{{ activity.excluded_items }}</p></div>{% endif %}
+        </div>
+        {% endif %}
+
+        <div class="dash-card">
+            <header class="dash-card-header"><div><p class="dash-card-title">Gallery · {{ gallery_images.count }}</p></div></header>
+            {% if gallery_images %}
+            <div class="grid grid-cols-3 sm:grid-cols-4 gap-3">
+                {% for img in gallery_images %}<a href="{{ img.image.url }}" target="_blank" class="aspect-square rounded-lg overflow-hidden bg-slate-100 block"><img src="{{ img.image.url }}" alt="" class="w-full h-full object-cover"></a>{% endfor %}
+            </div>
+            {% else %}<p class="text-sm text-slate-500 text-center py-6">No gallery images yet.</p>{% endif %}
+        </div>
+    </div>
+
+    <aside class="space-y-4 lg:sticky lg:top-20 lg:self-start">
+        <div class="dash-card">
+            <p class="dash-stat-label mb-3">Quick facts</p>
+            <dl class="space-y-2.5 text-xs">
+                <div class="flex justify-between"><dt class="text-slate-500">Destination</dt><dd class="text-slate-900">{{ activity.destination.name }}</dd></div>
+                <div class="flex justify-between"><dt class="text-slate-500">Category</dt><dd class="text-slate-900">{{ activity.get_category_display }}</dd></div>
+                <div class="flex justify-between"><dt class="text-slate-500">Difficulty</dt><dd class="text-slate-900">{{ activity.get_difficulty_display }}</dd></div>
+                <div class="flex justify-between"><dt class="text-slate-500">Duration</dt><dd class="text-slate-900">{{ activity.duration_display }}</dd></div>
+                <div class="flex justify-between"><dt class="text-slate-500">Price</dt><dd class="text-slate-900">{{ activity.currency }} {{ activity.price_per_person|floatformat:0 }}</dd></div>
+                <div class="flex justify-between"><dt class="text-slate-500">Views</dt><dd class="text-slate-900">{{ activity.view_count }}</dd></div>
+            </dl>
+        </div>
+    </aside>
+</div>
+
+{% endblock %}
