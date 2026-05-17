@@ -257,11 +257,17 @@ Branch: `feature/dashboard-listings` → PR → `develop`
 
 ### Phase 7.3 — Dashboard forms (2–3 days)
 Branch: `feature/dashboard-forms` → PR → `develop`
-- [ ] 2-column layout: form left, sticky sidebar right (save / status / delete / publish actions)
-- [ ] Section cards within forms
-- [ ] **Tabs for multi-section forms** — package edit (details / images / itinerary / inclusions / departures), accommodation edit (details / images / rooms), etc.
-- [ ] Inline validation; error chips beside each field
-- [ ] Migrate every dashboard create/edit template
+- [x] **2-column layout** — form left (`1fr`), sticky publish sidebar right (`280px`) — saves/cancels/active toggle/featured toggle/danger zone
+- [x] **Section cards** — every form is split into titled `dash-card`s (Basics / Pricing / Media / SEO, etc.)
+- [x] **`.dash-form-field` wrapper class** — Tailwind component layer styles ALL input/select/textarea descendants so existing Django widget attrs (`form-control`) become visual no-ops; no widget rewrites needed
+- [x] **Inline validation** — `dash-form-field--error` red border + per-field error list with `fa-exclamation-circle` icon
+- [x] **Migrated 11 form templates**:
+    - destinations · packages · activities · accommodations
+    - faq · testimonial
+    - booking · passenger
+    - itinerary (package) · departure · custom-itinerary (custom quote)
+- [x] Auto-render pattern via `{% for field in form %}` for the simpler forms; explicit section-by-section markup for packages (the most complex)
+- [ ] Tabs for multi-section forms — deferred (Alpine.js tabs would be nice but section cards work well; revisit only if user feedback says forms are too long)
 
 ### Phase 7.4 — Dashboard detail pages (2 days)
 Branch: `feature/dashboard-detail-pages` → PR → `develop`

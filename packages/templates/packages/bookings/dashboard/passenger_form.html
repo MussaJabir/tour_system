@@ -1,45 +1,49 @@
-{% extends "backend/base.html" %}
+{% extends 'backend/base_dashboard.html' %}
 {% load static %}
 
-{% block title %}Edit Passenger{% endblock %}
+{% block title %}Passenger — Booking {{ booking.booking_reference }}{% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <div class="mb-3">
-        <a href="{% url 'packages:dashboard_booking_detail' booking.pk %}" class="text-muted small">
-            <i class="mdi mdi-arrow-left"></i> {{ booking.booking_reference }}
-        </a>
-        <h4 class="mb-0 mt-1">Edit Passenger — {{ passenger.full_name }}</h4>
-    </div>
 
-    <div class="card">
-        <div class="card-body">
-            <form method="post">
-                {% csrf_token %}
+{% include 'backend/partials/_breadcrumb.html' with crumbs=' ' %}
+{% include 'backend/partials/_page_header.html' with title='Passenger' subtitle='Personal and travel details for one passenger on this booking.' %}
 
-                {% if form.non_field_errors %}
-                    <div class="alert alert-danger">{{ form.non_field_errors }}</div>
-                {% endif %}
+<form method="post" class="grid lg:grid-cols-[1fr_280px] gap-6">
+    {% csrf_token %}
 
-                <div class="row g-3">
-                    {% for field in form %}
-                        <div class="col-md-6">
-                            <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
-                            {{ field }}
-                            {% if field.errors %}
-                                <div class="text-danger small">{{ field.errors }}</div>
-                            {% endif %}
-                        </div>
-                    {% endfor %}
-                </div>
-
-                <div class="mt-4 d-flex gap-2">
-                    <button type="submit" class="btn btn-primary">Save Changes</button>
-                    <a href="{% url 'packages:dashboard_booking_detail' booking.pk %}"
-                       class="btn btn-outline-secondary">Cancel</a>
-                </div>
-            </form>
+    <div class="space-y-6 min-w-0">
+        <div class="dash-card">
+            <header class="dash-card-header"><div><p class="dash-card-title">Passenger details</p></div></header>
+            <div class="grid sm:grid-cols-2 gap-5">
+                {% for field in form %}
+                    <div class="{% if field.name == 'dietary_requirements' or field.name == 'medical_notes' or field.name == 'emergency_contact_name' or field.name == 'emergency_contact_phone' %}sm:col-span-2{% endif %}">
+                        {% include 'backend/partials/_dash_form_field.html' with field=field %}
+                    </div>
+                {% endfor %}
+            </div>
         </div>
+
+        {% if form.non_field_errors %}
+            <div class="dash-card border-rose-200 bg-rose-50 text-rose-700 text-sm">
+                {% for err in form.non_field_errors %}<p>{{ err }}</p>{% endfor %}
+            </div>
+        {% endif %}
     </div>
-</div>
+
+    <aside class="lg:sticky lg:top-20 lg:self-start space-y-4">
+        <div class="dash-card">
+            <p class="dash-card-title mb-4">Actions</p>
+            <button type="submit" class="dash-btn dash-btn-primary w-full"><i class="fal fa-check"></i> Save passenger</button>
+            <a href="{% url 'packages:dashboard_booking_detail' booking.pk %}" class="dash-btn dash-btn-ghost w-full mt-2 text-center justify-center">Cancel</a>
+        </div>
+
+        <div class="dash-card">
+            <p class="dash-stat-label mb-3">Booking</p>
+            <p class="text-xs font-mono text-slate-500">{{ booking.booking_reference }}</p>
+            <p class="mt-2 text-sm text-slate-900">{{ booking.package.name }}</p>
+            <p class="text-xs text-slate-500 mt-1">{{ booking.departure_date|date:'d M Y' }}</p>
+        </div>
+    </aside>
+</form>
+
 {% endblock %}

@@ -774,4 +774,48 @@ All 9 public route groups live on `base_modern.html` with the Safari Editorial s
 
 ---
 
+## Session 023 — 2026-05-17
+
+**Type:** Phase 7.3 — Dashboard forms (Operations Slate)
+**Branch:** `feature/dashboard-forms` → PR → `develop`
+
+### What we did
+1. **Added `.dash-form-field` component class** to `tailwind.css` — force-styles every input/select/textarea descendant with Operations Slate look (slate-300 border, bush-600 focus glow, rose-500 on error). This lets every form widget render correctly **without rewriting `widgets` attrs** in Django's `forms.py`. Existing `form-control` / `form-select` widget classes become visual no-ops.
+2. **Added `_dash_form_field.html` partial** — Django BoundField → label + input + help-text + per-field error list. Used as `{% include … with field=form.name %}`.
+3. **Migrated 11 form templates** to `base_dashboard.html` with a consistent **2-column layout**: form left (`1fr`), sticky publish sidebar right (`280px`).
+   - **Forms migrated**:
+     - `destinations/dashboard/form.html` — Basics / Travel info / Media & location / SEO cards
+     - `packages/dashboard/form.html` — 8 sections (Basics, Duration & group, Pricing, Availability, What's included, Policies, Media, SEO), plus "Related" sidebar links (Departures, Add itinerary, Add inclusion, Add image)
+     - `activities/dashboard/form.html` — auto-rendered fields with wide-field detection
+     - `accommodations/dashboard/form.html` — auto-rendered with wide-field detection
+     - `core/dashboard/faq_form.html` — minimalist single-section
+     - `core/dashboard/testimonial_form.html` — quote field spans 2 cols
+     - `packages/bookings/dashboard/form.html` — auto-rendered with text-area fields spanning both cols
+     - `packages/bookings/dashboard/passenger_form.html` — passenger details with emergency contact full-width
+     - `packages/dashboard/itinerary_form.html` — per-day itinerary entry
+     - `packages/departures/dashboard/form.html` — single departure
+     - `packages/inquiry/dashboard/custom_itinerary_form.html` — custom-quote day
+4. **Sidebar publish panel pattern** (every form):
+   - Primary "Save" button + secondary "Cancel" → back to list
+   - `is_active` / `is_featured` checkboxes inline with descriptive labels
+   - "Danger zone" card with delete button (only on edit views, gated by `{% if object %}`)
+   - Context-relevant sidebar cards (e.g. packages form shows "Related" links to departures/itinerary/inclusions/images; booking form shows source inquiry; passenger form shows parent booking)
+5. **Form rendering patterns**:
+   - **Complex forms** (packages, destinations): explicit field-by-field grid layout with named sections
+   - **Simple forms** (activities, accommodations, faq, testimonial, booking, passenger, itinerary, departure, custom_itinerary): `{% for field in form %}` auto-render with a per-field check for "wide" fields (descriptions, requirements, notes) that span both columns
+   - Both patterns extract `is_active`/`is_featured`/`order` out of the loop to render them in the sidebar
+6. **Tailwind rebuild** — 68 KB minified (+2 KB over Phase 7.2 from the new `.dash-form-field` rules)
+7. **Cache-bust** bumped to `v=20260517e`
+8. **5 new tests** in `core/tests_dashboard_forms.py` — subTest over 7 create routes (destination, package, activity, accommodation, faq, testimonial, booking): each returns 200 for staff, uses `base_dashboard.html`, contains `dash-form-field` wrapper, contains submit button. Plus anonymous-redirect auth test.
+9. **All 271 tests pass** (266 prior + 5 new) — 124s
+10. **Visual spot-check** at `/dashboard/packages/create/` — 8 named section cards (Basics, Duration & group, Pricing, Availability, What's included, Policies, Media, SEO), sticky Publish sidebar with Save package CTA + Active/Featured/Customisable toggles, all rendering cleanly in Operations Slate.
+
+### Deferred
+- **Tabs for multi-section forms** (e.g. package edit with images/itinerary/inclusions/departures tabs). Section cards work well enough for v1; revisit only if forms feel too long during real use.
+
+### PR
+- (opening next…)
+
+---
+
 _Add new sessions above this line._
