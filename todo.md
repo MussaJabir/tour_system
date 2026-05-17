@@ -311,6 +311,48 @@ Branch: `feature/dashboard-polish` → PR → `develop`
 
 ---
 
+## Phase 8 — Dashboard Polish (post-launch audit findings)
+> Triggered by a senior-dev audit of the Phase 7 dashboard. P0 = real bugs.
+> P1 / P2 are NOT pre-planned — they will be re-evaluated after 2 weeks of
+> real-data use, so this list stays as a backlog not a roadmap.
+
+### P0 — bugs (must fix)
+
+- [x] **Topbar `{% block %}` inside `{% include %}` partial** — `topbar_extras` and `topbar_search` block declarations lived in `_dashboard_topbar.html`, which is `{% include %}d` into the base. Django blocks do not cross include boundaries, so every "+ New X" CTA on ~16 dashboard pages was silently dropped. Inlined the topbar into `base_dashboard.html`, deleted the partial. Regression test added.
+- [x] **Package `delete_confirm.html` missing** — view rendered `delete_confirm.html` but only `delete.html` existed → `TemplateDoesNotExist` on every package delete. (Fixed in Phase 7.5 / PR #26.)
+- [x] **Empty dashboard has no onboarding** — fresh staff sign-in shows flat-zero KPIs + "No X yet" everywhere with no next-step guidance. Added a get-started checklist card on the dashboard home (4 steps: destination → activity → lodge → package) that tracks partial progress and auto-hides once all four catalog buckets are seeded.
+
+### P1 — UX friction (backlog, re-evaluate after 2 weeks of real use)
+> Do NOT pre-build these. Each item gets re-scored once real data has flowed
+> through the dashboard. Some will turn out to be non-issues in practice.
+
+- [ ] **Package form is too long** — 23 fields in one screen; only 6 required. Candidate fixes: Alpine.js tabs (4 tabs) OR two-step (quick-draft → inline-edit detail).
+- [ ] **No autosave / no unsaved-changes warning** — long forms lose work on accidental tab close. Add localStorage autosave + beforeunload guard.
+- [ ] **Per-row action icons lack tooltips/aria-labels** — pencil/calendar/trash icons are functional but discovery-hostile. Add `title` + `aria-label`.
+- [ ] **Inquiry detail crams management form into 280px sidebar** — move status/assign/priority actions into a topbar dropdown; keep sidebar read-only.
+- [ ] **No bulk actions on list pages** — priority: Reviews (approve/reject), Newsletter (delete inactive), Contact messages (archive). Needs checkbox column + sticky bottom action bar.
+- [ ] **List tables are not sortable** — header clicks do nothing; add `?sort=` query-string sorting with reusable template pattern.
+- [ ] **Dashboard KPIs lack baseline context** — "Inquiries · 30d: 0" with no comparison feels inert when there's no prior period. Add baseline / target / last-quarter average.
+
+### P2 — architecture (defer indefinitely; do not pre-plan)
+> These were nice-to-haves in the audit. None of them block the product.
+> If after a month of use they are still missed, then reconsider.
+
+- [ ] **Keyboard shortcuts** — `g d`, `g p`, `n` (new), `/` (focus search), `?` (help).
+- [ ] **Recently-viewed / "continue editing" affordance after save**
+- [ ] **Global search** — `/dashboard/search/?q=` across packages, destinations, activities, lodges, bookings, inquiries
+- [ ] **Saved filter views** — pin a personal filter as a sidebar shortcut
+- [ ] **"Today" view on dashboard home** — departures today, deposits expiring 48h, inquiries unread >24h
+- [ ] **Audit log per record** — who changed status from X to Y and when (simple-history or homegrown)
+- [ ] **Custom-package builder save-as-draft / preview-before-create**
+- [ ] **AI Assistant job cancellation** — long-running Celery jobs currently can't be cancelled from the UI
+
+### Deferred from Phase 8 P0 itself
+
+- [ ] **`templates/500.html` multi-line `{# #}` comment bug** — Django's `{# #}` comments are single-line only; the multi-line comment on lines 2-3 contains a literal `{% url %}` that the parser sees. Currently masked because tests don't usually hit 500. Not in P0 scope (pre-existing, doesn't affect functionality unless an actual 500 happens in DEBUG=False). Fix when touching the template anyway.
+
+---
+
 ## Priority Order (Impact vs Effort)
 
 | # | Item | Impact | Effort |

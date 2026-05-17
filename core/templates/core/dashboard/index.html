@@ -29,6 +29,65 @@
 </div>
 
 {# ============================================================ #}
+{# GET STARTED CHECKLIST — auto-hides once catalog is seeded #}
+{# ============================================================ #}
+{% if getting_started_visible %}
+<section data-getting-started class="dash-card mb-6 border-bush-200 bg-bush-50/40">
+    <header class="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+            <p class="dash-stat-label text-bush-700">Get started</p>
+            <p class="dash-card-title mt-1">Set up your catalog</p>
+            <p class="text-sm text-slate-500 mt-1">
+                A few quick steps before your first inquiry can become a booking.
+            </p>
+        </div>
+        <div class="text-right">
+            <p class="text-xs uppercase tracking-wide text-slate-500">Progress</p>
+            <p class="text-2xl font-semibold text-bush-700 mt-1">
+                {{ getting_started_done_count }}<span class="text-slate-400 text-base">/{{ getting_started_total }}</span>
+            </p>
+        </div>
+    </header>
+
+    <ol class="mt-5 grid sm:grid-cols-2 gap-3">
+        {% for step in getting_started_steps %}
+        <li>
+            <a href="{{ step.href }}"
+               class="flex items-start gap-3 p-3 rounded-lg border transition
+                      {% if step.done %}
+                      border-emerald-200 bg-emerald-50 hover:bg-emerald-100
+                      {% else %}
+                      border-slate-200 bg-white hover:border-bush-300 hover:bg-bush-50/30
+                      {% endif %}">
+
+                <span class="w-9 h-9 rounded-md flex items-center justify-center flex-shrink-0
+                             {% if step.done %}bg-emerald-100 text-emerald-700
+                             {% else %}bg-bush-100 text-bush-700{% endif %}">
+                    {% if step.done %}
+                        <i class="fal fa-check"></i>
+                    {% else %}
+                        <i class="fal fa-{{ step.icon }}"></i>
+                    {% endif %}
+                </span>
+
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-medium {% if step.done %}text-emerald-800 line-through{% else %}text-slate-900{% endif %}">
+                        {{ step.label }}
+                    </p>
+                    <p class="text-xs text-slate-500 mt-0.5">{{ step.description }}</p>
+                </div>
+
+                {% if not step.done %}
+                <i class="fal fa-arrow-right text-slate-400 mt-2"></i>
+                {% endif %}
+            </a>
+        </li>
+        {% endfor %}
+    </ol>
+</section>
+{% endif %}
+
+{# ============================================================ #}
 {# QUICK STAT CARDS #}
 {# ============================================================ #}
 <section class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">

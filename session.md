@@ -964,4 +964,47 @@ All 9 public route groups live on `base_modern.html` with the Safari Editorial s
 
 ---
 
+## Session 027 — 2026-05-17
+
+**Type:** Phase 8 P0 — Dashboard polish fixes (post-Phase-7 audit)
+**Branch:** `feature/dashboard-phase8-p0` → PR → `develop`
+
+### Context
+Phase 7 shipped the full Operations Slate dashboard. A senior-dev audit turned up 18 findings across P0 / P1 / P2 severity. This session ships **P0 only**. P1 / P2 are logged in `todo.md` as backlog and deliberately NOT pre-planned — they will be re-scored after 2 weeks of real-data use, so we avoid the trap of polishing problems we don't actually have.
+
+### What we did
+
+1. **Fixed the topbar `{% block %} inside {% include %}` bug** — every "+ New X" CTA on ~16 dashboard pages had been silently dropped since Phase 7.0:
+   - `topbar_extras` and `topbar_search` block declarations had been placed inside `templates/backend/partials/_dashboard_topbar.html`, which `base_dashboard.html` pulled in via `{% include %}`.
+   - Django template blocks only inherit through `{% extends %}` chains, not `{% include %}` — so every child template's `{% block topbar_extras %}...{% endblock %}` override resolved to nothing.
+   - **Fix**: inlined the topbar markup directly into `base_dashboard.html` and deleted the partial. Block declarations now live in the same template that child pages extend, so overrides reach them.
+   - Confirmed affected: every list, detail, and home template under packages, destinations, activities, accommodations, core, and the dashboard home itself — all of which define `topbar_extras`. After the fix, CTAs render as designed.
+
+2. **Added a get-started checklist on the dashboard home** — fresh staff sign-ins had nothing to act on (all KPIs zero, every list "No X yet"):
+   - View computes a 4-step checklist (destination → activity → lodge → package) with each step's `done` flag based on whether the corresponding catalog model has ≥1 `is_active=True` row.
+   - Template shows a bush-tinted card above the KPI grid with a "2/4" progress indicator. Done steps render with line-through styling + emerald checkmark. Undone steps link directly to the relevant create form.
+   - Auto-hides when all four buckets are seeded — once the dashboard is in real use, the card disappears and never returns.
+   - Uses only existing `dash-card`, `dash-stat-label`, `dash-card-title` utilities — no new CSS.
+
+3. **Drive-by self-bug** — my first stab at the topbar fix wrapped the inlined topbar in a multi-line `{# ... #}` comment explaining the why. Django's `{# #}` syntax is single-line only — the parser tripped on the `{% block %}` references inside the comment text and threw `TemplateSyntaxError: 'extends' takes one argument` site-wide. Caught immediately by the test suite (every dashboard test failed). Replaced with a single-line comment + Phase 8 entry in `todo.md` documenting the same gotcha in `templates/500.html` (pre-existing, deferred).
+
+4. **Regression test** — added `core/tests_dashboard_phase8.py` with 10 tests across 2 classes:
+   - `TopbarExtrasBlockRegressionTests` — asserts the "New package" + "New destination" CTAs render in the topbar from their respective list pages, asserts the static "View site" link still appears, asserts the old `_dashboard_topbar.html` file no longer exists.
+   - `GettingStartedChecklistTests` — empty catalog → card visible with 0/4; seeding 2 of 4 → visible with 2/4 + line-through styling appears; seeding all 4 → card hidden and absent from HTML; an `is_active=False` destination does NOT mark the step done (only the live catalog counts).
+
+5. **All 290 tests pass** (280 prior + 10 new) — 148s.
+
+6. **Logged the full 18-item audit into `todo.md`** — P0 marked done, P1 / P2 in a backlog section with an explicit "do not pre-plan" note.
+
+### Decisions / non-goals
+
+- **No P1 work this session.** Auto-save, sortable headers, bulk actions, package-form simplification are real candidates but were explicitly deferred to give real usage a chance to dictate priority. Doing them now would be guessing at problems we don't yet have evidence of.
+- **`templates/500.html` multi-line comment bug** — found during debugging but not in P0 scope; logged in `todo.md` under "Deferred from Phase 8 P0 itself".
+- **No keyboard shortcuts / global search / audit log** — these were P2 in the audit; deferred indefinitely.
+
+### PR
+- https://github.com/MussaJabir/tour_system/pull/28
+
+---
+
 _Add new sessions above this line._
