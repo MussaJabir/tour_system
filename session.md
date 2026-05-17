@@ -814,7 +814,7 @@ All 9 public route groups live on `base_modern.html` with the Safari Editorial s
 - **Tabs for multi-section forms** (e.g. package edit with images/itinerary/inclusions/departures tabs). Section cards work well enough for v1; revisit only if forms feel too long during real use.
 
 ### PR
-- (opening next…)
+- https://github.com/MussaJabir/tour_system/pull/24
 
 ---
 
