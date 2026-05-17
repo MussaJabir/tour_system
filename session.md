@@ -891,7 +891,7 @@ All 9 public route groups live on `base_modern.html` with the Safari Editorial s
 - **Booking status workflow transition guards** — UI hides "Cancel" button when status is already cancelled, but full state-machine enforcement (e.g. can't cancel a `completed` booking) belongs in `Booking.save()` / signals, not the template. Tracked as a separate concern.
 
 ### PR
-- (opening next…)
+- https://github.com/MussaJabir/tour_system/pull/26
 
 ---
 
