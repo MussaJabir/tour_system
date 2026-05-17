@@ -1,61 +1,33 @@
-{% extends 'backend/base.html' %}
+{% extends 'backend/base_dashboard.html' %}
 {% load static %}
 
+{% block title %}Delete {{ activity.name }} — Dashboard{% endblock %}
+
 {% block content %}
-<div class="container-fluid">
-    <!-- Page Heading -->
-    <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h3 mb-0 text-gray-800">{{ page_title }}</h1>
-        <a href="{% url 'dashboard_activity_list' %}" class="btn btn-secondary btn-sm">
-            <i class="fas fa-arrow-left"></i> Back
-        </a>
-    </div>
 
-    <!-- Delete Confirmation -->
-    <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <div class="card shadow mb-4 border-danger">
-                <div class="card-header py-3 bg-danger text-white">
-                    <h6 class="m-0 font-weight-bold">⚠️ Confirm Deletion</h6>
-                </div>
-                <div class="card-body">
-                    <div class="alert alert-danger">
-                        <strong>Warning!</strong> You are about to delete this activity. This action cannot be undone.
-                    </div>
+{% include 'backend/partials/_breadcrumb.html' with crumbs=' ' %}
 
-                    <h4>{{ activity.name }}</h4>
-                    <p class="text-muted">Destination: {{ activity.destination.name }}</p>
+<div class="max-w-xl mx-auto">
+    <div class="dash-card text-center py-12">
+        <span class="w-14 h-14 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center mx-auto">
+            <i class="fal fa-trash text-xl"></i>
+        </span>
+        <h1 class="font-medium text-slate-900 text-lg mt-5">Delete this activity?</h1>
+        <p class="text-sm text-slate-500 mt-2 max-w-sm mx-auto">
+            This will permanently remove the activity and any linked images. Packages including it may break.
+        </p>
 
-                    {% if activity.featured_image %}
-                    <img src="{{ activity.featured_image.url }}" alt="{{ activity.name }}" class="img-fluid mb-3 rounded" style="max-height: 300px;">
-                    {% endif %}
-
-                    <div class="row mt-3">
-                        <div class="col-md-6">
-                            <p><strong>Category:</strong> {{ activity.get_category_display }}</p>
-                            <p><strong>Difficulty:</strong> {{ activity.get_difficulty_display }}</p>
-                        </div>
-                        <div class="col-md-6">
-                            <p><strong>Duration:</strong> {{ activity.duration_display }}</p>
-                            <p><strong>Price:</strong> {{ activity.price_display }}</p>
-                        </div>
-                    </div>
-
-                    <hr>
-
-                    <form method="post">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-danger">
-                            <i class="fas fa-trash"></i> Yes, Delete This Activity
-                        </button>
-                        <a href="{% url 'dashboard_activity_detail' activity.pk %}" class="btn btn-secondary">
-                            <i class="fas fa-times"></i> Cancel
-                        </a>
-                    </form>
-                </div>
-            </div>
+        <div class="mt-6 px-6 py-4 bg-slate-50 rounded-lg text-left text-sm">
+            <p><strong class="text-slate-900">{{ activity.name }}</strong></p>
+            <p class="text-slate-500 mt-1">{{ activity.get_category_display }} · {{ activity.destination.name }}</p>
         </div>
+
+        <form method="post" class="mt-6 flex flex-wrap gap-2 justify-center">
+            {% csrf_token %}
+            <a href="{% url 'dashboard_activity_list' %}" class="dash-btn dash-btn-ghost">Cancel</a>
+            <button type="submit" class="dash-btn dash-btn-danger"><i class="fal fa-trash"></i> Delete permanently</button>
+        </form>
     </div>
 </div>
-{% endblock %}
 
+{% endblock %}

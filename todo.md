@@ -281,10 +281,17 @@ Branch: `feature/dashboard-detail-pages` → PR → `develop`
 
 ### Phase 7.5 — Special workflows (2 days)
 Branch: `feature/dashboard-workflows` → PR → `develop`
-- [ ] Reviews moderation (approve / reject / feature; bulk single-click actions)
-- [ ] Custom-package builder (staff-side multi-step form)
-- [ ] AI Assistant pages — brochure parser, itinerary generator, quote suggestion, route optimization
-- [ ] Booking status workflow with transition guards
+- [x] **Reviews moderation** — approve_confirm (emerald), reject_confirm (rose + reason textarea), delete_confirm (rose, permanent warning)
+- [x] **6 catalog delete confirms** — destinations, activities, accommodations, packages, departures, custom-itinerary; fixes pre-existing bug where `packages/views.py` rendered `delete_confirm.html` but only `delete.html` existed
+- [x] **Booking cancel confirm** — amber-tinted, inline cancellation-reason textarea, "Keep booking" escape hatch
+- [x] **Custom-package builder** — 4-section staff form (Basics / Pricing / Modifications &amp; notes / Validity &amp; media) on 2-col layout with inquiry + base-package context in sidebar
+- [x] **AI Assistant home** — 4 stat cards + 4 action tiles + setup-required banner if no AI config
+- [x] **AI brochure parser** — upload form + result page with auto-refresh while running, JSON preview, copy-to-clipboard
+- [x] **AI itinerary generator** — trip parameters form + result page with copy-to-clipboard
+- [x] **AI route optimiser** — destinations input + ordered numbered-list result
+- [x] **AI quote suggestions result** — match-score cards with reasoning
+- [x] Shared `_confirm_action.html` reference partial documenting the icon + color variant pattern
+- [ ] Booking status workflow transition guards — deferred (UI hides Cancel when already cancelled; deeper guards belong in `Booking.save()` not template)
 
 ### Phase 7.6 — Polish + a11y + cleanup (1–2 days)
 Branch: `feature/dashboard-polish` → PR → `develop`

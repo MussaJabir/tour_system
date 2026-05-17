@@ -1,14 +1,33 @@
-{% extends 'backend/base.html' %}
+{% extends 'backend/base_dashboard.html' %}
+{% load static %}
+
+{% block title %}Delete {{ accommodation.name }} — Dashboard{% endblock %}
+
 {% block content %}
-<div class="container-fluid">
-    <div class="card shadow border-danger"><div class="card-header bg-danger text-white"><h6 class="m-0">⚠️ Confirm Deletion</h6></div>
-    <div class="card-body">
-        <div class="alert alert-danger">Warning! This action cannot be undone.</div>
-        <h4>{{ accommodation.name }}</h4>
-        <form method="post">{% csrf_token %}
-            <button type="submit" class="btn btn-danger">Yes, Delete</button>
-            <a href="{% url 'dashboard_accommodation_list' %}" class="btn btn-secondary">Cancel</a>
+
+{% include 'backend/partials/_breadcrumb.html' with crumbs=' ' %}
+
+<div class="max-w-xl mx-auto">
+    <div class="dash-card text-center py-12">
+        <span class="w-14 h-14 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center mx-auto">
+            <i class="fal fa-trash text-xl"></i>
+        </span>
+        <h1 class="font-medium text-slate-900 text-lg mt-5">Delete this lodge?</h1>
+        <p class="text-sm text-slate-500 mt-2 max-w-sm mx-auto">
+            This will permanently remove the lodge, its rooms, and gallery images. Bookings referencing it may break.
+        </p>
+
+        <div class="mt-6 px-6 py-4 bg-slate-50 rounded-lg text-left text-sm">
+            <p><strong class="text-slate-900">{{ accommodation.name }}</strong></p>
+            <p class="text-slate-500 mt-1">{{ accommodation.get_accommodation_type_display }} · {{ accommodation.destination.name }}</p>
+        </div>
+
+        <form method="post" class="mt-6 flex flex-wrap gap-2 justify-center">
+            {% csrf_token %}
+            <a href="{% url 'dashboard_accommodation_list' %}" class="dash-btn dash-btn-ghost">Cancel</a>
+            <button type="submit" class="dash-btn dash-btn-danger"><i class="fal fa-trash"></i> Delete permanently</button>
         </form>
-    </div></div>
+    </div>
 </div>
+
 {% endblock %}

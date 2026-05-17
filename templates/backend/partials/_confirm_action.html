@@ -1,0 +1,40 @@
+{% comment %}
+Reusable confirm-action page — destructive ops, approve/reject, cancel etc.
+Centered card with icon, headline, body context, danger/primary action button + cancel.
+
+Pages don't include this — instead they extend base_dashboard.html and copy
+the inline pattern below. Keeping this as a documentation reference.
+
+Pattern (copy into your template):
+
+<div class="max-w-xl mx-auto">
+    <div class="dash-card text-center py-12">
+        <span class="w-14 h-14 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center mx-auto">
+            <i class="fal fa-trash text-xl"></i>
+        </span>
+        <h1 class="font-medium text-slate-900 text-lg mt-5">Delete this thing?</h1>
+        <p class="text-sm text-slate-500 mt-2 max-w-sm mx-auto">
+            This will permanently remove the record. Cannot be undone.
+        </p>
+
+        <div class="mt-6 px-6 py-4 bg-slate-50 rounded-lg text-sm text-slate-700 text-left">
+            <p><strong>What:</strong> {{ object.name }}</p>
+            <p class="mt-1"><strong>When:</strong> {{ object.created_at|date:'d M Y' }}</p>
+        </div>
+
+        <form method="post" class="mt-6 flex flex-wrap gap-2 justify-center">
+            {% csrf_token %}
+            <a href="{{ cancel_url }}" class="dash-btn dash-btn-ghost">Cancel</a>
+            <button type="submit" class="dash-btn dash-btn-danger">
+                <i class="fal fa-trash"></i> Delete permanently
+            </button>
+        </form>
+    </div>
+</div>
+
+Variants by icon + colour:
+    - Delete / cancel:  fal fa-trash · bg-rose-50 / text-rose-600 · dash-btn-danger
+    - Reject:           fal fa-times · bg-rose-50 / text-rose-600 · dash-btn-danger
+    - Approve:          fal fa-check · bg-emerald-50 / text-emerald-600 · dash-btn-primary
+    - Cancel booking:   fal fa-ban   · bg-amber-50 / text-amber-600 · dash-btn-danger
+{% endcomment %}
