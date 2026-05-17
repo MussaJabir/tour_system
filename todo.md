@@ -271,10 +271,13 @@ Branch: `feature/dashboard-forms` → PR → `develop`
 
 ### Phase 7.4 — Dashboard detail pages (2 days)
 Branch: `feature/dashboard-detail-pages` → PR → `develop`
-- [ ] Booking detail: header with actions, tabs for passengers / payments / timeline, activity log
-- [ ] Inquiry detail: full customer info, link to custom-package builder, response composer
-- [ ] Custom-package detail: itinerary preview, status, send-link action
-- [ ] Each model's dashboard detail page
+- [x] **Booking detail** — header with reference + status badge, Customer card, Passengers table with row actions, Payments table with semantic status badges, Special requirements card, Staff notes (amber-tinted), sticky sidebar with financial summary (Total / Deposit / Paid / Balance) + Trip facts + Timeline
+- [x] **Inquiry detail** — Customer + Trip request cards, Custom-quotes-for-this-inquiry list, threaded Messages with reply form, sticky sidebar with InquiryManagementForm + contact preferences
+- [x] **Custom-package detail** — Overview + modifications + designer note, Itinerary days timeline with edit/delete per day + "Copy from base" action, edit form, sticky sidebar with Total price + price-difference vs base + Secure-client-link copy box + Inquiry link + Validity card
+- [x] **Contact-message detail** — message body, reply form, amber-tinted Internal notes form, sticky From-customer info card
+- [x] **Review moderation detail** — review body + star rating, attached photos grid, rejection-reason card (when rejected), sticky sidebar with Approve/Reject/Delete actions + Reviewer info + Package context
+- [x] **Destinations / Activities / Accommodations detail** — hero image, About + Wildlife/Climate/Requirements/Amenities cards, Gallery grid, Rooms table (accommodations), sticky Quick-facts sidebar; topbar actions for "Public page" + "Edit"
+- [x] Per-entity action menus in topbar (Edit / Cancel booking / Send quote / Delete message etc.)
 
 ### Phase 7.5 — Special workflows (2 days)
 Branch: `feature/dashboard-workflows` → PR → `develop`

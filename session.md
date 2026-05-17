@@ -818,4 +818,42 @@ All 9 public route groups live on `base_modern.html` with the Safari Editorial s
 
 ---
 
+## Session 024 — 2026-05-17
+
+**Type:** Phase 7.4 — Dashboard detail pages (Operations Slate)
+**Branch:** `feature/dashboard-detail-pages` → PR → `develop`
+
+### What we did
+1. **Migrated all 8 dashboard detail templates** to `base_dashboard.html` with a consistent **2-column layout** (1fr + 320px sidebar):
+   - **`packages/bookings/dashboard/detail.html`** — the most complex one. Header with booking-reference + semantic status badge, topbar actions (Edit / Cancel). Main column: Customer card (when inquiry-linked), Passengers table with per-row edit/delete, Payments table with semantic status badges and "Record payment" action, Special requirements card, amber-tinted Staff notes card. Sidebar: Financial summary card (Total / Deposit / Paid / Balance), Trip facts, Timeline.
+   - **`packages/inquiry/dashboard/detail.html`** — Customer + Trip request dl cards, Custom-quotes-for-this-inquiry list with status badges and "New quote" action, **threaded message list** with sender avatars + inline reply form. Sidebar: InquiryManagementForm rendered via `_dash_form_field` partial, Contact-preference list.
+   - **`packages/inquiry/dashboard/custom_package_detail.html`** — Overview/modifications/designer-note cards, **Itinerary timeline** with day markers + edit/delete per day + "Copy from base" form-action, edit form. Sidebar: Total price + price-difference vs base, **Secure-client-link copy box** with click-to-select + "Preview as client" button, Inquiry link, Validity card.
+   - **`core/dashboard/contact_detail.html`** — Message body card, Reply form, amber-tinted Internal notes form, "Delete" topbar action. Sidebar: From-customer info (name, email, phone, received-at, ip).
+   - **`reviews/dashboard/detail.html`** — Review title + star rating, body, attached photos grid, rejection-reason card when rejected. Sidebar: Approve/Reject/Delete buttons (state-aware — different actions shown based on current status), Reviewer info, Package context with public-page link.
+   - **`destinations/dashboard/detail.html`** — Hero image, About / Wildlife / Climate cards, Gallery grid with "Add image" action. Sidebar: Quick-facts.
+   - **`activities/dashboard/detail.html`** — Hero, About card, Requirements card, Included/Excluded 2-col cards, Gallery. Sidebar: Quick-facts (destination, category, difficulty, duration, price, views).
+   - **`accommodations/dashboard/detail.html`** — Hero, About, **Rooms table** with bed/occupancy/price, Amenities, Gallery. Sidebar: Quick-facts.
+2. **Topbar action menus** — every detail page exposes contextual actions:
+   - Booking → Edit + Cancel (Cancel hidden when status='cancelled')
+   - Inquiry → Build quote (links to custom-package builder)
+   - Custom quote → Send to client (when draft/pending)
+   - Contact message → Delete with confirm
+   - Catalog (destination/activity/accommodation) → Public page (external) + Edit
+3. **URL namespacing fix** — `packages:public_package_detail` in inquiry-detail.html (line 58) + review-detail.html (line 124). Hit during testing — fixed both.
+4. **URL name correction** — `dashboard_add_accommodation_room` (not `dashboard_accommodation_add_room`) in accommodations detail. Fixed.
+5. **3 new tests** in `core/tests_dashboard_details.py` covering catalog detail pages (destinations/activities/accommodations). Booking/inquiry/custom-package/contact/review details have more involved fixtures (need inquiry + custom-package + booking relationships) so they were validated visually in Phase 7.5 prep.
+6. **Tailwind rebuild** — 70 KB minified (+2 KB from minor pattern additions). Built inside `tour_django` Docker container because the host-side Tailwind binary started returning `H.replace` errors (transient v4 binary glitch — happens occasionally, host-vs-docker workaround works reliably).
+7. **Cache-bust** bumped to `v=20260517f`
+8. **All 274 tests pass** (271 prior + 3 new) — 129s
+
+### Operational tips recorded
+- **Tailwind build fallback**: when the host-side `tailwindcss` binary throws `undefined is not an object (evaluating 'H.replace')`, run the build inside the Django container instead:
+  `docker compose exec -T -w /app django tailwindcss -i static/frontend/src/tailwind.css -o static/frontend/css/tailwind.css --minify`
+  The container has its own pytailwindcss install and is unaffected.
+
+### PR
+- https://github.com/MussaJabir/tour_system/pull/25
+
+---
+
 _Add new sessions above this line._
