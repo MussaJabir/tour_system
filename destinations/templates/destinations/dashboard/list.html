@@ -43,7 +43,7 @@
         </select>
 
         <span class="ml-auto text-xs text-slate-500">
-            {{ page_obj.paginator.count }} destination{{ page_obj.paginator.count|pluralize }}
+            {{ destinations.paginator.count }} destination{{ destinations.paginator.count|pluralize }}
         </span>
     </form>
 
@@ -60,7 +60,7 @@
                 </tr>
             </thead>
             <tbody>
-                {% for d in page_obj %}
+                {% for d in destinations %}
                 <tr>
                     <td>
                         <div class="flex items-center gap-3">
@@ -105,14 +105,14 @@
     </div>
 
     {# Pagination #}
-    {% if page_obj.paginator.num_pages > 1 %}
+    {% if destinations.paginator.num_pages > 1 %}
     <nav class="px-4 py-3 border-t border-slate-200 flex items-center justify-between text-xs">
         <p class="text-slate-500">
-            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+            Page {{ destinations.number }} of {{ destinations.paginator.num_pages }}
         </p>
         <div class="flex gap-1">
-            {% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if filter_country %}&country={{ filter_country }}{% endif %}{% if filter_status %}&status={{ filter_status }}{% endif %}" class="dash-btn dash-btn-sm dash-btn-ghost"><i class="fal fa-arrow-left"></i> Prev</a>{% endif %}
-            {% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if filter_country %}&country={{ filter_country }}{% endif %}{% if filter_status %}&status={{ filter_status }}{% endif %}" class="dash-btn dash-btn-sm dash-btn-ghost">Next <i class="fal fa-arrow-right"></i></a>{% endif %}
+            {% if destinations.has_previous %}<a href="?page={{ destinations.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if filter_country %}&country={{ filter_country }}{% endif %}{% if filter_status %}&status={{ filter_status }}{% endif %}" class="dash-btn dash-btn-sm dash-btn-ghost"><i class="fal fa-arrow-left"></i> Prev</a>{% endif %}
+            {% if destinations.has_next %}<a href="?page={{ destinations.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if filter_country %}&country={{ filter_country }}{% endif %}{% if filter_status %}&status={{ filter_status }}{% endif %}" class="dash-btn dash-btn-sm dash-btn-ghost">Next <i class="fal fa-arrow-right"></i></a>{% endif %}
         </div>
     </nav>
     {% endif %}

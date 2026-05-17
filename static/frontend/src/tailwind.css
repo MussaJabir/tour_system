@@ -363,6 +363,16 @@
      with the public-site naming.
      ============================================================= */
 
+  /* -- Main content wrapper --------------------------------- */
+  /* Caps dashboard content at 1600px and centers it. Keeps
+     tables scannable on wide monitors without leaving all the
+     empty space on one side. */
+  .dash-main {
+    max-width: 1600px;
+    margin-inline: auto;
+    width: 100%;
+  }
+
   /* -- Page chrome ------------------------------------------- */
   .dash-shell {
     display: grid;
