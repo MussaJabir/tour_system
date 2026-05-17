@@ -1,563 +1,348 @@
-{% extends "backend/base.html" %}
+{% extends 'backend/base_dashboard.html' %}
 {% load static %}
 
-{% block extra_css %}
-<!-- Chart.js -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+{% block title %}Dashboard — Tour System{% endblock %}
+
+{% block topbar_extras %}
+<a href="{% url 'packages:dashboard_booking_create' %}" class="dash-btn dash-btn-primary">
+    <i class="fal fa-plus"></i>
+    <span class="hidden sm:inline">New booking</span>
+</a>
 {% endblock %}
 
-{% block title %}Dashboard Overview{% endblock %}
-
 {% block content %}
-<div class="container-fluid">
-    <!-- Page Header -->
-    <div class="row mb-3">
-        <div class="col-12">
-            <h4 class="mb-0">Dashboard Overview</h4>
-            <p class="text-muted mb-0">Welcome back! Here's what's happening with your tour system.</p>
-        </div>
+
+{# Page header #}
+<div class="dash-page-header">
+    <div>
+        <h1 class="dash-page-title">Welcome back, {{ request.user.username }}.</h1>
+        <p class="text-sm text-slate-500 mt-1">Here's how the last 30 days are looking.</p>
     </div>
-
-    <!-- Key Metrics Cards -->
-    <div class="row mb-4">
-        <!-- Packages -->
-        <div class="col-xl-3 col-md-6">
-            <div class="card">
-                <div class="card-body">
-                    <div class="d-flex">
-                        <div class="flex-grow-1">
-                            <h5 class="text-muted fw-normal mt-0">Packages</h5>
-                            <h3 class="mb-2">{{ stats.total_packages }}</h3>
-                            {% if stats.new_packages_week > 0 %}
-                            <p class="mb-0 text-success">
-                                <i class="mdi mdi-arrow-up"></i> +{{ stats.new_packages_week }} this week
-                            </p>
-                            {% else %}
-                            <p class="mb-0 text-muted">No new packages</p>
-                            {% endif %}
-                        </div>
-                        <div class="flex-shrink-0 align-self-center">
-                            <div class="avatar-sm rounded-circle bg-primary-subtle mini-stat-icon">
-                                <span class="avatar-title rounded-circle bg-primary">
-                                    <i class="mdi mdi-package-variant font-20"></i>
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                    <a href="{% url 'packages:dashboard_package_list' %}" class="btn btn-sm btn-link p-0 mt-2">View All <i class="mdi mdi-arrow-right"></i></a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Destinations -->
-        <div class="col-xl-3 col-md-6">
-            <div class="card">
-                <div class="card-body">
-                    <div class="d-flex">
-                        <div class="flex-grow-1">
-                            <h5 class="text-muted fw-normal mt-0">Destinations</h5>
-                            <h3 class="mb-2">{{ stats.total_destinations }}</h3>
-                            {% if stats.new_destinations_week > 0 %}
-                            <p class="mb-0 text-success">
-                                <i class="mdi mdi-arrow-up"></i> +{{ stats.new_destinations_week }} this week
-                            </p>
-                            {% else %}
-                            <p class="mb-0 text-muted">No new destinations</p>
-                            {% endif %}
-                        </div>
-                        <div class="flex-shrink-0 align-self-center">
-                            <div class="avatar-sm rounded-circle bg-success-subtle mini-stat-icon">
-                                <span class="avatar-title rounded-circle bg-success">
-                                    <i class="mdi mdi-map-marker font-20"></i>
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                    <a href="{% url 'dashboard_destination_list' %}" class="btn btn-sm btn-link p-0 mt-2">View All <i class="mdi mdi-arrow-right"></i></a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Accommodations -->
-        <div class="col-xl-3 col-md-6">
-            <div class="card">
-                <div class="card-body">
-                    <div class="d-flex">
-                        <div class="flex-grow-1">
-                            <h5 class="text-muted fw-normal mt-0">Accommodations</h5>
-                            <h3 class="mb-2">{{ stats.total_accommodations }}</h3>
-                            {% if stats.new_accommodations_week > 0 %}
-                            <p class="mb-0 text-success">
-                                <i class="mdi mdi-arrow-up"></i> +{{ stats.new_accommodations_week }} this week
-                            </p>
-                            {% else %}
-                            <p class="mb-0 text-muted">No new accommodations</p>
-                            {% endif %}
-                        </div>
-                        <div class="flex-shrink-0 align-self-center">
-                            <div class="avatar-sm rounded-circle bg-info-subtle mini-stat-icon">
-                                <span class="avatar-title rounded-circle bg-info">
-                                    <i class="mdi mdi-home-city font-20"></i>
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                    <a href="{% url 'dashboard_accommodation_list' %}" class="btn btn-sm btn-link p-0 mt-2">View All <i class="mdi mdi-arrow-right"></i></a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Activities -->
-        <div class="col-xl-3 col-md-6">
-            <div class="card">
-                <div class="card-body">
-                    <div class="d-flex">
-                        <div class="flex-grow-1">
-                            <h5 class="text-muted fw-normal mt-0">Activities</h5>
-                            <h3 class="mb-2">{{ stats.total_activities }}</h3>
-                            {% if stats.new_activities_week > 0 %}
-                            <p class="mb-0 text-success">
-                                <i class="mdi mdi-arrow-up"></i> +{{ stats.new_activities_week }} this week
-                            </p>
-                            {% else %}
-                            <p class="mb-0 text-muted">No new activities</p>
-                            {% endif %}
-                        </div>
-                        <div class="flex-shrink-0 align-self-center">
-                            <div class="avatar-sm rounded-circle bg-warning-subtle mini-stat-icon">
-                                <span class="avatar-title rounded-circle bg-warning">
-                                    <i class="mdi mdi-compass font-20"></i>
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                    <a href="{% url 'dashboard_activity_list' %}" class="btn btn-sm btn-link p-0 mt-2">View All <i class="mdi mdi-arrow-right"></i></a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Alerts Section -->
-    {% if stats.pending_inquiries > 0 or stats.custom_packages_pending > 0 or stats.new_contact_messages > 0 %}
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card border-warning">
-                <div class="card-body">
-                    <h5 class="card-title text-warning mb-3">
-                        <i class="mdi mdi-alert-circle"></i> Needs Attention
-                    </h5>
-                    <div class="row">
-                        {% if stats.pending_inquiries > 0 %}
-                        <div class="col-md-4">
-                            <div class="d-flex align-items-center">
-                                <i class="mdi mdi-email-outline font-24 text-warning me-2"></i>
-                                <div>
-                                    <a href="{% url 'packages:dashboard_inquiry_list' %}" class="text-dark">
-                                        <strong>{{ stats.pending_inquiries }}</strong> New Inquir{{ stats.pending_inquiries|pluralize:"y,ies" }} waiting
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                        {% endif %}
-                        
-                        {% if stats.custom_packages_pending > 0 %}
-                        <div class="col-md-4">
-                            <div class="d-flex align-items-center">
-                                <i class="mdi mdi-package-variant-closed font-24 text-warning me-2"></i>
-                                <div>
-                                    <a href="{% url 'packages:dashboard_custom_package_list' %}" class="text-dark">
-                                        <strong>{{ stats.custom_packages_pending }}</strong> Custom Package{{ stats.custom_packages_pending|pluralize }} pending
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                        {% endif %}
-                        
-                        {% if stats.new_contact_messages > 0 %}
-                        <div class="col-md-4">
-                            <div class="d-flex align-items-center">
-                                <i class="mdi mdi-message-text-outline font-24 text-warning me-2"></i>
-                                <div>
-                                    <a href="{% url 'dashboard_contact_list' %}" class="text-dark">
-                                        <strong>{{ stats.new_contact_messages }}</strong> New Contact Message{{ stats.new_contact_messages|pluralize }}
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    {% endif %}
-
-    <!-- Quick Actions -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title mb-3">Quick Actions</h5>
-                    <div class="d-flex flex-wrap gap-2">
-                        <a href="{% url 'packages:dashboard_package_create' %}" class="btn btn-primary">
-                            <i class="mdi mdi-plus"></i> New Package
-                        </a>
-                        <a href="{% url 'dashboard_destination_create' %}" class="btn btn-success">
-                            <i class="mdi mdi-plus"></i> New Destination
-                        </a>
-                        <a href="{% url 'dashboard_accommodation_create' %}" class="btn btn-info">
-                            <i class="mdi mdi-plus"></i> New Accommodation
-                        </a>
-                        <a href="{% url 'dashboard_activity_create' %}" class="btn btn-warning">
-                            <i class="mdi mdi-plus"></i> New Activity
-                        </a>
-                        <a href="{% url 'packages:dashboard_inquiry_list' %}" class="btn btn-secondary">
-                            <i class="mdi mdi-email"></i> View Inquiries
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Charts Row -->
-    <div class="row mb-4">
-        <!-- Inquiries Trend Chart -->
-        <div class="col-xl-8">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title mb-3">Inquiries Trend (Last 7 Days)</h5>
-                    <div style="position: relative; height: 250px;">
-                        <canvas id="inquiriesTrendChart"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Package Categories Chart -->
-        <div class="col-xl-4">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title mb-3">Package Categories</h5>
-                    <div style="position: relative; height: 250px;">
-                        <canvas id="packageCategoriesChart"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Inquiry Status & Content Stats -->
-    <div class="row mb-4">
-        <!-- Inquiry Status -->
-        <div class="col-xl-6">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title mb-3">Inquiry Status Overview</h5>
-                    <div class="table-responsive">
-                        <table class="table table-sm">
-                            <tbody>
-                                {% for status in inquiry_status_counts %}
-                                <tr>
-                                    <td>
-                                        {% if status.status == 'pending' %}
-                                            <span class="badge bg-warning">{{ status.status|title }}</span>
-                                        {% elif status.status == 'contacted' %}
-                                            <span class="badge bg-info">{{ status.status|title }}</span>
-                                        {% elif status.status == 'confirmed' %}
-                                            <span class="badge bg-success">{{ status.status|title }}</span>
-                                        {% elif status.status == 'cancelled' %}
-                                            <span class="badge bg-danger">{{ status.status|title }}</span>
-                                        {% else %}
-                                            <span class="badge bg-secondary">{{ status.status|title }}</span>
-                                        {% endif %}
-                                    </td>
-                                    <td><strong>{{ status.count }}</strong> inquir{{ status.count|pluralize:"y,ies" }}</td>
-                                </tr>
-                                {% empty %}
-                                <tr>
-                                    <td colspan="2" class="text-muted text-center">No inquiries yet</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Custom Package Stats -->
-        <div class="col-xl-6">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title mb-3">Custom Packages Overview</h5>
-                    <div class="row text-center">
-                        <div class="col-4">
-                            <h3 class="text-warning">{{ stats.custom_packages_pending }}</h3>
-                            <p class="text-muted mb-0">Pending</p>
-                        </div>
-                        <div class="col-4">
-                            <h3 class="text-success">{{ stats.custom_packages_approved }}</h3>
-                            <p class="text-muted mb-0">Approved</p>
-                        </div>
-                        <div class="col-4">
-                            <h3 class="text-primary">{{ stats.custom_packages_total }}</h3>
-                            <p class="text-muted mb-0">Total</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Most Viewed & Recent Activity -->
-    <div class="row">
-        <!-- Most Viewed Destinations -->
-        <div class="col-xl-4">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title mb-3"><i class="mdi mdi-fire text-danger"></i> Most Viewed Destinations</h5>
-                    <div class="table-responsive">
-                        <table class="table table-sm">
-                            <tbody>
-                                {% for destination in top_destinations %}
-                                <tr>
-                                    <td>
-                                        {% if destination.featured_image %}
-                                        <img src="{{ destination.featured_image.url }}" alt="{{ destination.name }}" class="rounded" style="width: 40px; height: 40px; object-fit: cover;">
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        <a href="{% url 'dashboard_destination_detail' destination.pk %}" class="text-dark">
-                                            {{ destination.name }}
-                                        </a>
-                                    </td>
-                                    <td class="text-end">
-                                        <span class="badge bg-light text-dark">{{ destination.view_count }} views</span>
-                                    </td>
-                                </tr>
-                                {% empty %}
-                                <tr>
-                                    <td colspan="3" class="text-muted text-center">No destinations yet</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Most Viewed Packages -->
-        <div class="col-xl-4">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title mb-3"><i class="mdi mdi-fire text-danger"></i> Most Viewed Packages</h5>
-                    <div class="table-responsive">
-                        <table class="table table-sm">
-                            <tbody>
-                                {% for package in top_packages %}
-                                <tr>
-                                    <td>
-                                        {% if package.featured_image %}
-                                        <img src="{{ package.featured_image.url }}" alt="{{ package.name }}" class="rounded" style="width: 40px; height: 40px; object-fit: cover;">
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        <a href="{% url 'packages:dashboard_package_edit' package.pk %}" class="text-dark">
-                                            {{ package.name|truncatewords:4 }}
-                                        </a>
-                                    </td>
-                                    <td class="text-end">
-                                        <span class="badge bg-light text-dark">{{ package.view_count }} views</span>
-                                    </td>
-                                </tr>
-                                {% empty %}
-                                <tr>
-                                    <td colspan="3" class="text-muted text-center">No packages yet</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Recent Inquiries -->
-        <div class="col-xl-4">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title mb-3"><i class="mdi mdi-clock-outline"></i> Recent Inquiries</h5>
-                    <div class="table-responsive">
-                        <table class="table table-sm">
-                            <tbody>
-                                {% for inquiry in recent_inquiries %}
-                                <tr>
-                                    <td>
-                                        <a href="{% url 'packages:dashboard_inquiry_detail' inquiry.pk %}" class="text-dark">
-                                            <strong>{{ inquiry.first_name }} {{ inquiry.last_name }}</strong><br>
-                                            <small class="text-muted">{{ inquiry.base_package.name|truncatewords:4 }}</small>
-                                        </a>
-                                    </td>
-                                    <td class="text-end">
-                                        <small class="text-muted">{{ inquiry.created_at|timesince }} ago</small>
-                                    </td>
-                                </tr>
-                                {% empty %}
-                                <tr>
-                                    <td colspan="2" class="text-muted text-center">No inquiries yet</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                    <a href="{% url 'packages:dashboard_inquiry_list' %}" class="btn btn-sm btn-link p-0 mt-2">View All Inquiries <i class="mdi mdi-arrow-right"></i></a>
-                </div>
-            </div>
-        </div>
+    <div class="flex flex-wrap gap-2">
+        <a href="{% url 'packages:dashboard_inquiry_list' %}" class="dash-btn dash-btn-secondary">
+            <i class="fal fa-comment-alt-lines"></i> Inquiries
+        </a>
+        <a href="{% url 'packages:dashboard_package_list' %}" class="dash-btn dash-btn-secondary">
+            <i class="fal fa-route"></i> Packages
+        </a>
     </div>
 </div>
 
-<script>
-// Inquiries Trend Chart (Line Chart)
-const inquiriesTrendCtx = document.getElementById('inquiriesTrendChart');
+{# ============================================================ #}
+{# QUICK STAT CARDS #}
+{# ============================================================ #}
+<section class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
 
-// Destroy existing chart if it exists (prevents duplication)
-if (window.inquiriesTrendChart instanceof Chart) {
-    window.inquiriesTrendChart.destroy();
-}
+    {% include 'backend/partials/_stat_card.html' with label='Inquiries · 30d' value=inquiries_30d trend_value=kpi_trends.inquiries.label trend_dir=kpi_trends.inquiries.dir icon='comment-alt-lines' href='/dashboard/inquiries/' %}
 
-window.inquiriesTrendChart = new Chart(inquiriesTrendCtx, {
-    type: 'line',
-    data: {
-        labels: [{% for item in inquiry_trend %}'{{ item.date }}'{% if not forloop.last %},{% endif %}{% endfor %}],
-        datasets: [{
-            label: 'Inquiries',
-            data: [{% for item in inquiry_trend %}{{ item.count }}{% if not forloop.last %},{% endif %}{% endfor %}],
-            borderColor: '#4a81d4',
-            backgroundColor: 'rgba(74, 129, 212, 0.08)',
-            borderWidth: 3,
-            tension: 0.4,
-            fill: true,
-            pointRadius: 5,
-            pointBackgroundColor: '#4a81d4',
-            pointBorderColor: '#fff',
-            pointBorderWidth: 2,
-            pointHoverRadius: 7,
-            pointHoverBackgroundColor: '#4a81d4',
-            pointHoverBorderWidth: 3
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        layout: {
-            padding: {
-                top: 10,
-                bottom: 10
-            }
+    {% include 'backend/partials/_stat_card.html' with label='Bookings · 30d' value=bookings_30d trend_value=kpi_trends.bookings.label trend_dir=kpi_trends.bookings.dir icon='calendar-check' href='/dashboard/bookings/' %}
+
+    {% include 'backend/partials/_stat_card.html' with label='Revenue · 30d' value='USD '|add:revenue_30d|floatformat:0 trend_value=kpi_trends.revenue.label trend_dir=kpi_trends.revenue.dir icon='dollar-sign' %}
+
+    {% include 'backend/partials/_stat_card.html' with label='Conversion' value=conversion_pct|stringformat:'s'|add:'%' icon='chart-line' %}
+</section>
+
+{# ============================================================ #}
+{# CHARTS (Chart.js loaded per-page) #}
+{# ============================================================ #}
+<section class="grid lg:grid-cols-2 gap-4 mb-6">
+
+    <div class="dash-card">
+        <header class="dash-card-header">
+            <div>
+                <p class="dash-stat-label">Bookings</p>
+                <p class="dash-card-title">Daily — last 30 days</p>
+            </div>
+        </header>
+        <div class="h-64">
+            <canvas id="bookings-trend-chart"></canvas>
+        </div>
+    </div>
+
+    <div class="dash-card">
+        <header class="dash-card-header">
+            <div>
+                <p class="dash-stat-label">Revenue</p>
+                <p class="dash-card-title">Monthly — last 6 months</p>
+            </div>
+        </header>
+        <div class="h-64">
+            <canvas id="revenue-chart"></canvas>
+        </div>
+    </div>
+</section>
+
+{# ============================================================ #}
+{# RECENT ACTIVITY #}
+{# ============================================================ #}
+<section class="grid lg:grid-cols-2 gap-4 mb-6">
+
+    {# Recent inquiries #}
+    <div class="bg-white border border-slate-200 rounded-xl overflow-hidden">
+        <header class="px-4 py-3 border-b border-slate-200 flex items-center justify-between">
+            <p class="dash-card-title">Recent inquiries</p>
+            <a href="{% url 'packages:dashboard_inquiry_list' %}" class="text-xs text-bush-700 hover:underline">View all →</a>
+        </header>
+        <div class="overflow-x-auto">
+            <table class="dash-table">
+                <thead>
+                    <tr>
+                        <th>Reference</th>
+                        <th>Customer</th>
+                        <th>When</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for inq in recent_inquiries %}
+                    <tr>
+                        <td class="font-mono text-xs text-slate-500">{{ inq.inquiry_reference }}</td>
+                        <td class="text-slate-900">{{ inq.customer_name|default:inq.customer_email }}</td>
+                        <td class="text-slate-500">{{ inq.created_at|date:'d M, H:i' }}</td>
+                        <td>
+                            {% if inq.status == 'pending' %}
+                                {% include 'backend/partials/_status_badge.html' with label='Pending' variant='warning' %}
+                            {% elif inq.status == 'contacted' %}
+                                {% include 'backend/partials/_status_badge.html' with label='Contacted' variant='info' %}
+                            {% elif inq.status == 'quoted' %}
+                                {% include 'backend/partials/_status_badge.html' with label='Quoted' variant='info' %}
+                            {% elif inq.status == 'converted' %}
+                                {% include 'backend/partials/_status_badge.html' with label='Converted' variant='success' %}
+                            {% elif inq.status == 'closed' %}
+                                {% include 'backend/partials/_status_badge.html' with label='Closed' variant='neutral' %}
+                            {% else %}
+                                {% include 'backend/partials/_status_badge.html' with label=inq.get_status_display variant='neutral' %}
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="4" class="text-center text-slate-400 py-8">No inquiries yet.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {# Recent bookings #}
+    <div class="bg-white border border-slate-200 rounded-xl overflow-hidden">
+        <header class="px-4 py-3 border-b border-slate-200 flex items-center justify-between">
+            <p class="dash-card-title">Recent bookings</p>
+            <a href="{% url 'packages:dashboard_booking_list' %}" class="text-xs text-bush-700 hover:underline">View all →</a>
+        </header>
+        <div class="overflow-x-auto">
+            <table class="dash-table">
+                <thead>
+                    <tr>
+                        <th>Reference</th>
+                        <th>Package</th>
+                        <th>Departure</th>
+                        <th>Status</th>
+                        <th class="text-right">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for b in recent_bookings %}
+                    <tr>
+                        <td class="font-mono text-xs text-slate-500">{{ b.booking_reference }}</td>
+                        <td class="text-slate-900 truncate max-w-[14rem]">{{ b.package.name }}</td>
+                        <td class="text-slate-500">{{ b.departure_date|date:'d M Y' }}</td>
+                        <td>
+                            {% if b.status == 'confirmed' or b.status == 'completed' %}
+                                {% include 'backend/partials/_status_badge.html' with label=b.get_status_display variant='success' %}
+                            {% elif b.status == 'pending_deposit' or b.status == 'deposit_paid' %}
+                                {% include 'backend/partials/_status_badge.html' with label=b.get_status_display variant='warning' %}
+                            {% elif b.status == 'cancelled' or b.status == 'refunded' %}
+                                {% include 'backend/partials/_status_badge.html' with label=b.get_status_display variant='danger' %}
+                            {% elif b.status == 'in_progress' %}
+                                {% include 'backend/partials/_status_badge.html' with label='In progress' variant='info' %}
+                            {% else %}
+                                {% include 'backend/partials/_status_badge.html' with label=b.get_status_display variant='neutral' %}
+                            {% endif %}
+                        </td>
+                        <td class="text-right font-medium">{{ b.currency }} {{ b.quoted_price|floatformat:0 }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="5" class="text-center text-slate-400 py-8">No bookings yet.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+{# ============================================================ #}
+{# SECONDARY ROW — catalog + queue #}
+{# ============================================================ #}
+<section class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+
+    {# Action queue #}
+    <div class="dash-card">
+        <p class="dash-stat-label">Needs your attention</p>
+        <ul class="mt-4 space-y-3 text-sm">
+            <li class="flex items-center justify-between">
+                <span class="flex items-center gap-2">
+                    <span class="w-7 h-7 rounded-md bg-amber-50 text-amber-700 flex items-center justify-center"><i class="fal fa-clock text-xs"></i></span>
+                    <a href="{% url 'packages:dashboard_inquiry_list' %}?status=pending" class="text-slate-900 hover:text-bush-700">Pending inquiries</a>
+                </span>
+                <span class="font-medium">{{ pending_inquiries }}</span>
+            </li>
+            <li class="flex items-center justify-between">
+                <span class="flex items-center gap-2">
+                    <span class="w-7 h-7 rounded-md bg-sky-50 text-sky-700 flex items-center justify-center"><i class="fal fa-file-invoice text-xs"></i></span>
+                    <a href="{% url 'packages:dashboard_custom_package_list' %}" class="text-slate-900 hover:text-bush-700">Quotes awaiting send</a>
+                </span>
+                <span class="font-medium">{{ pending_quotes }}</span>
+            </li>
+            <li class="flex items-center justify-between">
+                <span class="flex items-center gap-2">
+                    <span class="w-7 h-7 rounded-md bg-rose-50 text-rose-700 flex items-center justify-center"><i class="fal fa-envelope text-xs"></i></span>
+                    <a href="{% url 'dashboard_contact_list' %}" class="text-slate-900 hover:text-bush-700">Unread messages</a>
+                </span>
+                <span class="font-medium">{{ new_messages }}</span>
+            </li>
+        </ul>
+    </div>
+
+    {# Catalog totals #}
+    <div class="dash-card">
+        <p class="dash-stat-label">Catalog</p>
+        <ul class="mt-4 space-y-3 text-sm">
+            <li class="flex items-center justify-between">
+                <a href="{% url 'packages:dashboard_package_list' %}" class="text-slate-900 hover:text-bush-700 flex items-center gap-2">
+                    <span class="w-7 h-7 rounded-md bg-slate-100 text-slate-500 flex items-center justify-center"><i class="fal fa-route text-xs"></i></span>
+                    Tour packages
+                </a>
+                <span class="font-medium">{{ total_packages }}</span>
+            </li>
+            <li class="flex items-center justify-between">
+                <a href="{% url 'dashboard_destination_list' %}" class="text-slate-900 hover:text-bush-700 flex items-center gap-2">
+                    <span class="w-7 h-7 rounded-md bg-slate-100 text-slate-500 flex items-center justify-center"><i class="fal fa-map-marked-alt text-xs"></i></span>
+                    Destinations
+                </a>
+                <span class="font-medium">{{ total_destinations }}</span>
+            </li>
+            <li class="flex items-center justify-between">
+                <a href="{% url 'dashboard_activity_list' %}" class="text-slate-900 hover:text-bush-700 flex items-center gap-2">
+                    <span class="w-7 h-7 rounded-md bg-slate-100 text-slate-500 flex items-center justify-center"><i class="fal fa-binoculars text-xs"></i></span>
+                    Activities
+                </a>
+                <span class="font-medium">{{ total_activities }}</span>
+            </li>
+            <li class="flex items-center justify-between">
+                <a href="{% url 'dashboard_accommodation_list' %}" class="text-slate-900 hover:text-bush-700 flex items-center gap-2">
+                    <span class="w-7 h-7 rounded-md bg-slate-100 text-slate-500 flex items-center justify-center"><i class="fal fa-bed text-xs"></i></span>
+                    Lodges &amp; camps
+                </a>
+                <span class="font-medium">{{ total_accommodations }}</span>
+            </li>
+        </ul>
+    </div>
+
+    {# Quick links / create shortcuts #}
+    <div class="dash-card">
+        <p class="dash-stat-label">Quick create</p>
+        <div class="mt-4 grid grid-cols-2 gap-2 text-xs">
+            <a href="{% url 'packages:dashboard_package_create' %}" class="dash-btn dash-btn-secondary text-center"><i class="fal fa-plus"></i> Package</a>
+            <a href="{% url 'dashboard_destination_create' %}" class="dash-btn dash-btn-secondary text-center"><i class="fal fa-plus"></i> Destination</a>
+            <a href="{% url 'dashboard_activity_create' %}" class="dash-btn dash-btn-secondary text-center"><i class="fal fa-plus"></i> Activity</a>
+            <a href="{% url 'dashboard_accommodation_create' %}" class="dash-btn dash-btn-secondary text-center"><i class="fal fa-plus"></i> Lodge</a>
+            <a href="{% url 'packages:dashboard_booking_create' %}" class="dash-btn dash-btn-primary text-center col-span-2"><i class="fal fa-plus"></i> New booking</a>
+        </div>
+    </div>
+</section>
+
+{# JSON datasets for Chart.js #}
+{{ booking_trend_labels|json_script:"booking-trend-labels" }}
+{{ booking_trend_data|json_script:"booking-trend-data" }}
+{{ revenue_labels|json_script:"revenue-labels" }}
+{{ revenue_data|json_script:"revenue-data" }}
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'frontend/vendor/chart.min.js' %}" defer></script>
+<script defer>
+document.addEventListener('DOMContentLoaded', () => {
+    if (!window.Chart) return;
+
+    const slate200 = '#E2E8F0';
+    const slate500 = '#64748B';
+    const bush600  = '#234C24';
+    const bush100  = '#D7E2D4';
+
+    Chart.defaults.font.family = 'Inter, system-ui, sans-serif';
+    Chart.defaults.color = slate500;
+
+    // --- Bookings daily trend (line) ---
+    const bookingLabels = JSON.parse(document.getElementById('booking-trend-labels').textContent);
+    const bookingData = JSON.parse(document.getElementById('booking-trend-data').textContent);
+
+    new Chart(document.getElementById('bookings-trend-chart'), {
+        type: 'line',
+        data: {
+            labels: bookingLabels,
+            datasets: [{
+                data: bookingData,
+                borderColor: bush600,
+                backgroundColor: 'rgba(35, 76, 36, 0.08)',
+                tension: 0.35,
+                fill: true,
+                pointRadius: 0,
+                pointHoverRadius: 4,
+                borderWidth: 2,
+            }],
         },
-        plugins: {
-            legend: {
-                display: false
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: {
+                    ticks: { maxTicksLimit: 7, font: { size: 11 } },
+                    grid: { display: false },
+                },
+                y: {
+                    beginAtZero: true,
+                    ticks: { precision: 0, font: { size: 11 } },
+                    grid: { color: slate200, drawBorder: false },
+                },
             },
-            tooltip: {
-                enabled: true,
-                backgroundColor: '#fff',
-                titleColor: '#333',
-                bodyColor: '#666',
-                borderColor: '#ddd',
-                borderWidth: 1,
-                padding: 10,
-                displayColors: false,
-                callbacks: {
-                    title: function(context) {
-                        return context[0].label;
-                    },
-                    label: function(context) {
-                        return context.parsed.y + ' ' + (context.parsed.y === 1 ? 'Inquiry' : 'Inquiries');
-                    }
-                }
-            }
         },
-        scales: {
-            x: {
-                grid: {
-                    display: false,
-                    drawBorder: false
-                },
-                ticks: {
-                    font: {
-                        size: 11
+    });
+
+    // --- Revenue by month (bar) ---
+    const revLabels = JSON.parse(document.getElementById('revenue-labels').textContent);
+    const revData = JSON.parse(document.getElementById('revenue-data').textContent);
+
+    new Chart(document.getElementById('revenue-chart'), {
+        type: 'bar',
+        data: {
+            labels: revLabels,
+            datasets: [{
+                data: revData,
+                backgroundColor: bush100,
+                hoverBackgroundColor: bush600,
+                borderRadius: 6,
+                borderSkipped: false,
+            }],
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { grid: { display: false }, ticks: { font: { size: 11 } } },
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        font: { size: 11 },
+                        callback: (v) => v >= 1000 ? (v/1000).toFixed(0) + 'k' : v,
                     },
-                    color: '#666'
-                }
-            },
-            y: {
-                beginAtZero: true,
-                ticks: {
-                    stepSize: 1,
-                    precision: 0,
-                    font: {
-                        size: 11
-                    },
-                    color: '#666'
+                    grid: { color: slate200, drawBorder: false },
                 },
-                grid: {
-                    color: 'rgba(0, 0, 0, 0.03)',
-                    drawBorder: false
-                }
-            }
-        }
-    }
-});
-
-// Package Categories Chart (Doughnut Chart)
-const packageCategoriesCtx = document.getElementById('packageCategoriesChart');
-
-// Destroy existing chart if it exists (prevents duplication)
-if (window.packageCategoriesChart instanceof Chart) {
-    window.packageCategoriesChart.destroy();
-}
-
-window.packageCategoriesChart = new Chart(packageCategoriesCtx, {
-    type: 'doughnut',
-    data: {
-        labels: [{% for cat in package_categories %}'{{ cat.category|title }}'{% if not forloop.last %},{% endif %}{% endfor %}],
-        datasets: [{
-            data: [{% for cat in package_categories %}{{ cat.count }}{% if not forloop.last %},{% endif %}{% endfor %}],
-            backgroundColor: [
-                '#4a81d4',
-                '#36b37e',
-                '#00c9ff',
-                '#ffc107',
-                '#f9547a',
-                '#9b59b6'
-            ],
-            borderWidth: 2,
-            borderColor: '#fff'
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: {
-                position: 'bottom',
-                labels: {
-                    padding: 10,
-                    font: {
-                        size: 12
-                    }
-                }
             },
-            tooltip: {
-                enabled: true
-            }
-        }
-    }
+        },
+    });
 });
 </script>
 {% endblock %}
-
