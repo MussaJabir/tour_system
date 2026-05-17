@@ -770,7 +770,7 @@ All 9 public route groups live on `base_modern.html` with the Safari Editorial s
 - Per-row Alpine dropdown menu (current inline icon buttons work for v1)
 
 ### PR
-- (opening next…)
+- https://github.com/MussaJabir/tour_system/pull/23
 
 ---
 
