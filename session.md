@@ -675,4 +675,52 @@ All 9 public route groups live on `base_modern.html` with the Safari Editorial s
 
 ---
 
+## Session 021 — 2026-05-17
+
+**Type:** Phase 7.1 — Dashboard home (Operations Slate)
+**Branch:** `feature/dashboard-home` → PR → `develop`
+
+### What we did
+1. **Rewrote `core.views.dashboard_home`** to surface revenue + booking data Phase 7.0 didn't have:
+   - 4 headline KPIs: inquiries 30d, bookings 30d, revenue 30d, conversion %
+   - Each headline KPI gets a vs-prior-30d trend dict `{'label': '+18%', 'dir': 'up'}` or `{'label': None, 'dir': None}` when no prior data exists
+   - Daily booking trend (30 days) — `TruncDate` aggregate, missing days backfilled with 0
+   - Revenue by month (6 months) — `TruncMonth` aggregate with `Sum('quoted_price')`
+   - Recent inquiries + recent bookings (top 6 each) for activity tables
+   - Side stats: pending inquiries, pending custom quotes, unread contact messages
+   - Catalog totals: packages / destinations / activities / accommodations
+   - **Excludes `cancelled` and `refunded` bookings from revenue + booking counts** — those shouldn't count toward the business funnel
+2. **Rewrote `core/dashboard/index.html`** on the new `base_dashboard.html`. Layout:
+   - **Topbar extras**: "New booking" primary CTA
+   - **Page header**: "Welcome back, {{username}}" + two secondary CTAs (Inquiries / Packages)
+   - **4-card KPI grid** using `_stat_card.html`
+   - **Two-chart row**: bookings trend (line) + revenue (bar), both 64px height, Chart.js loaded per-page via `extra_js`
+   - **Two recent-activity tables** side-by-side: inquiries + bookings, each with status badges and "View all →" link
+   - **Three secondary cards**: action queue (pending inquiries/quotes/messages), catalog totals, quick-create shortcuts
+3. **Chart.js wired** with `{{ list|json_script:"id" }}` for data injection (Django's safe JSON serializer). Defaults set:
+   - `Chart.defaults.font.family = 'Inter, system-ui, sans-serif'`
+   - `Chart.defaults.color = #64748B` (slate-500)
+   - Line: tension 0.35, fill with rgba(35, 76, 36, 0.08), bush-600 stroke
+   - Bar: bush-100 default, bush-600 on hover, 6px border-radius
+4. **Cache-bust** bumped to `v=20260517b`
+5. **16 new tests** in `core/tests_dashboard_home.py`:
+   - Access: anonymous redirects to login, non-staff redirects, staff gets 200
+   - Render: uses `base_dashboard.html`, welcome header + 4 KPI labels + chart canvases + json_script IDs all present, Chart.js loaded, both activity tables render, side cards render
+   - Context: all 18 required keys present, booking trend arrays exactly 30 elements, counts are int
+6. **All 261 tests pass** (245 prior + 16 new) — 329s
+7. **Visual spot-check** at `http://localhost:8080/dashboard/` — sidebar nav, KPI grid, both charts (empty since DB has no bookings), activity tables with empty-state copy, action queue / catalog / quick-create row all render perfectly in Operations Slate.
+
+### View extension detail (for future ref)
+- The trend helper `_trend(now_v, prev_v)` returns `{'label': None, 'dir': None}` when there's no prior-period data so the template can skip rendering the trend chip cleanly. Earlier prototype returned `(None, '')` and the template piped it through `|stringformat:'s'|add:'%'` which produced literal `'None%'` — bug fixed before merge.
+
+### Dev workflow notes (unchanged, still apply)
+- After Tailwind rebuild: `docker compose exec django python manage.py collectstatic --noinput --clear`
+- After template edit: `docker compose exec django sh -c 'kill -HUP 1'`
+- Bump the `?v=` on `base_dashboard.html` after each Tailwind rebuild
+
+### PR
+- (opening next…)
+
+---
+
 _Add new sessions above this line._

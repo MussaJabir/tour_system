@@ -229,10 +229,14 @@ Branch: `feature/dashboard-foundation` → PR → `develop`
 
 ### Phase 7.1 — Dashboard home (1–2 days)
 Branch: `feature/dashboard-home` → PR → `develop`
-- [ ] Stat-card grid (revenue, inquiries, bookings, conversion %)
-- [ ] Recent-activity feed (latest inquiries, bookings, reviews)
-- [ ] Quick actions row (New booking / New package / New destination / New inquiry)
-- [ ] Mini Chart.js charts for booking trends + revenue by month
+- [x] **4-card KPI grid** — inquiries 30d, bookings 30d, revenue 30d, conversion %; each with vs-prior-30d trend chip (up/down arrow, signed %)
+- [x] **Chart.js daily booking trend** — last 30 days, line chart with bush-green stroke + fill
+- [x] **Chart.js revenue by month** — last 6 months, bar chart with bush hover state
+- [x] **Recent inquiries table** — top 6 with status badges
+- [x] **Recent bookings table** — top 6 with status badges and totals
+- [x] **Action queue card** — pending inquiries / quotes awaiting send / unread messages with click-through
+- [x] **Catalog totals card** — package / destination / activity / lodge counts, all clickable to their list pages
+- [x] **Quick-create card** — 4 secondary buttons + primary "New booking" CTA
 
 ### Phase 7.2 — Dashboard listings (3–4 days · biggest sub-phase)
 Branch: `feature/dashboard-listings` → PR → `develop`
