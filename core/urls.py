@@ -25,6 +25,7 @@ urlpatterns = [
 
     # Styleguide (DEBUG only)
     path('styleguide/', views.styleguide, name='styleguide'),
+    path('dashboard/styleguide/', views.dashboard_styleguide, name='dashboard_styleguide'),
     
     # ==================== DASHBOARD URLS ====================
     # Dashboard Home

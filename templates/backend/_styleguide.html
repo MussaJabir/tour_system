@@ -1,0 +1,252 @@
+{% extends 'backend/base_dashboard.html' %}
+{% load static %}
+
+{% block title %}Dashboard Styleguide — Tour System{% endblock %}
+
+{% block content %}
+
+{% include 'backend/partials/_breadcrumb.html' with crumbs=' ' %}
+{% include 'backend/partials/_page_header.html' with title='Operations Slate' subtitle='Dashboard design-system reference · use this as the contract for every Phase 7.x page.' %}
+
+{# ============================================================ #}
+{# 01 — PALETTE #}
+{# ============================================================ #}
+<section class="dash-card mb-6">
+    <header class="dash-card-header">
+        <div>
+            <p class="dash-stat-label">01 — Palette</p>
+            <h2 class="dash-card-title mt-1">Colours</h2>
+        </div>
+    </header>
+
+    {# Slate #}
+    <h3 class="text-sm font-medium text-slate-900 mb-3">Slate (neutrals)</h3>
+    <div class="grid grid-cols-5 lg:grid-cols-10 gap-2 text-xs mb-8">
+        {% for n in slate_shades %}
+            <div>
+                <div class="aspect-square rounded-md border border-slate-200" style="background-color: var(--color-slate-{{ n }});"></div>
+                <p class="mt-1.5 text-slate-500">{{ n }}</p>
+            </div>
+        {% endfor %}
+    </div>
+
+    {# Bush — brand accent (carried from Safari Editorial) #}
+    <h3 class="text-sm font-medium text-slate-900 mb-3">Bush (brand accent — from Safari Editorial)</h3>
+    <div class="grid grid-cols-5 lg:grid-cols-10 gap-2 text-xs mb-8">
+        {% for n in bush_shades %}
+            <div>
+                <div class="aspect-square rounded-md" style="background-color: var(--color-bush-{{ n }});"></div>
+                <p class="mt-1.5 text-slate-500">{{ n }}</p>
+            </div>
+        {% endfor %}
+    </div>
+
+    {# Semantic #}
+    <h3 class="text-sm font-medium text-slate-900 mb-3">Semantic (statuses)</h3>
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
+        <div><div class="h-12 rounded-md" style="background-color: var(--color-emerald-500);"></div><p class="mt-2 text-slate-700">emerald · success</p></div>
+        <div><div class="h-12 rounded-md" style="background-color: var(--color-amber-500);"></div><p class="mt-2 text-slate-700">amber · warning</p></div>
+        <div><div class="h-12 rounded-md" style="background-color: var(--color-rose-500);"></div><p class="mt-2 text-slate-700">rose · danger</p></div>
+        <div><div class="h-12 rounded-md" style="background-color: var(--color-sky-500);"></div><p class="mt-2 text-slate-700">sky · info</p></div>
+    </div>
+</section>
+
+{# ============================================================ #}
+{# 02 — TYPOGRAPHY #}
+{# ============================================================ #}
+<section class="dash-card mb-6">
+    <header class="dash-card-header">
+        <div>
+            <p class="dash-stat-label">02 — Typography</p>
+            <h2 class="dash-card-title mt-1">Type scale</h2>
+        </div>
+    </header>
+
+    <div class="space-y-5">
+        <div><p class="text-xs text-slate-500">Page title · 28px / 600</p><h1 class="dash-page-title">28 / 32 — Page title</h1></div>
+        <div><p class="text-xs text-slate-500">Section title · 16px / 600</p><p class="dash-card-title">16 / 24 — Section title</p></div>
+        <div><p class="text-xs text-slate-500">Body · 14px / 400 (base)</p><p>The quick brown fox jumps over the lazy dog.</p></div>
+        <div><p class="text-xs text-slate-500">Small · 13px / 400 — table cell</p><p class="text-[13px]">Bookings · 24 confirmed · 4 pending</p></div>
+        <div><p class="text-xs text-slate-500">Label · 11px / 500 / uppercase / tracking-[0.06em]</p><p class="dash-stat-label">Revenue · last 30 days</p></div>
+        <div><p class="text-xs text-slate-500">Mono — JetBrains Mono</p><p class="font-mono text-sm">BKG-20260516-00001</p></div>
+    </div>
+</section>
+
+{# ============================================================ #}
+{# 03 — BUTTONS #}
+{# ============================================================ #}
+<section class="dash-card mb-6">
+    <header class="dash-card-header">
+        <div>
+            <p class="dash-stat-label">03 — Buttons</p>
+            <h2 class="dash-card-title mt-1">Variants</h2>
+        </div>
+    </header>
+
+    <div class="flex flex-wrap gap-3 items-center">
+        <button class="dash-btn dash-btn-primary"><i class="fal fa-plus"></i> Primary</button>
+        <button class="dash-btn dash-btn-secondary"><i class="fal fa-edit"></i> Secondary</button>
+        <button class="dash-btn dash-btn-ghost">Ghost</button>
+        <button class="dash-btn dash-btn-danger"><i class="fal fa-trash"></i> Danger</button>
+        <span class="text-slate-400 text-xs">·</span>
+        <button class="dash-btn dash-btn-sm dash-btn-secondary">Small</button>
+        <button class="dash-btn dash-btn-sm dash-btn-ghost">Small ghost</button>
+    </div>
+</section>
+
+{# ============================================================ #}
+{# 04 — STAT CARDS #}
+{# ============================================================ #}
+<section class="mb-6">
+    <p class="dash-stat-label mb-3">04 — Stat cards</p>
+    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {% include 'backend/partials/_stat_card.html' with label='Inquiries · 30d' value='42' trend_value='+18%' trend_dir='up' icon='comment-alt-lines' %}
+        {% include 'backend/partials/_stat_card.html' with label='Bookings · 30d' value='14' trend_value='+6%' trend_dir='up' icon='calendar-check' %}
+        {% include 'backend/partials/_stat_card.html' with label='Revenue · 30d' value='USD 38,200' trend_value='-4%' trend_dir='down' icon='dollar-sign' %}
+        {% include 'backend/partials/_stat_card.html' with label='Conversion' value='33.3%' icon='chart-line' %}
+    </div>
+</section>
+
+{# ============================================================ #}
+{# 05 — STATUS BADGES #}
+{# ============================================================ #}
+<section class="dash-card mb-6">
+    <header class="dash-card-header">
+        <div>
+            <p class="dash-stat-label">05 — Status badges</p>
+            <h2 class="dash-card-title mt-1">Semantic variants</h2>
+        </div>
+    </header>
+
+    <div class="flex flex-wrap gap-2">
+        {% include 'backend/partials/_status_badge.html' with label='Confirmed' variant='success' %}
+        {% include 'backend/partials/_status_badge.html' with label='Completed' variant='success' %}
+        {% include 'backend/partials/_status_badge.html' with label='Pending deposit' variant='warning' %}
+        {% include 'backend/partials/_status_badge.html' with label='Cancelled' variant='danger' %}
+        {% include 'backend/partials/_status_badge.html' with label='Refunded' variant='danger' %}
+        {% include 'backend/partials/_status_badge.html' with label='In progress' variant='info' %}
+        {% include 'backend/partials/_status_badge.html' with label='Draft' variant='info' %}
+        {% include 'backend/partials/_status_badge.html' with label='Archived' variant='neutral' %}
+    </div>
+</section>
+
+{# ============================================================ #}
+{# 06 — DATA TABLE #}
+{# ============================================================ #}
+<section class="mb-6">
+    <p class="dash-stat-label mb-3">06 — Data table</p>
+
+    {% include 'backend/partials/_data_table.html' with search_placeholder='Search bookings…' show_count=4 count_label='booking' %}
+    {% block table %}
+    <table class="dash-table">
+        <thead>
+            <tr>
+                <th>Reference</th>
+                <th>Customer</th>
+                <th>Package</th>
+                <th>Date</th>
+                <th>Status</th>
+                <th class="text-right">Total</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td class="font-mono text-xs text-slate-500">BKG-20260516-00001</td>
+                <td class="text-slate-900 font-medium">Jane Doe</td>
+                <td>7-day Serengeti adventure</td>
+                <td>15 Jul 2026</td>
+                <td>{% include 'backend/partials/_status_badge.html' with label='Confirmed' variant='success' %}</td>
+                <td class="text-right font-medium">USD 2,400</td>
+                <td><button class="dash-btn dash-btn-sm dash-btn-ghost"><i class="fal fa-ellipsis-h"></i></button></td>
+            </tr>
+            <tr>
+                <td class="font-mono text-xs text-slate-500">BKG-20260514-00007</td>
+                <td class="text-slate-900 font-medium">Mark Aldrich</td>
+                <td>Kilimanjaro climb · 6D</td>
+                <td>02 Aug 2026</td>
+                <td>{% include 'backend/partials/_status_badge.html' with label='Pending deposit' variant='warning' %}</td>
+                <td class="text-right font-medium">USD 1,800</td>
+                <td><button class="dash-btn dash-btn-sm dash-btn-ghost"><i class="fal fa-ellipsis-h"></i></button></td>
+            </tr>
+            <tr>
+                <td class="font-mono text-xs text-slate-500">BKG-20260512-00012</td>
+                <td class="text-slate-900 font-medium">Aisha Wabwire</td>
+                <td>Zanzibar 5-night</td>
+                <td>21 Jun 2026</td>
+                <td>{% include 'backend/partials/_status_badge.html' with label='In progress' variant='info' %}</td>
+                <td class="text-right font-medium">USD 1,150</td>
+                <td><button class="dash-btn dash-btn-sm dash-btn-ghost"><i class="fal fa-ellipsis-h"></i></button></td>
+            </tr>
+            <tr>
+                <td class="font-mono text-xs text-slate-500">BKG-20260508-00031</td>
+                <td class="text-slate-900 font-medium">Diego Ramos</td>
+                <td>Northern Circuit Classic</td>
+                <td>—</td>
+                <td>{% include 'backend/partials/_status_badge.html' with label='Cancelled' variant='danger' %}</td>
+                <td class="text-right text-slate-400">—</td>
+                <td><button class="dash-btn dash-btn-sm dash-btn-ghost"><i class="fal fa-ellipsis-h"></i></button></td>
+            </tr>
+        </tbody>
+    </table>
+    {% endblock %}
+</section>
+
+{# ============================================================ #}
+{# 07 — FORM FIELDS #}
+{# ============================================================ #}
+<section class="dash-card mb-6">
+    <header class="dash-card-header">
+        <div>
+            <p class="dash-stat-label">07 — Forms</p>
+            <h2 class="dash-card-title mt-1">Inputs</h2>
+        </div>
+    </header>
+
+    <div class="grid sm:grid-cols-2 gap-5 max-w-3xl">
+        <div>
+            <label class="dash-label" for="sg-input">Text input</label>
+            <input id="sg-input" type="text" class="dash-input" placeholder="Tour package name">
+        </div>
+        <div>
+            <label class="dash-label" for="sg-select">Select</label>
+            <select id="sg-select" class="dash-select">
+                <option>Adventure</option>
+                <option>Luxury</option>
+                <option>Honeymoon</option>
+            </select>
+        </div>
+        <div class="sm:col-span-2">
+            <label class="dash-label" for="sg-textarea">Textarea</label>
+            <textarea id="sg-textarea" class="dash-textarea" placeholder="Day 1: Arrival in Arusha…"></textarea>
+        </div>
+    </div>
+</section>
+
+{# ============================================================ #}
+{# 08 — EMPTY STATE #}
+{# ============================================================ #}
+<section class="mb-6">
+    <p class="dash-stat-label mb-3">08 — Empty state</p>
+    {% include 'backend/partials/_empty_state.html' with icon='inbox' title='No inquiries yet.' subtitle='New customer inquiries will appear here as soon as someone submits the form.' action_label='View public inquiry form' action_url='/inquiry/' %}
+</section>
+
+{# ============================================================ #}
+{# 09 — MOTION #}
+{# ============================================================ #}
+<section class="dash-card mb-6">
+    <header class="dash-card-header">
+        <div>
+            <p class="dash-stat-label">09 — Motion</p>
+            <h2 class="dash-card-title mt-1">Tight, functional, never cinematic</h2>
+        </div>
+    </header>
+    <ul class="text-sm text-slate-600 space-y-2">
+        <li>– Transitions: 120–250 ms · `ease` or `ease-out`</li>
+        <li>– Allowed: hover row tint, focus glow, dropdown fade, modal slide-up</li>
+        <li>– Forbidden: scroll-triggered reveals, parallax, Ken Burns zooms, GSAP, Lenis</li>
+        <li>– <code class="font-mono text-xs">prefers-reduced-motion</code> disables all enhancement animations</li>
+    </ul>
+</section>
+
+{% endblock %}

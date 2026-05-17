@@ -221,11 +221,11 @@ Branch: `feature/frontend-polish` → PR → `develop`
 
 ### Phase 7.0 — Foundation & Dashboard Styleguide (2 days)
 Branch: `feature/dashboard-foundation` → PR → `develop`
-- [ ] Extend `tailwind.css` `@theme` with Operations Slate tokens (no second CSS file — both systems share the build)
-- [ ] Add Chart.js to `static/frontend/vendor/`
-- [ ] Build new `templates/backend/base_dashboard.html` — sidebar + topbar + main shell
-- [ ] Reusable partials: `_dashboard_sidebar.html`, `_dashboard_topbar.html`, `_stat_card.html`, `_data_table.html`, `_status_badge.html`, `_page_header.html`, `_breadcrumb.html`, `_empty_state.html`
-- [ ] `/dashboard/styleguide/` page (DEBUG-only) — full visual reference
+- [x] Extended `tailwind.css` `@theme` — slate 50→900, semantic emerald/amber/rose/sky ramps. ~25 dashboard component classes (`dash-shell`, `dash-sidebar`, `dash-nav-link`, `dash-topbar`, `dash-page-title`, `dash-card`, `dash-stat`, `dash-btn`, `dash-btn-primary`, `dash-btn-danger`, `dash-badge` + variants, `dash-table`, `dash-input`, `dash-label`)
+- [x] Chart.js 4.4.1 downloaded to `static/frontend/vendor/chart.min.js` (200 KB; loaded per-page, not globally)
+- [x] Built `templates/backend/base_dashboard.html` — sidebar + topbar + main shell with Alpine off-canvas mobile nav + skip-to-content link + Django messages renderer
+- [x] 8 reusable partials in `templates/backend/partials/` — `_dashboard_sidebar`, `_dashboard_topbar`, `_page_header`, `_breadcrumb`, `_stat_card`, `_status_badge`, `_empty_state`, `_data_table`
+- [x] `/dashboard/styleguide/` page (DEBUG-only) showing every token, partial, badge, button, table, form field, motion guidance
 
 ### Phase 7.1 — Dashboard home (1–2 days)
 Branch: `feature/dashboard-home` → PR → `develop`

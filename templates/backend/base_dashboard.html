@@ -1,0 +1,86 @@
+{% load static %}<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="robots" content="noindex, nofollow">
+
+    <title>{% block title %}Dashboard — Tour System{% endblock %}</title>
+
+    <link rel="shortcut icon" href="{% static 'frontend/assets/images/logos/favicon.png' %}" type="image/x-icon">
+
+    {# Inter only — no Fraunces in the dashboard. Variable font, narrow weight range to keep load small. #}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400..600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    {# Tailwind compiled CSS — shared between public + dashboard #}
+    <link rel="stylesheet" href="{% static 'frontend/css/tailwind.css' %}?v=20260517a">
+
+    {# Font Awesome #}
+    <link rel="stylesheet" href="{% static 'frontend/assets/css/fontawesome-5.14.0.min.css' %}">
+
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body class="bg-slate-50 text-slate-700 antialiased font-sans">
+
+    {# Skip-to-content #}
+    <a href="#dash-content"
+       class="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100]
+              focus:bg-slate-900 focus:text-white focus:px-4 focus:py-2 focus:rounded focus:text-sm">
+        Skip to content
+    </a>
+
+    <div class="dash-shell" x-data="{ sidebarOpen: false }">
+
+        {# Mobile sidebar overlay #}
+        <div x-show="sidebarOpen"
+             x-cloak
+             @click="sidebarOpen = false"
+             x-transition.opacity
+             class="fixed inset-0 bg-slate-900/50 z-30 lg:hidden"></div>
+
+        {# Sidebar (off-canvas on mobile, fixed column on lg+) #}
+        <div :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
+             class="dash-sidebar fixed inset-y-0 left-0 w-64 z-40 transform transition-transform duration-200 lg:relative lg:translate-x-0 lg:w-auto lg:z-auto">
+            {% include 'backend/partials/_dashboard_sidebar.html' %}
+        </div>
+
+        {# Main column #}
+        <div class="flex flex-col min-h-screen min-w-0">
+            {% include 'backend/partials/_dashboard_topbar.html' %}
+
+            <main id="dash-content" tabindex="-1" class="flex-1 px-5 py-6 lg:px-8 lg:py-8 max-w-[1400px] w-full">
+                {# Django messages #}
+                {% if messages %}
+                    <div class="space-y-2 mb-6">
+                        {% for m in messages %}
+                            <div class="dash-card flex items-start gap-3 text-sm
+                                        {% if m.tags == 'success' %}border-emerald-200 bg-emerald-50 text-emerald-700
+                                        {% elif m.tags == 'error' %}border-rose-200 bg-rose-50 text-rose-700
+                                        {% elif m.tags == 'warning' %}border-amber-200 bg-amber-50 text-amber-700
+                                        {% else %}border-sky-200 bg-sky-50 text-sky-700{% endif %}"
+                                 style="padding: 0.65rem 1rem;">
+                                <i class="fal {% if m.tags == 'success' %}fa-check-circle
+                                          {% elif m.tags == 'error' %}fa-exclamation-circle
+                                          {% elif m.tags == 'warning' %}fa-exclamation-triangle
+                                          {% else %}fa-info-circle{% endif %} mt-0.5"></i>
+                                <span class="flex-1">{{ m }}</span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                {% block content %}{% endblock %}
+            </main>
+        </div>
+    </div>
+
+    {# Vendor scripts — Alpine for interactivity, Chart.js loaded per-page where needed #}
+    <script src="{% static 'frontend/vendor/alpine.min.js' %}" defer></script>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
