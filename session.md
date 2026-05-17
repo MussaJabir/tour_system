@@ -960,7 +960,7 @@ All 9 public route groups live on `base_modern.html` with the Safari Editorial s
 **Total: 67 dashboard templates migrated, 107 MB of legacy assets deleted across Phase 6 + Phase 7.**
 
 ### PR
-- (opening next…)
+- https://github.com/MussaJabir/tour_system/pull/27
 
 ---
 
