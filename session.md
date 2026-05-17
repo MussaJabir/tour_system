@@ -1003,7 +1003,7 @@ Phase 7 shipped the full Operations Slate dashboard. A senior-dev audit turned u
 - **No keyboard shortcuts / global search / audit log** — these were P2 in the audit; deferred indefinitely.
 
 ### PR
-- _to be filled in_
+- https://github.com/MussaJabir/tour_system/pull/28
 
 ---
 
