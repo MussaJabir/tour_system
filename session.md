@@ -852,7 +852,7 @@ All 9 public route groups live on `base_modern.html` with the Safari Editorial s
   The container has its own pytailwindcss install and is unaffected.
 
 ### PR
-- (opening next…)
+- https://github.com/MussaJabir/tour_system/pull/25
 
 ---
 
