@@ -671,7 +671,7 @@ All 9 public route groups live on `base_modern.html` with the Safari Editorial s
 - Phase 7.1 — Dashboard home (stats grid + recent activity feed + quick actions + Chart.js mini charts). Branch `feature/dashboard-home`.
 
 ### PR
-- (opening next…)
+- https://github.com/MussaJabir/tour_system/pull/21
 
 ---
 
