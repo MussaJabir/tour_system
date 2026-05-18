@@ -353,6 +353,98 @@ Branch: `feature/dashboard-polish` → PR → `develop`
 
 ---
 
+## Phase 9 — Strategic Differentiators (pre-launch must-haves)
+> Decision (Session 028): the "wait 2 weeks before next phase" rule applies
+> only to UX polish (Phase 8 P1 / P2). It does **not** apply to strategic
+> feature gaps that determine whether the product is even worth selling.
+>
+> The product ships when this list is done. Adding scope here is allowed
+> only with a deliberate "I'm extending the launch line" decision — no
+> scope creep by accident.
+
+### Launch line — definition of done
+
+- [ ] **F1 Route templates** live + ≥8 seeded canonical Tanzanian routes (Northern, Southern, Migration, Honeymoon, Kilimanjaro+Safari, Zanzibar+Safari, etc.)
+- [ ] **F2 Lodge proximity suggestion** working in the custom-package builder
+- [ ] **F3 AI itinerary draft** (via existing `RouteOptimizationJob`) returning useful output for ≥3 sample inputs
+- [ ] **Real catalog data seeded**: ≥15 destinations, ≥30 accommodations, ≥25 activities, ≥10 packages — all with lat/lng, descriptions, hero images
+- [ ] **UI loopholes audit** (Session 028 — see below) — all P0 items resolved
+- [ ] **At least 1 friendly tour-operator agrees to be the first paying customer** (not just a feature checklist — the actual market test)
+
+### UI loopholes audit — Session 028 user walk-through
+> Hands-on walk-through of the dashboard + public site looking for: broken
+> flows, missing buttons, confusing copy, dead links, layouts breaking on
+> edge cases (mobile, empty data, very-long names, etc.).
+
+- [ ] _to be filled in as the user reports findings — one bullet per issue with severity P0 / P1 / P2_
+
+### F1 — Route templates  (highest ROI, lowest risk)
+> Pre-built named itineraries staff clone-and-tweak. 80% of quotes look
+> like one of 5-10 templates, so this is the single biggest quote-time
+> reduction available.
+
+- [ ] Add `is_template = BooleanField(default=False)` to `Package` model + migration
+- [ ] Add `template_category` choices field: `northern_circuit`, `southern_circuit`, `migration`, `honeymoon`, `family`, `kilimanjaro`, `zanzibar_combo`, `custom`
+- [ ] Filter on `/dashboard/packages/?type=templates` showing only templates
+- [ ] "Start from template" CTA on inquiry detail → opens custom-package builder pre-populated from the chosen template (reuses existing `dashboard_custom_itinerary_copy` flow)
+- [ ] Seed ≥8 canonical routes via a management command `python manage.py seed_route_templates`
+- [ ] Public site: show templates on the homepage / packages index alongside regular packages (or filter them out — decide during build)
+- **Effort**: 2-3 days
+
+### F2 — Lodge proximity suggestion  (high ROI, low effort)
+> When staff adds a destination to a custom itinerary, surface lodges
+> within X km in a sidebar so they don't have to remember which lodges
+> are near Tarangire vs. Manyara vs. Serengeti Central.
+
+- [ ] Haversine helper in `accommodations/utils.py` (no PostGIS needed at ~50 lodges)
+- [ ] API endpoint: `GET /api/v1/accommodations/near/?lat=X&lng=Y&radius_km=30`
+- [ ] Sidebar partial in the custom-package builder consumes the endpoint via Alpine.js fetch
+- [ ] Test: lat/lng = Serengeti Central returns the right cluster of lodges
+- **Effort**: 1-2 days
+
+### F3 — AI itinerary draft  (wires up existing model)
+> `ai_assistant.RouteOptimizationJob` already exists architecturally —
+> needs system prompt + Celery task + result rendering. Riskiest of the
+> three because output quality depends entirely on prompt quality.
+
+- [ ] Pre-flight: confirm `OPENAI_API_KEY` set in `.env` + budget plan (per-call cost × expected quotes/month)
+- [ ] Build a strong system prompt with Tanzanian safari operational knowledge: park sequences, drive-time rules, seasonal awareness, lodge classification by budget tier, currency, common pitfalls (Loliondo restricted, western corridor wet-season closure, etc.)
+- [ ] Few-shot examples sourced from F1's seeded route templates
+- [ ] Celery task posts to OpenAI, parses structured JSON response (itinerary days, lodges, activities, drive times), saves to job result
+- [ ] Result view renders editable itinerary + "Save as custom quote" CTA that converts to a `CustomPackage`
+- [ ] Manual QA: 3 sample inputs (budget honeymoon 7d, family safari 10d, photographer migration trip) all return plausible output
+- **Effort**: 3-5 days (variance on prompt quality)
+
+### F4 — Drive-time matrix  (deferred — earn via F1 side-effect)
+> Manually populated `(origin, destination) → drive_hours` table used to
+> flag brutal drive days in custom itineraries.
+
+- [ ] Model: `core.DriveTime(origin_dest_id, destination_dest_id, road_hours, flight_minutes_or_null, notes)`
+- [ ] Populated organically as F1 templates are seeded — each template leg writes a row
+- [ ] Custom-package builder flags any day with > 6 hr drive time as warning
+- **Effort**: 2 hrs code (data accumulates from F1 work)
+
+### F5 — Map view on client-facing quote PDF  (deferred)
+> Render the route on a static map embedded in the quote PDF. Sells the
+> quote visually.
+
+- [ ] Pre-flight: audit current PDF generator + Mapbox Static API key
+- **Effort**: 2-3 days. Do **not** start until F1-F3 are shipped.
+
+### Out of scope for launch
+
+- ❌ Auto-routing algorithm from raw lat/lng (rejected — Session 028 — see mentor discussion)
+- ❌ Phase 8 P1 items (autosave, bulk actions, sortable headers, tooltips, inquiry-sidebar redesign, KPI baselines) — re-evaluate post-launch with real usage data
+- ❌ Phase 8 P2 items (keyboard shortcuts, global search, audit log, saved filters, "today" view) — re-evaluate post-launch
+- ❌ Reviews moderation polish — basics work; revisit if reviews actually flow in
+- ❌ Newsletter campaign sender — export-only is fine for launch
+- ❌ Payment gateway (Stripe / M-Pesa) — manual payment tracking is sufficient for launch; gateway after first paying clients confirm the need
+
+### Phase 9 total estimate
+~10-14 focused days for F1+F2+F3 + data seeding + UI loopholes fixes, assuming no scope creep. 2-3 PRs to `develop`.
+
+---
+
 ## Priority Order (Impact vs Effort)
 
 | # | Item | Impact | Effort |
