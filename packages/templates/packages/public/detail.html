@@ -62,221 +62,454 @@
 </section>
 
 {# ============================================================ #}
-{# MAIN — content + sticky booking sidebar #}
+{# PRICE BLOCK — centered, under hero, replaces sticky sidebar #}
 {# ============================================================ #}
-<section class="py-16 lg:py-24">
+<section class="relative -mt-12 lg:-mt-16 z-10">
     <div class="container-editorial">
-        <div class="listing-grid">
-
-            {# ----- BOOKING SIDEBAR (sticky on lg+) ----- #}
-            <aside class="lg:order-2 lg:sticky lg:top-28 lg:self-start">
-                <div class="bg-bone rounded-2xl p-7 lg:p-8" style="box-shadow: var(--shadow-frame);">
-                    <p class="eyebrow text-mist">From</p>
+        <div class="bg-ivory rounded-2xl px-6 py-8 lg:px-12 lg:py-10 max-w-5xl mx-auto" style="box-shadow: var(--shadow-frame);">
+            <div class="grid lg:grid-cols-[1fr_auto] gap-8 lg:gap-12 items-center">
+                {# Price + CTA #}
+                <div class="text-center lg:text-left">
+                    <p class="eyebrow text-mist">From, per person</p>
                     {% if package.discount_percentage %}
-                        <div class="mt-3 flex items-baseline gap-3">
-                            <span class="font-display text-display-sm text-charcoal">{{ package.currency }} {{ package.final_price|floatformat:0 }}</span>
+                        <div class="mt-2 flex flex-wrap items-baseline gap-3 justify-center lg:justify-start">
+                            <span class="font-display text-display-md text-charcoal">{{ package.currency }} {{ package.final_price|floatformat:0 }}</span>
                             <span class="text-mist line-through">{{ package.currency }} {{ package.price_per_person|floatformat:0 }}</span>
+                            <span class="text-sm text-clay-500">Save {{ package.discount_percentage }}%</span>
                         </div>
-                        <p class="text-sm text-clay-500 mt-1">Save {{ package.discount_percentage }}%</p>
                     {% else %}
-                        <div class="mt-3">
-                            <span class="font-display text-display-sm text-charcoal">{{ package.currency }} {{ package.price_per_person|floatformat:0 }}</span>
-                        </div>
+                        <span class="font-display text-display-md text-charcoal block mt-2">{{ package.currency }} {{ package.price_per_person|floatformat:0 }}</span>
                     {% endif %}
-                    <p class="text-xs text-mist mt-1">per person</p>
-
-                    <a href="{% url 'packages:inquiry_create_package' package.slug %}" class="btn btn-primary w-full mt-6">
+                    <p class="text-xs text-mist mt-2">No deposit until you accept your tailored itinerary.</p>
+                </div>
+                <div class="flex flex-col gap-3 lg:min-w-[280px]">
+                    <a href="{% url 'packages:inquiry_create_package' package.slug %}" class="btn btn-primary w-full justify-center">
                         Plan This Trip
                         <i class="fal fa-arrow-right"></i>
                     </a>
-                    <a href="{% url 'contact_page' %}" class="btn btn-ghost w-full mt-3 justify-center">
+                    <a href="{% url 'contact_page' %}" class="btn btn-ghost w-full justify-center">
                         Ask a question
                     </a>
+                </div>
+            </div>
 
-                    {# Quick facts #}
-                    <dl class="mt-7 pt-6 border-t border-sand-300 space-y-3 text-sm">
-                        <div class="flex justify-between">
-                            <dt class="text-mist">Duration</dt>
-                            <dd>{{ package.duration_days }}D · {{ package.duration_nights }}N</dd>
-                        </div>
+            {# Fact tiles #}
+            <dl class="mt-8 pt-8 border-t border-sand-200 grid grid-cols-2 lg:grid-cols-4 gap-6 text-center">
+                <div>
+                    <dt class="eyebrow text-mist">Duration</dt>
+                    <dd class="font-display text-xl text-charcoal mt-2">{{ package.duration_days }}D · {{ package.duration_nights }}N</dd>
+                </div>
+                <div>
+                    <dt class="eyebrow text-mist">Category</dt>
+                    <dd class="font-display text-xl text-charcoal mt-2">{{ package.get_category_display|default:package.category|default:"—" }}</dd>
+                </div>
+                <div>
+                    <dt class="eyebrow text-mist">Difficulty</dt>
+                    <dd class="font-display text-xl text-charcoal mt-2">{{ package.get_difficulty_level_display|default:package.difficulty_level|default:"—" }}</dd>
+                </div>
+                <div>
+                    <dt class="eyebrow text-mist">Group</dt>
+                    <dd class="font-display text-xl text-charcoal mt-2">
                         {% if package.min_group_size or package.max_group_size %}
-                        <div class="flex justify-between">
-                            <dt class="text-mist">Group size</dt>
-                            <dd>{{ package.min_group_size|default:1 }}–{{ package.max_group_size|default:'∞' }} guests</dd>
-                        </div>
-                        {% endif %}
-                        {% if package.category %}
-                        <div class="flex justify-between">
-                            <dt class="text-mist">Category</dt>
-                            <dd>{{ package.get_category_display|default:package.category }}</dd>
-                        </div>
-                        {% endif %}
-                        {% if package.difficulty_level %}
-                        <div class="flex justify-between">
-                            <dt class="text-mist">Difficulty</dt>
-                            <dd>{{ package.get_difficulty_level_display|default:package.difficulty_level }}</dd>
-                        </div>
-                        {% endif %}
-                    </dl>
-
-                    {# Departures #}
-                    {% if upcoming_departures %}
-                    <div class="mt-7 pt-6 border-t border-sand-300">
-                        <p class="eyebrow text-mist">Upcoming departures</p>
-                        <ul class="mt-3 space-y-2">
-                            {% for d in upcoming_departures|slice:":4" %}
-                                <li class="flex justify-between text-sm">
-                                    <span>{{ d.departure_date|date:"d M Y" }}</span>
-                                    <span class="text-mist">{{ d.seats_remaining }} seats</span>
-                                </li>
-                            {% endfor %}
-                        </ul>
-                    </div>
-                    {% endif %}
+                            {{ package.min_group_size|default:1 }}–{{ package.max_group_size|default:"∞" }}
+                        {% else %}Private{% endif %}
+                    </dd>
                 </div>
+            </dl>
 
-                {# Route map — itinerary stops connected in order #}
-                {% if route_stops|length >= 1 %}
-                <div class="bg-bone rounded-2xl p-7 lg:p-8 mt-6" style="box-shadow: var(--shadow-frame);">
-                    <p class="eyebrow text-mist">The route</p>
-                    <h3 class="font-display text-2xl mt-2">Where you'll go</h3>
-                    <div id="package-route-map" class="mt-5 h-72 rounded-xl overflow-hidden bg-sand-100"></div>
-                    <ol class="mt-5 space-y-3 text-sm">
-                        {% for stop in route_stops %}
-                            <li class="flex items-start gap-3">
-                                <span class="mt-0.5 w-6 h-6 rounded-full bg-bush-700 text-ivory flex items-center justify-center text-xs font-medium flex-shrink-0">{{ forloop.counter }}</span>
-                                <span>
-                                    <span class="block text-charcoal">{{ stop.name }}</span>
-                                    <span class="block text-mist text-xs">{{ stop.day_label }}{% if stop.country %} · {{ stop.country }}{% endif %}</span>
-                                </span>
-                            </li>
-                        {% endfor %}
-                    </ol>
+            {# Inline review snippet #}
+            {% if inline_review_top %}
+            <figure class="mt-8 pt-8 border-t border-sand-200 flex items-start gap-4">
+                <div class="flex gap-0.5 text-clay-500 mt-1">
+                    {% for i in "12345"|make_list %}{% if forloop.counter <= inline_review_top.rating %}<i class="fas fa-star text-xs"></i>{% endif %}{% endfor %}
                 </div>
-                {% endif %}
-            </aside>
-
-            {# ----- MAIN CONTENT ----- #}
-            <article class="lg:order-1 max-w-3xl space-y-16 lg:space-y-20">
-
-                {# Overview #}
-                <div>
-                    <p class="eyebrow">Overview</p>
-                    <h2 class="font-display text-display-md mt-3 text-balance">About this journey</h2>
-                    <div class="mt-6 prose-editorial text-charcoal/90 leading-relaxed text-lg">
-                        {{ package.description|linebreaks }}
-                    </div>
-                </div>
-
-                {# Highlights #}
-                {% if package.highlights %}
-                <div>
-                    <p class="eyebrow">Highlights</p>
-                    <h2 class="font-display text-display-md mt-3 text-balance">What you'll see</h2>
-                    <div class="mt-6 text-charcoal/90 leading-relaxed text-lg">
-                        {{ package.highlights|linebreaks }}
-                    </div>
-                </div>
-                {% endif %}
-
-                {# Itinerary timeline #}
-                {% if itineraries %}
-                <div>
-                    <p class="eyebrow">Day by day</p>
-                    <h2 class="font-display text-display-md mt-3 text-balance">Itinerary</h2>
-                    <ol class="mt-8 relative border-l border-sand-300 space-y-10 pl-8">
-                        {% for day in itineraries %}
-                        <li class="relative">
-                            <span class="absolute -left-[2.6rem] top-0 w-10 h-10 rounded-full bg-bush-700 text-ivory flex items-center justify-center font-display text-sm">{{ day.day_number }}</span>
-                            <h3 class="font-display text-xl lg:text-2xl text-balance">{{ day.title }}</h3>
-                            <div class="mt-3 text-charcoal/80 leading-relaxed">
-                                {{ day.description|linebreaks }}
-                            </div>
-                            {% if day.accommodation %}
-                                <p class="mt-3 text-sm text-mist">
-                                    <i class="fal fa-bed mr-1"></i> Overnight: {{ day.accommodation.name }}
-                                </p>
-                            {% endif %}
-                            {% if day.notes %}
-                                <p class="mt-2 text-sm text-clay-600 italic">{{ day.notes }}</p>
-                            {% endif %}
-                        </li>
-                        {% endfor %}
-                    </ol>
-                </div>
-                {% endif %}
-
-                {# Inclusions / Exclusions #}
-                {% if inclusions or exclusions %}
-                <div class="grid sm:grid-cols-2 gap-10">
-                    {% if inclusions %}
-                    <div>
-                        <p class="eyebrow text-bush-600">Included</p>
-                        <ul class="mt-4 space-y-3">
-                            {% for inc in inclusions %}
-                            <li class="flex gap-3 text-charcoal/90">
-                                <i class="fal fa-check text-bush-600 mt-1.5"></i>
-                                <span>
-                                    {{ inc.item_name }}
-                                    {% if inc.quantity %}<span class="text-mist text-sm">({{ inc.quantity }})</span>{% endif %}
-                                </span>
-                            </li>
-                            {% endfor %}
-                        </ul>
-                    </div>
-                    {% endif %}
-                    {% if exclusions %}
-                    <div>
-                        <p class="eyebrow text-clay-500">Not included</p>
-                        <ul class="mt-4 space-y-3">
-                            {% for exc in exclusions %}
-                            <li class="flex gap-3 text-charcoal/70">
-                                <i class="fal fa-times text-clay-500 mt-1.5"></i>
-                                <span>{{ exc.item_name }}</span>
-                            </li>
-                            {% endfor %}
-                        </ul>
-                    </div>
-                    {% endif %}
-                </div>
-                {% endif %}
-
-                {# Gallery #}
-                {% if gallery_images %}
-                <div>
-                    <p class="eyebrow">Gallery</p>
-                    <h2 class="font-display text-display-md mt-3 text-balance">Glimpses from the trail</h2>
-                    <div class="mt-8">
-                        {% include 'frontend/partials/_gallery.html' with images=gallery_images %}
-                    </div>
-                </div>
-                {% endif %}
-
-                {# Final CTA inside article column #}
-                <div class="bg-charcoal text-ivory rounded-2xl p-10 lg:p-14 text-center">
-                    <p class="eyebrow text-sand-300">Ready when you are</p>
-                    <h3 class="font-display text-display-sm lg:text-display-md mt-4 text-balance">Make it yours.</h3>
-                    <p class="mt-4 text-ivory/80 max-w-md mx-auto">
-                        Use this itinerary as-is, or tell us what to tweak — we'll write back within a day with a draft built around it.
-                    </p>
-                    <a href="{% url 'packages:inquiry_create_package' package.slug %}" class="btn btn-primary bg-ivory text-charcoal hover:bg-sand-300 mt-8">
-                        Plan This Trip
-                        <i class="fal fa-arrow-right"></i>
-                    </a>
-                </div>
-
-            </article>
+                <blockquote class="flex-1">
+                    <p class="text-charcoal/85 italic leading-relaxed">"{{ inline_review_top.quote|truncatechars:180 }}"</p>
+                    <figcaption class="mt-2 text-xs text-mist">— {{ inline_review_top.customer_name }}{% if inline_review_top.customer_location %}, {{ inline_review_top.customer_location }}{% endif %}</figcaption>
+                </blockquote>
+            </figure>
+            {% endif %}
         </div>
     </div>
 </section>
+
+{# ============================================================ #}
+{# MAIN CONTENT — wide editorial article, no sidebar #}
+{# ============================================================ #}
+<section class="py-16 lg:py-24">
+    <div class="container-editorial">
+        <article class="max-w-4xl mx-auto space-y-20 lg:space-y-24">
+
+            {# Overview #}
+            <div>
+                <p class="eyebrow">Overview</p>
+                <h2 class="font-display text-display-md mt-3 text-balance">About this journey</h2>
+                <div class="mt-6 prose-editorial text-charcoal/90 leading-relaxed text-lg">
+                    {{ package.description|linebreaks }}
+                </div>
+            </div>
+
+            {# Highlights #}
+            {% if package.highlights %}
+            <div>
+                <p class="eyebrow">Highlights</p>
+                <h2 class="font-display text-display-md mt-3 text-balance">What you'll see</h2>
+                <div class="mt-6 text-charcoal/90 leading-relaxed text-lg">
+                    {{ package.highlights|linebreaks }}
+                </div>
+            </div>
+            {% endif %}
+
+            {# Your local team — static trust card #}
+            <div class="bg-bone rounded-2xl p-8 lg:p-12">
+                <p class="eyebrow text-bush-600">Your local team</p>
+                <h2 class="font-display text-display-sm mt-3 text-balance">Built and guided from Arusha.</h2>
+                <p class="mt-5 text-charcoal/80 leading-relaxed text-lg max-w-2xl">
+                    Every itinerary is written and run by a team that grew up walking these parks. Your driver-guide is a
+                    full-time staff guide — not a freelancer pulled in for the week — and your itinerary is yours alone.
+                    No fixed groups, no conveyor belt.
+                </p>
+                <dl class="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-6">
+                    <div><dt class="eyebrow text-mist">Years guiding</dt><dd class="font-display text-2xl mt-2 text-charcoal">10+</dd></div>
+                    <div><dt class="eyebrow text-mist">Languages</dt><dd class="font-display text-2xl mt-2 text-charcoal">EN · SW · FR</dd></div>
+                    <div><dt class="eyebrow text-mist">Guide ratio</dt><dd class="font-display text-2xl mt-2 text-charcoal">1 : 1 trip</dd></div>
+                    <div><dt class="eyebrow text-mist">Reply time</dt><dd class="font-display text-2xl mt-2 text-charcoal">&lt; 24h</dd></div>
+                </dl>
+            </div>
+
+        </article>
+    </div>
+</section>
+
+{# ============================================================ #}
+{# ITINERARY — grouped accordion with sticky day-rail #}
+{# ============================================================ #}
+{% if itinerary_groups %}
+<section class="py-16 lg:py-20 bg-bone" id="itinerary">
+    <div class="container-editorial">
+        <div class="max-w-5xl mx-auto">
+            <p class="eyebrow">Day by day</p>
+            <h2 class="font-display text-display-md mt-3 text-balance">Your itinerary</h2>
+            <p class="mt-4 text-charcoal/70 max-w-2xl">
+                Days are grouped by where you'll wake up. Click a group to see each day, or use the day-rail on the left to jump.
+            </p>
+        </div>
+
+        <div class="mt-12 lg:mt-16 grid lg:grid-cols-[80px_1fr] gap-6 lg:gap-12 max-w-5xl mx-auto">
+            {# Sticky day-rail #}
+            <aside class="hidden lg:block">
+                <ol class="sticky top-28 space-y-2" data-day-rail>
+                    {% for day in itineraries %}
+                        <li>
+                            <a href="#day-{{ day.day_number }}"
+                               class="day-rail-link block px-3 py-2 rounded-lg text-xs tracking-wider uppercase text-mist hover:text-bush-700 hover:bg-sand-100 transition-colors"
+                               data-rail-day="{{ day.day_number }}">
+                                <span class="font-display text-base block leading-none text-charcoal">{{ day.day_number }}</span>
+                                <span class="block mt-1 text-[10px] truncate">{{ day.title|truncatechars:18 }}</span>
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ol>
+            </aside>
+
+            {# Accordion groups #}
+            <div class="space-y-6">
+                {% for group in itinerary_groups %}
+                <details class="bg-ivory rounded-2xl overflow-hidden group/acc"
+                         data-itinerary-group
+                         {% if group.stop_index is not None %}data-stop-index="{{ group.stop_index }}"{% endif %}
+                         {% if forloop.first %}open{% endif %}>
+                    <summary class="cursor-pointer list-none">
+                        <div class="relative">
+                            {% if group.hero_image %}
+                                <div class="aspect-[16/6] overflow-hidden">
+                                    <img src="{{ group.hero_image.url }}"
+                                         alt="{{ group.destination.name|default:'Itinerary group' }}"
+                                         class="w-full h-full object-cover transition-transform duration-700 group-hover/acc:scale-[1.03]"
+                                         loading="lazy">
+                                </div>
+                                <div class="absolute inset-0 bg-gradient-to-t from-charcoal/70 via-charcoal/10 to-transparent"></div>
+                            {% else %}
+                                <div class="aspect-[16/4] bg-bush-700"></div>
+                            {% endif %}
+                            <div class="absolute inset-x-0 bottom-0 p-6 lg:p-8 text-ivory">
+                                <p class="eyebrow text-sand-200">{{ group.day_label }}</p>
+                                <h3 class="font-display text-2xl lg:text-3xl mt-1 leading-tight">
+                                    {{ group.destination.name|default:"Transit & travel" }}
+                                </h3>
+                            </div>
+                            <span class="absolute top-4 right-4 w-10 h-10 rounded-full bg-ivory/95 text-charcoal flex items-center justify-center transition-transform group-open/acc:rotate-180">
+                                <i class="fal fa-chevron-down"></i>
+                            </span>
+                        </div>
+                    </summary>
+
+                    <div class="p-6 lg:p-10 space-y-8">
+                        {% for day in group.days %}
+                        <article id="day-{{ day.day_number }}"
+                                 class="grid sm:grid-cols-[80px_1fr] gap-5 scroll-mt-32"
+                                 data-itinerary-day
+                                 data-day-number="{{ day.day_number }}"
+                                 {% if group.stop_index is not None %}data-stop-index="{{ group.stop_index }}"{% endif %}>
+                            <div class="flex flex-col items-start">
+                                <span class="w-12 h-12 rounded-full bg-bush-700 text-ivory flex items-center justify-center font-display text-lg">{{ day.day_number }}</span>
+                                <span class="mt-2 eyebrow text-mist">Day {{ day.day_number }}</span>
+                            </div>
+                            <div>
+                                <h4 class="font-display text-xl lg:text-2xl text-balance">{{ day.title }}</h4>
+                                <div class="mt-3 text-charcoal/80 leading-relaxed">
+                                    {{ day.description|linebreaks }}
+                                </div>
+
+                                {# Meal + accommodation badges #}
+                                <div class="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs">
+                                    {% if day.breakfast_included or day.lunch_included or day.dinner_included %}
+                                        <span class="flex items-center gap-1.5 text-charcoal">
+                                            <i class="fal fa-utensils text-bush-600"></i>
+                                            {% if day.breakfast_included %}<span class="inline-block w-5 h-5 rounded-full bg-bush-700 text-ivory text-[10px] flex items-center justify-center" title="Breakfast">B</span>{% endif %}
+                                            {% if day.lunch_included %}<span class="inline-block w-5 h-5 rounded-full bg-bush-700 text-ivory text-[10px] flex items-center justify-center" title="Lunch">L</span>{% endif %}
+                                            {% if day.dinner_included %}<span class="inline-block w-5 h-5 rounded-full bg-bush-700 text-ivory text-[10px] flex items-center justify-center" title="Dinner">D</span>{% endif %}
+                                        </span>
+                                    {% endif %}
+                                    {% if day.accommodation %}
+                                        <span class="flex items-center gap-1.5 text-mist">
+                                            <i class="fal fa-bed"></i>
+                                            <span class="text-charcoal">{{ day.accommodation.name }}</span>
+                                        </span>
+                                    {% endif %}
+                                </div>
+
+                                {% if day.notes %}
+                                    <p class="mt-3 text-xs text-clay-600 italic">{{ day.notes }}</p>
+                                {% endif %}
+
+                                {% if day.accommodation and day.accommodation.featured_image %}
+                                <div class="mt-5 rounded-xl overflow-hidden bg-sand-100">
+                                    <img src="{{ day.accommodation.featured_image.url }}"
+                                         alt="{{ day.accommodation.name }}"
+                                         class="w-full h-40 object-cover"
+                                         loading="lazy">
+                                </div>
+                                {% endif %}
+                            </div>
+                        </article>
+                        {% endfor %}
+                    </div>
+                </details>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+{# ============================================================ #}
+{# YOUR ROUTE — scrollytelling split pane with bidirectional sync #}
+{# ============================================================ #}
+{% if route_stops %}
+<section class="py-16 lg:py-24" id="your-route" data-route-section>
+    <div class="container-editorial">
+        <div class="max-w-5xl mx-auto text-center lg:text-left">
+            <p class="eyebrow">Your route</p>
+            <h2 class="font-display text-display-md mt-3 text-balance">Trace the journey across the map.</h2>
+            <p class="mt-4 text-charcoal/70 max-w-2xl mx-auto lg:mx-0">
+                Hover a stop or scroll the list to see it light up on the map. Click a pin on the map to jump back to that day in your itinerary.
+            </p>
+        </div>
+
+        <div class="mt-10 lg:mt-14 grid lg:grid-cols-[1fr_1.2fr] gap-6 lg:gap-10 max-w-6xl mx-auto">
+            {# Day list #}
+            <ol class="space-y-3" data-route-list>
+                {% for stop in route_stops %}
+                <li>
+                    <button type="button"
+                            class="route-stop w-full text-left p-5 rounded-xl bg-bone hover:bg-sand-100 border border-sand-200 transition-colors"
+                            data-stop-index="{{ forloop.counter0 }}"
+                            data-stop-lat="{{ stop.lat }}"
+                            data-stop-lng="{{ stop.lng }}">
+                        <div class="flex items-start gap-4">
+                            <span class="route-stop__pin mt-0.5 w-9 h-9 rounded-full bg-bush-700 text-ivory flex items-center justify-center font-medium text-sm flex-shrink-0">{{ forloop.counter }}</span>
+                            <div class="flex-1 min-w-0">
+                                <h3 class="font-display text-lg lg:text-xl text-charcoal">{{ stop.name }}</h3>
+                                <p class="text-xs text-mist mt-1">{{ stop.day_label }}{% if stop.country %} · {{ stop.country }}{% endif %}</p>
+                            </div>
+                            <i class="fal fa-arrow-right text-bush-600 mt-2"></i>
+                        </div>
+                    </button>
+                </li>
+                {% endfor %}
+            </ol>
+
+            {# Map #}
+            <div class="lg:sticky lg:top-28 lg:self-start">
+                <div id="package-route-map" class="h-[60vh] lg:h-[70vh] rounded-2xl overflow-hidden bg-sand-100"></div>
+                <p class="mt-3 text-xs text-mist text-center">Click a pin to scroll to that day's plan.</p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+{# ============================================================ #}
+{# INCLUSIONS / EXCLUSIONS #}
+{# ============================================================ #}
+{% if inclusions or exclusions %}
+<section class="py-16 lg:py-20 bg-bone">
+    <div class="container-editorial">
+        <div class="max-w-5xl mx-auto">
+            <p class="eyebrow">Plain pricing</p>
+            <h2 class="font-display text-display-md mt-3 text-balance">What's in (and what's not).</h2>
+
+            <div class="mt-10 grid md:grid-cols-2 gap-10 lg:gap-16">
+                {% if inclusions %}
+                <div>
+                    <p class="eyebrow text-bush-600">Included</p>
+                    <ul class="mt-4 space-y-3">
+                        {% for inc in inclusions %}
+                        <li class="flex gap-3 text-charcoal/90">
+                            <i class="fal fa-check text-bush-600 mt-1.5"></i>
+                            <span>
+                                {{ inc.item_name }}
+                                {% if inc.quantity %}<span class="text-mist text-sm">({{ inc.quantity }})</span>{% endif %}
+                            </span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+                {% if exclusions %}
+                <div>
+                    <p class="eyebrow text-clay-500">Not included</p>
+                    <ul class="mt-4 space-y-3">
+                        {% for exc in exclusions %}
+                        <li class="flex gap-3 text-charcoal/70">
+                            <i class="fal fa-times text-clay-500 mt-1.5"></i>
+                            <span>{{ exc.item_name }}</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+{# ============================================================ #}
+{# GALLERY #}
+{# ============================================================ #}
+{% if gallery_images %}
+<section class="py-16 lg:py-24">
+    <div class="container-editorial">
+        <div class="max-w-5xl mx-auto">
+            <p class="eyebrow">Gallery</p>
+            <h2 class="font-display text-display-md mt-3 text-balance">Glimpses from the trail</h2>
+            <div class="mt-10">
+                {% include 'frontend/partials/_gallery.html' with images=gallery_images %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+{# ============================================================ #}
+{# INLINE REVIEW — second touchpoint before final CTA #}
+{# ============================================================ #}
+{% if inline_review_bottom %}
+<section class="py-16 lg:py-20">
+    <div class="container-editorial">
+        <figure class="max-w-3xl mx-auto text-center">
+            <div class="flex gap-1 text-clay-500 justify-center">
+                {% for i in "12345"|make_list %}{% if forloop.counter <= inline_review_bottom.rating %}<i class="fas fa-star"></i>{% endif %}{% endfor %}
+            </div>
+            <blockquote class="font-display text-2xl lg:text-3xl leading-snug mt-6 text-balance text-charcoal">
+                "{{ inline_review_bottom.quote }}"
+            </blockquote>
+            <figcaption class="mt-6 text-sm text-mist">— {{ inline_review_bottom.customer_name }}{% if inline_review_bottom.customer_location %}, {{ inline_review_bottom.customer_location }}{% endif %}</figcaption>
+        </figure>
+    </div>
+</section>
+{% endif %}
+
+{# ============================================================ #}
+{# FINAL CTA #}
+{# ============================================================ #}
+<section class="py-16 lg:py-24">
+    <div class="container-editorial">
+        <div class="bg-charcoal text-ivory rounded-2xl p-10 lg:p-16 text-center max-w-5xl mx-auto">
+            <p class="eyebrow text-sand-300">Ready when you are</p>
+            <h3 class="font-display text-display-sm lg:text-display-md mt-4 text-balance">Make it yours.</h3>
+            <p class="mt-4 text-ivory/80 max-w-md mx-auto">
+                Use this itinerary as-is, or tell us what to tweak — we'll write back within a day with a draft built around you.
+            </p>
+            <a href="{% url 'packages:inquiry_create_package' package.slug %}" class="btn btn-primary bg-ivory text-charcoal hover:bg-sand-300 mt-8">
+                Plan This Trip
+                <i class="fal fa-arrow-right"></i>
+            </a>
+        </div>
+    </div>
+</section>
+
+{# ============================================================ #}
+{# EXTEND YOUR TRIP #}
+{# ============================================================ #}
+{% if extend_packages %}
+<section class="py-16 lg:py-20 bg-bone">
+    <div class="container-editorial">
+        <div class="max-w-5xl mx-auto">
+            <p class="eyebrow">Extend your trip</p>
+            <h2 class="font-display text-display-md mt-3 text-balance">Add a few more days.</h2>
+            <p class="mt-4 text-charcoal/70 max-w-2xl">
+                Most travellers tack on a beach extension or a second wilderness area. Here are three that pair well.
+            </p>
+
+            <div class="mt-10 grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for ext in extend_packages %}
+                <a href="{% url 'packages:public_package_detail' ext.slug %}" class="group block">
+                    <div class="aspect-[4/3] rounded-xl overflow-hidden bg-sand-100">
+                        {% if ext.featured_image %}
+                            <img src="{{ ext.featured_image.url }}" alt="{{ ext.name }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy">
+                        {% endif %}
+                    </div>
+                    <p class="eyebrow mt-4">{{ ext.get_category_display|default:ext.category }}</p>
+                    <h3 class="font-display text-xl mt-2 text-balance group-hover:text-bush-700 transition-colors">{{ ext.name }}</h3>
+                    <p class="mt-2 text-sm text-mist">{{ ext.duration_days }}D · {{ ext.duration_nights }}N · from {{ ext.currency }} {{ ext.final_price|floatformat:0 }}</p>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
 
 {# ============================================================ #}
 {# RELATED #}
 {# ============================================================ #}
 {% include 'frontend/partials/_related_grid.html' with items=related_packages eyebrow='Continue exploring' title='Related tours' url_name='packages:public_package_detail' image_attr='featured_image' %}
 
+{# ============================================================ #}
+{# STICKY MOBILE BOTTOM CTA #}
+{# ============================================================ #}
+<div class="lg:hidden fixed inset-x-0 bottom-0 z-40 bg-ivory/95 backdrop-blur border-t border-sand-200 px-4 py-3"
+     style="padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));">
+    <div class="flex items-center justify-between gap-3">
+        <div class="leading-tight">
+            <p class="text-[10px] uppercase tracking-wider text-mist">From, per person</p>
+            <p class="font-display text-lg text-charcoal">{{ package.currency }} {{ package.final_price|floatformat:0 }}</p>
+        </div>
+        <a href="{% url 'packages:inquiry_create_package' package.slug %}" class="btn btn-primary flex-1 justify-center">
+            Plan This Trip
+            <i class="fal fa-arrow-right"></i>
+        </a>
+    </div>
+</div>
+
 {% endblock %}
 
+{# ============================================================ #}
+{# Scripts: Leaflet map + bidirectional scroll sync + day-rail #}
+{# ============================================================ #}
 {% block extra_js %}
 {% if route_stops %}
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
@@ -284,37 +517,121 @@
 <script defer>
 document.addEventListener('DOMContentLoaded', () => {
     const stops = {{ route_stops_json|safe }};
-    if (!stops.length || !window.L) return;
     const mapEl = document.getElementById('package-route-map');
-    if (!mapEl) return;
+    if (!stops.length || !window.L || !mapEl) return;
 
-    const latlngs = stops.map(s => [s.lat, s.lng]);
     const map = L.map(mapEl, { scrollWheelZoom: false, attributionControl: false });
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap',
-        maxZoom: 11,
+        attribution: '&copy; OpenStreetMap', maxZoom: 11,
     }).addTo(map);
 
-    const numIcon = (n) => L.divIcon({
+    const idleIcon = (n) => L.divIcon({
         className: 'route-marker',
         html: `<span style="display:flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:#3a4a2a;color:#f5f0e6;font:600 12px/1 system-ui;border:2px solid #f5f0e6;box-shadow:0 1px 4px rgba(0,0,0,.3);">${n}</span>`,
-        iconSize: [26, 26],
-        iconAnchor: [13, 13],
+        iconSize: [26, 26], iconAnchor: [13, 13],
+    });
+    const activeIcon = (n) => L.divIcon({
+        className: 'route-marker route-marker--active',
+        html: `<span style="display:flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;background:#c97b3a;color:#f5f0e6;font:700 15px/1 system-ui;border:3px solid #f5f0e6;box-shadow:0 4px 14px rgba(201,123,58,.5);animation: pulseStop 1.6s ease-out infinite;">${n}</span>`,
+        iconSize: [38, 38], iconAnchor: [19, 19],
     });
 
-    stops.forEach((s, i) => {
-        L.marker([s.lat, s.lng], { icon: numIcon(i + 1) })
+    // Pulse keyframes injected once
+    if (!document.getElementById('route-pulse-style')) {
+        const style = document.createElement('style');
+        style.id = 'route-pulse-style';
+        style.textContent = '@keyframes pulseStop { 0% { box-shadow: 0 0 0 0 rgba(201,123,58,.6);} 70% { box-shadow: 0 0 0 14px rgba(201,123,58,0);} 100% { box-shadow: 0 0 0 0 rgba(201,123,58,0);}}';
+        document.head.appendChild(style);
+    }
+
+    const markers = stops.map((s, i) =>
+        L.marker([s.lat, s.lng], { icon: idleIcon(i + 1) })
             .addTo(map)
-            .bindPopup(`<b>${s.name}</b><br>${s.day_label}`);
-    });
+            .bindTooltip(`<b>${s.name}</b><br>${s.day_label}`, { direction: 'top', offset: [0, -10] })
+    );
 
+    const latlngs = stops.map(s => [s.lat, s.lng]);
     if (latlngs.length > 1) {
-        L.polyline(latlngs, {
-            color: '#3a4a2a', weight: 2.5, opacity: 0.85, dashArray: '6 6'
-        }).addTo(map);
+        L.polyline(latlngs, { color: '#3a4a2a', weight: 2.5, opacity: 0.85, dashArray: '6 6' }).addTo(map);
         map.fitBounds(L.latLngBounds(latlngs).pad(0.25));
     } else {
         map.setView(latlngs[0], 7);
+    }
+
+    let activeIndex = -1;
+    const setActive = (idx, opts = {}) => {
+        if (idx === activeIndex || idx < 0 || idx >= markers.length) return;
+        if (activeIndex !== -1) markers[activeIndex].setIcon(idleIcon(activeIndex + 1));
+        markers[idx].setIcon(activeIcon(idx + 1));
+        activeIndex = idx;
+        // Highlight the corresponding day-list button
+        document.querySelectorAll('[data-route-list] .route-stop').forEach((el, i) => {
+            el.classList.toggle('route-stop--active', i === idx);
+        });
+        if (opts.pan !== false) {
+            map.flyTo([stops[idx].lat, stops[idx].lng], Math.max(map.getZoom(), 7), { duration: 0.7 });
+        }
+    };
+
+    // --- Day-list buttons → activate marker + scroll into view -------------
+    document.querySelectorAll('[data-route-list] .route-stop').forEach((btn) => {
+        btn.addEventListener('mouseenter', () => {
+            setActive(parseInt(btn.dataset.stopIndex, 10));
+        });
+        btn.addEventListener('click', () => {
+            const idx = parseInt(btn.dataset.stopIndex, 10);
+            setActive(idx);
+            // Find the first day in the matching itinerary group and scroll there
+            const targetGroup = document.querySelector(`[data-itinerary-group][data-stop-index="${idx}"]`);
+            if (targetGroup) {
+                if (!targetGroup.open) targetGroup.open = true;
+                const firstDay = targetGroup.querySelector('[data-itinerary-day]');
+                (firstDay || targetGroup).scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        });
+    });
+
+    // --- Map marker click → scroll page to the day's card ------------------
+    markers.forEach((marker, idx) => {
+        marker.on('click', () => {
+            setActive(idx, { pan: false });
+            const targetGroup = document.querySelector(`[data-itinerary-group][data-stop-index="${idx}"]`);
+            if (targetGroup) {
+                if (!targetGroup.open) targetGroup.open = true;
+                const firstDay = targetGroup.querySelector('[data-itinerary-day]');
+                (firstDay || targetGroup).scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        });
+    });
+
+    // --- Scroll-sync: itinerary day enters viewport → highlight matching marker
+    const dayCards = document.querySelectorAll('[data-itinerary-day][data-stop-index]');
+    if (dayCards.length && 'IntersectionObserver' in window) {
+        const io = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                    const idx = parseInt(entry.target.dataset.stopIndex, 10);
+                    if (!Number.isNaN(idx)) setActive(idx);
+                }
+            });
+        }, { rootMargin: '-40% 0px -50% 0px', threshold: 0 });
+        dayCards.forEach((el) => io.observe(el));
+    }
+
+    // --- Day-rail: highlight active day on scroll --------------------------
+    const dayRailLinks = document.querySelectorAll('[data-day-rail] [data-rail-day]');
+    if (dayRailLinks.length && 'IntersectionObserver' in window) {
+        const railIo = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                    const n = entry.target.dataset.dayNumber;
+                    dayRailLinks.forEach((link) => {
+                        link.classList.toggle('day-rail-link--active', link.dataset.railDay === n);
+                    });
+                }
+            });
+        }, { rootMargin: '-40% 0px -55% 0px', threshold: 0 });
+        document.querySelectorAll('[data-itinerary-day]').forEach((el) => railIo.observe(el));
     }
 });
 </script>
