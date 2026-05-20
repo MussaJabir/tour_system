@@ -108,8 +108,8 @@
                         </div>
                     </a>
                 {% else %}
-                    <a href="{% url 'public_destination_detail' dest.slug %}" class="card group col-span-12 sm:col-span-6 lg:col-span-5" data-reveal>
-                        <div class="card-media aspect-[5/4] lg:aspect-[5/3]">
+                    <a href="{% url 'public_destination_detail' dest.slug %}" class="card group col-span-12 sm:col-span-6 lg:col-span-5 lg:h-full" data-reveal>
+                        <div class="card-media aspect-[5/4] lg:aspect-auto lg:h-full lg:min-h-[19rem]">
                             {% if dest.featured_image %}
                                 <img src="{{ dest.featured_image.url }}" alt="{{ dest.name }}" loading="lazy">
                             {% else %}
@@ -166,7 +166,7 @@
                         <div class="mt-5 flex items-baseline justify-between">
                             <p class="text-charcoal">
                                 <span class="text-sm text-mist">from</span>
-                                <span class="font-display text-2xl ml-1">{{ pkg.currency }} {{ pkg.get_final_price|floatformat:0 }}</span>
+                                <span class="font-display text-2xl ml-1">{{ pkg.currency }} {{ pkg.final_price|floatformat:0 }}</span>
                             </p>
                             <span class="text-bush-600 group-hover:translate-x-1 transition-transform">
                                 <i class="fal fa-arrow-right"></i>
