@@ -533,34 +533,56 @@ def public_package_detail(request, slug):
         departure_date__gte=timezone.now().date(),
     )
 
-    # Build ordered route stops for the sidebar map.
-    # Walk the itinerary day-by-day, pick each day's destination from its
-    # accommodation (preferred) or first activity (fallback), then collapse
-    # consecutive same-destination days into a single stop with a range label.
-    route_stops = []
-    for day in itineraries:
-        dest = None
+    # ------------------------------------------------------------------
+    # Itinerary groups: cluster consecutive days that share a destination.
+    # Each group gets a stop_index that matches route_stops below — this is
+    # what powers the scrollytelling map sync. Days without a resolvable
+    # destination form their own "Transit" group (stop_index = None).
+    # ------------------------------------------------------------------
+    def _day_destination(day):
         if day.accommodation and day.accommodation.destination:
-            dest = day.accommodation.destination
+            return day.accommodation.destination
+        for act in day.activities.all():
+            if act.destination:
+                return act.destination
+        return None
+
+    itinerary_groups = []
+    for day in itineraries:
+        dest = _day_destination(day)
+        if itinerary_groups and itinerary_groups[-1]['_dest_id'] == (dest.id if dest else None):
+            itinerary_groups[-1]['days'].append(day)
+            itinerary_groups[-1]['day_to'] = day.day_number
         else:
-            for act in day.activities.all():
-                if act.destination:
-                    dest = act.destination
-                    break
-        if not dest or dest.latitude is None or dest.longitude is None:
-            continue
-        if route_stops and route_stops[-1]['id'] == dest.id:
-            route_stops[-1]['day_to'] = day.day_number
-        else:
+            itinerary_groups.append({
+                '_dest_id': dest.id if dest else None,
+                'destination': dest,
+                'days': [day],
+                'day_from': day.day_number,
+                'day_to': day.day_number,
+            })
+
+    # ------------------------------------------------------------------
+    # Route stops for the map: a parallel list of groups that HAVE coordinates.
+    # stop_index on each group links itinerary_groups[i] ↔ route_stops[j].
+    # ------------------------------------------------------------------
+    route_stops = []
+    for group in itinerary_groups:
+        dest = group['destination']
+        if dest and dest.latitude is not None and dest.longitude is not None:
+            group['stop_index'] = len(route_stops)
             route_stops.append({
                 'id': dest.id,
                 'name': dest.name,
                 'country': dest.country or '',
                 'lat': float(dest.latitude),
                 'lng': float(dest.longitude),
-                'day_from': day.day_number,
-                'day_to': day.day_number,
+                'day_from': group['day_from'],
+                'day_to': group['day_to'],
             })
+        else:
+            group['stop_index'] = None
+
     for stop in route_stops:
         stop['day_label'] = (
             f"Day {stop['day_from']}"
@@ -568,9 +590,44 @@ def public_package_detail(request, slug):
             else f"Days {stop['day_from']}–{stop['day_to']}"
         )
 
+    # Friendly labels on each group + resolve hero image (lodge → destination).
+    for group in itinerary_groups:
+        group['day_label'] = (
+            f"Day {group['day_from']}"
+            if group['day_from'] == group['day_to']
+            else f"Days {group['day_from']}–{group['day_to']}"
+        )
+        hero = None
+        for day in group['days']:
+            if day.accommodation and getattr(day.accommodation, 'featured_image', None):
+                hero = day.accommodation.featured_image
+                break
+        if not hero and group['destination'] and getattr(group['destination'], 'featured_image', None):
+            hero = group['destination'].featured_image
+        group['hero_image'] = hero
+
+    # ------------------------------------------------------------------
+    # Trust + conversion data: inline review excerpts, extend-your-trip cards.
+    # ------------------------------------------------------------------
+    from core.models import Testimonial
+    featured_testimonials = list(
+        Testimonial.objects.filter(is_active=True, is_featured=True, rating__gte=5).order_by('?')[:2]
+    )
+    inline_review_top = featured_testimonials[0] if featured_testimonials else None
+    inline_review_bottom = featured_testimonials[1] if len(featured_testimonials) > 1 else None
+
+    EXTEND_CATEGORIES = ['beach', 'cultural', 'mountain', 'wildlife', 'adventure']
+    extend_packages = Package.objects.filter(
+        is_active=True,
+        category__in=EXTEND_CATEGORIES,
+    ).exclude(pk=package.pk).exclude(
+        pk__in=[p.pk for p in related_packages]
+    ).order_by('?')[:3]
+
     context = {
         'package': package,
         'itineraries': itineraries,
+        'itinerary_groups': itinerary_groups,
         'inclusions': inclusions,
         'exclusions': exclusions,
         'gallery_images': gallery_images,
@@ -578,6 +635,9 @@ def public_package_detail(request, slug):
         'upcoming_departures': upcoming_departures,
         'route_stops': route_stops,
         'route_stops_json': json.dumps(route_stops),
+        'inline_review_top': inline_review_top,
+        'inline_review_bottom': inline_review_bottom,
+        'extend_packages': extend_packages,
     }
     return render(request, 'packages/public/detail.html', context)
 

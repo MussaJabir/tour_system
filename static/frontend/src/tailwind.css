@@ -284,6 +284,33 @@
     }
   }
 
+  /* --- Package detail: route + day-rail interactive states - */
+  .route-stop {
+    transition: background-color 0.2s var(--ease-soft-in),
+                border-color 0.2s var(--ease-soft-in),
+                transform 0.2s var(--ease-soft-in);
+  }
+  .route-stop--active {
+    background-color: var(--color-sand-100);
+    border-color: var(--color-bush-600);
+    transform: translateX(2px);
+  }
+  .route-stop--active .route-stop__pin {
+    background-color: var(--color-clay-500);
+  }
+
+  .day-rail-link {
+    border-left: 2px solid transparent;
+  }
+  .day-rail-link--active {
+    border-left-color: var(--color-bush-600);
+    background-color: var(--color-sand-100);
+    color: var(--color-bush-700);
+  }
+  .day-rail-link--active span.font-display {
+    color: var(--color-bush-700);
+  }
+
   /* --- Form fields ----------------------------------------- */
   /* Inputs, selects, textareas inside .form-field get pill-rounded
      borders and Safari Editorial focus colour. Pre-existing Django
