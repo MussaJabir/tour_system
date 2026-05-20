@@ -71,6 +71,15 @@
                         {% if activity.best_season %}<div class="flex justify-between gap-4"><dt class="text-mist">Best season</dt><dd class="text-right">{{ activity.best_season }}</dd></div>{% endif %}
                     </dl>
                 </div>
+
+                {% if activity.destination.latitude and activity.destination.longitude %}
+                <div class="bg-bone rounded-2xl p-7 lg:p-8 mt-6" style="box-shadow: var(--shadow-frame);">
+                    <p class="eyebrow text-mist">Where</p>
+                    <h3 class="font-display text-2xl mt-2">{{ activity.destination.name }}</h3>
+                    <div id="activity-location-map" class="mt-5 h-64 rounded-xl overflow-hidden bg-sand-100"></div>
+                    {% if activity.destination.country %}<p class="text-sm text-mist mt-3">{{ activity.destination.country }}</p>{% endif %}
+                </div>
+                {% endif %}
             </aside>
 
             <article class="lg:order-1 max-w-3xl space-y-16 lg:space-y-20">
@@ -119,4 +128,30 @@
 
 {% include 'frontend/partials/_related_grid.html' with items=related_activities eyebrow='Continue exploring' title='Other activities you might like' url_name='public_activity_detail' image_attr='featured_image' %}
 
+{% endblock %}
+
+{% block extra_js %}
+{% if activity.destination.latitude and activity.destination.longitude %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script defer>
+document.addEventListener('DOMContentLoaded', () => {
+    const mapEl = document.getElementById('activity-location-map');
+    if (!mapEl || !window.L) return;
+    const lat = {{ activity.destination.latitude }};
+    const lng = {{ activity.destination.longitude }};
+    const map = L.map(mapEl, { scrollWheelZoom: false, attributionControl: false }).setView([lat, lng], 8);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap', maxZoom: 11
+    }).addTo(map);
+    const dot = L.divIcon({
+        className: 'route-marker',
+        html: '<span style="display:block;width:18px;height:18px;border-radius:50%;background:#3a4a2a;border:3px solid #f5f0e6;box-shadow:0 1px 4px rgba(0,0,0,.3);"></span>',
+        iconSize: [18, 18], iconAnchor: [9, 9],
+    });
+    L.marker([lat, lng], { icon: dot }).addTo(map)
+        .bindPopup('<b>{{ activity.destination.name|escapejs }}</b>');
+});
+</script>
+{% endif %}
 {% endblock %}

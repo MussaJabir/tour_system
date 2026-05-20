@@ -74,7 +74,7 @@
                     <p class="eyebrow text-mist">From</p>
                     {% if package.discount_percentage %}
                         <div class="mt-3 flex items-baseline gap-3">
-                            <span class="font-display text-display-sm text-charcoal">{{ package.currency }} {{ package.get_final_price|floatformat:0 }}</span>
+                            <span class="font-display text-display-sm text-charcoal">{{ package.currency }} {{ package.final_price|floatformat:0 }}</span>
                             <span class="text-mist line-through">{{ package.currency }} {{ package.price_per_person|floatformat:0 }}</span>
                         </div>
                         <p class="text-sm text-clay-500 mt-1">Save {{ package.discount_percentage }}%</p>
@@ -134,6 +134,26 @@
                     </div>
                     {% endif %}
                 </div>
+
+                {# Route map — itinerary stops connected in order #}
+                {% if route_stops|length >= 1 %}
+                <div class="bg-bone rounded-2xl p-7 lg:p-8 mt-6" style="box-shadow: var(--shadow-frame);">
+                    <p class="eyebrow text-mist">The route</p>
+                    <h3 class="font-display text-2xl mt-2">Where you'll go</h3>
+                    <div id="package-route-map" class="mt-5 h-72 rounded-xl overflow-hidden bg-sand-100"></div>
+                    <ol class="mt-5 space-y-3 text-sm">
+                        {% for stop in route_stops %}
+                            <li class="flex items-start gap-3">
+                                <span class="mt-0.5 w-6 h-6 rounded-full bg-bush-700 text-ivory flex items-center justify-center text-xs font-medium flex-shrink-0">{{ forloop.counter }}</span>
+                                <span>
+                                    <span class="block text-charcoal">{{ stop.name }}</span>
+                                    <span class="block text-mist text-xs">{{ stop.day_label }}{% if stop.country %} · {{ stop.country }}{% endif %}</span>
+                                </span>
+                            </li>
+                        {% endfor %}
+                    </ol>
+                </div>
+                {% endif %}
             </aside>
 
             {# ----- MAIN CONTENT ----- #}
@@ -255,4 +275,48 @@
 {# ============================================================ #}
 {% include 'frontend/partials/_related_grid.html' with items=related_packages eyebrow='Continue exploring' title='Related tours' url_name='packages:public_package_detail' image_attr='featured_image' %}
 
+{% endblock %}
+
+{% block extra_js %}
+{% if route_stops %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script defer>
+document.addEventListener('DOMContentLoaded', () => {
+    const stops = {{ route_stops_json|safe }};
+    if (!stops.length || !window.L) return;
+    const mapEl = document.getElementById('package-route-map');
+    if (!mapEl) return;
+
+    const latlngs = stops.map(s => [s.lat, s.lng]);
+    const map = L.map(mapEl, { scrollWheelZoom: false, attributionControl: false });
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap',
+        maxZoom: 11,
+    }).addTo(map);
+
+    const numIcon = (n) => L.divIcon({
+        className: 'route-marker',
+        html: `<span style="display:flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:#3a4a2a;color:#f5f0e6;font:600 12px/1 system-ui;border:2px solid #f5f0e6;box-shadow:0 1px 4px rgba(0,0,0,.3);">${n}</span>`,
+        iconSize: [26, 26],
+        iconAnchor: [13, 13],
+    });
+
+    stops.forEach((s, i) => {
+        L.marker([s.lat, s.lng], { icon: numIcon(i + 1) })
+            .addTo(map)
+            .bindPopup(`<b>${s.name}</b><br>${s.day_label}`);
+    });
+
+    if (latlngs.length > 1) {
+        L.polyline(latlngs, {
+            color: '#3a4a2a', weight: 2.5, opacity: 0.85, dashArray: '6 6'
+        }).addTo(map);
+        map.fitBounds(L.latLngBounds(latlngs).pad(0.25));
+    } else {
+        map.setView(latlngs[0], 7);
+    }
+});
+</script>
+{% endif %}
 {% endblock %}

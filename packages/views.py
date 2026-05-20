@@ -1,3 +1,4 @@
+import json
 import logging
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
@@ -503,23 +504,23 @@ def public_package_detail(request, slug):
         Package.objects.prefetch_related(
             'destinations',
             'gallery_images',
-            'itineraries__activities',
-            'itineraries__accommodation',
+            'itineraries__activities__destination',
+            'itineraries__accommodation__destination',
             'inclusions'
         ),
         slug=slug,
         is_active=True
     )
-    
+
     # Increment view count
     package.increment_view_count()
-    
+
     # Get related data
     itineraries = package.itineraries.filter(is_active=True).order_by('day_number')
     inclusions = package.inclusions.filter(is_included=True, is_active=True).order_by('order')
     exclusions = package.inclusions.filter(is_included=False, is_active=True).order_by('order')
     gallery_images = package.gallery_images.filter(is_active=True).order_by('order')
-    
+
     # Get related packages (same category or destination)
     related_packages = Package.objects.filter(
         Q(category=package.category) | Q(destinations__in=package.destinations.all()),
@@ -532,6 +533,41 @@ def public_package_detail(request, slug):
         departure_date__gte=timezone.now().date(),
     )
 
+    # Build ordered route stops for the sidebar map.
+    # Walk the itinerary day-by-day, pick each day's destination from its
+    # accommodation (preferred) or first activity (fallback), then collapse
+    # consecutive same-destination days into a single stop with a range label.
+    route_stops = []
+    for day in itineraries:
+        dest = None
+        if day.accommodation and day.accommodation.destination:
+            dest = day.accommodation.destination
+        else:
+            for act in day.activities.all():
+                if act.destination:
+                    dest = act.destination
+                    break
+        if not dest or dest.latitude is None or dest.longitude is None:
+            continue
+        if route_stops and route_stops[-1]['id'] == dest.id:
+            route_stops[-1]['day_to'] = day.day_number
+        else:
+            route_stops.append({
+                'id': dest.id,
+                'name': dest.name,
+                'country': dest.country or '',
+                'lat': float(dest.latitude),
+                'lng': float(dest.longitude),
+                'day_from': day.day_number,
+                'day_to': day.day_number,
+            })
+    for stop in route_stops:
+        stop['day_label'] = (
+            f"Day {stop['day_from']}"
+            if stop['day_from'] == stop['day_to']
+            else f"Days {stop['day_from']}–{stop['day_to']}"
+        )
+
     context = {
         'package': package,
         'itineraries': itineraries,
@@ -540,6 +576,8 @@ def public_package_detail(request, slug):
         'gallery_images': gallery_images,
         'related_packages': related_packages,
         'upcoming_departures': upcoming_departures,
+        'route_stops': route_stops,
+        'route_stops_json': json.dumps(route_stops),
     }
     return render(request, 'packages/public/detail.html', context)
 

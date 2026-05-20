@@ -1,6 +1,6 @@
 # Tour System — Product Roadmap & TODO
 
-Last updated: 2026-05-16
+Last updated: 2026-05-19
 Status key: `[ ]` not started · `[~]` in progress · `[x]` done
 
 ---
@@ -367,7 +367,7 @@ Branch: `feature/dashboard-polish` → PR → `develop`
 - [ ] **F1 Route templates** live + ≥8 seeded canonical Tanzanian routes (Northern, Southern, Migration, Honeymoon, Kilimanjaro+Safari, Zanzibar+Safari, etc.)
 - [ ] **F2 Lodge proximity suggestion** working in the custom-package builder
 - [ ] **F3 AI itinerary draft** (via existing `RouteOptimizationJob`) returning useful output for ≥3 sample inputs
-- [ ] **Real catalog data seeded**: ≥15 destinations, ≥30 accommodations, ≥25 activities, ≥10 packages — all with lat/lng, descriptions, hero images
+- [x] **Real catalog data seeded** (PR #29) — `python manage.py seed_catalog` ships with the repo. Final counts: 22 destinations (18 TZ + 4 neighbour stubs) with 47 gallery images, 83 accommodations (82 with hero images), 27 activities, 9 tour packages with 82 itinerary days, 10 testimonials, 12 FAQs. ~350 MB image bundle committed across 5 batched commits. Idempotent via `update_or_create`; `--reset` and `--skip-images` flags supported. Real Tanzanian lodge operators (Singita, andBeyond, Four Seasons, Sayari, Sanctuary, Serena, Sopa, Elewana, Asilia, Lemala) with 2025-26 USD price bands.
 - [ ] **UI loopholes audit** (Session 028 — see below) — all P0 items resolved
 - [ ] **At least 1 friendly tour-operator agrees to be the first paying customer** (not just a feature checklist — the actual market test)
 
@@ -430,6 +430,11 @@ Branch: `feature/dashboard-polish` → PR → `develop`
 
 - [ ] Pre-flight: audit current PDF generator + Mapbox Static API key
 - **Effort**: 2-3 days. Do **not** start until F1-F3 are shipped.
+
+### Pre-launch seed-data follow-ups (from PR #29)
+
+- [ ] **Image optimisation pass** — most hero shots are 5-25 MB raw. Resize to ≤1920px wide + re-encode WebP at 80% quality → expect ~70% repo size reduction and meaningfully faster public-site loads. Script: a one-off `python manage.py optimise_seed_images` that walks `core/seed_data/images/` and rewrites in place.
+- [ ] **Git LFS migration** — if the image footprint grows beyond ~500 MB after optimisation, migrate `core/seed_data/images/**` to LFS so the working tree stays lean. Currently fine on stock GitHub repos; revisit only if push timeouts return.
 
 ### Out of scope for launch
 
