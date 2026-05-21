@@ -781,6 +781,34 @@
   }
   .dash-choices .choices__placeholder { color: var(--color-slate-400); opacity: 1; }
 
+  /* -- Dashboard image-upload drop zone --------------------- */
+  .dash-dropzone {
+    border: 1.5px dashed var(--color-slate-300);
+    border-radius: 0.75rem;
+    background-color: var(--color-slate-50);
+    transition: border-color 0.15s var(--ease-soft-in),
+                background-color 0.15s var(--ease-soft-in);
+  }
+  .dash-dropzone:hover {
+    border-color: var(--color-slate-400);
+    background-color: white;
+  }
+  .dash-dropzone--has-file {
+    background-color: white;
+    border-style: solid;
+    border-color: var(--color-slate-200);
+  }
+  .dash-dropzone--dragover {
+    border-color: var(--color-bush-600);
+    background-color: var(--color-bush-50);
+  }
+  .dash-dropzone--warn {
+    border-color: var(--color-amber-300, #fcd34d);
+    background-color: var(--color-amber-50, #fffbeb);
+  }
+  /* x-cloak hides Alpine bindings before init paints them */
+  [x-cloak] { display: none !important; }
+
   /* Force-style any input/select/textarea inside .dash-form-field
      regardless of their existing widget classes (form-control, etc.).
      Lets us migrate Django forms without rewriting widget attrs. */

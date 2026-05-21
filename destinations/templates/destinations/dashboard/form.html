@@ -58,8 +58,10 @@
                     <p class="dash-card-title">Media &amp; location</p>
                 </div>
             </header>
+            {% if form.featured_image %}
+                <div class="mb-5">{% include 'backend/partials/_dash_image_field.html' with field=form.featured_image %}</div>
+            {% endif %}
             <div class="grid sm:grid-cols-2 gap-5">
-                {% if form.featured_image %}{% include 'backend/partials/_dash_form_field.html' with field=form.featured_image %}{% endif %}
                 {% if form.video_url %}{% include 'backend/partials/_dash_form_field.html' with field=form.video_url %}{% endif %}
                 {% if form.latitude %}{% include 'backend/partials/_dash_form_field.html' with field=form.latitude %}{% endif %}
                 {% if form.longitude %}{% include 'backend/partials/_dash_form_field.html' with field=form.longitude %}{% endif %}

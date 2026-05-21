@@ -104,8 +104,8 @@
                     <p class="dash-card-title">Media</p>
                 </div>
             </header>
-            <div class="grid sm:grid-cols-2 gap-5">
-                {% include 'backend/partials/_dash_form_field.html' with field=form.featured_image %}
+            {% include 'backend/partials/_dash_image_field.html' with field=form.featured_image %}
+            <div class="mt-5">
                 {% include 'backend/partials/_dash_form_field.html' with field=form.video_url %}
             </div>
         </div>

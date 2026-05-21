@@ -20,8 +20,12 @@
             <div class="grid sm:grid-cols-2 gap-5">
                 {% for field in form %}
                     {% if field.name != 'is_active' and field.name != 'is_featured' and field.name != 'order' %}
-                        <div class="{% if field.name == 'description' or field.name == 'short_description' or field.name == 'requirements' or field.name == 'included_items' or field.name == 'excluded_items' or field.name == 'best_season' or field.name == 'meta_description' or field.name == 'meta_keywords' %}sm:col-span-2{% endif %}">
-                            {% include 'backend/partials/_dash_form_field.html' with field=field %}
+                        <div class="{% if field.name == 'description' or field.name == 'short_description' or field.name == 'requirements' or field.name == 'included_items' or field.name == 'excluded_items' or field.name == 'best_season' or field.name == 'meta_description' or field.name == 'meta_keywords' or field.name == 'featured_image' %}sm:col-span-2{% endif %}">
+                            {% if field.name == 'featured_image' %}
+                                {% include 'backend/partials/_dash_image_field.html' with field=field %}
+                            {% else %}
+                                {% include 'backend/partials/_dash_form_field.html' with field=field %}
+                            {% endif %}
                         </div>
                     {% endif %}
                 {% endfor %}
