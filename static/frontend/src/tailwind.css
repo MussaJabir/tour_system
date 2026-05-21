@@ -311,6 +311,57 @@
     color: var(--color-bush-700);
   }
 
+  /* --- Destination detail: section nav + month calendar --- */
+  .section-nav-link {
+    transition: color 0.2s var(--ease-soft-in),
+                background-color 0.2s var(--ease-soft-in);
+  }
+  .section-nav-link--active {
+    color: var(--color-bush-700);
+    background-color: var(--color-sand-100);
+  }
+
+  .month-pill {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.85rem 0.5rem;
+    border-radius: 0.75rem;
+    background-color: var(--color-sand-100);
+    border: 1px solid var(--color-sand-200);
+    text-align: center;
+    transition: background-color 0.2s var(--ease-soft-in),
+                border-color 0.2s var(--ease-soft-in);
+  }
+  .month-pill__abbr {
+    font-family: var(--font-sans);
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-mist);
+  }
+  .month-pill__dot {
+    display: block;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 9999px;
+    background-color: var(--color-sand-300);
+  }
+  .month-pill--best {
+    background-color: var(--color-bush-50);
+    border-color: var(--color-bush-300);
+  }
+  .month-pill--best .month-pill__abbr {
+    color: var(--color-bush-800);
+  }
+  .month-pill--best .month-pill__dot {
+    background-color: var(--color-bush-600);
+    box-shadow: 0 0 0 3px var(--color-bush-100);
+  }
+
   /* --- Form fields ----------------------------------------- */
   /* Inputs, selects, textareas inside .form-field get pill-rounded
      borders and Safari Editorial focus colour. Pre-existing Django

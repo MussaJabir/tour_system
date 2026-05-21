@@ -91,7 +91,10 @@ class DestinationDetailTests(TestCase):
         response = self.client.get(
             reverse('public_destination_detail', args=[self.dest.slug])
         )
-        self.assertContains(response, 'Quick facts')
+        # New design replaces the sidebar "Quick facts" panel with the
+        # centered fact-tile bar under the hero ("Plan a trip to", country
+        # + activities + lodges counters). Assert the surviving signals.
+        self.assertContains(response, 'Plan a trip to')
         self.assertContains(response, self.dest.country)
 
 
@@ -120,7 +123,7 @@ class ActivityDetailTests(TestCase):
             reverse('public_activity_detail', args=[self.act.slug])
         )
         self.assertContains(response, self.act.name)
-        self.assertContains(response, 'Add To Trip')
+        self.assertContains(response, 'Add To My Trip')
         self.assertContains(response, 'About this activity')
 
 
