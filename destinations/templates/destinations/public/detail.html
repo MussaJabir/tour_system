@@ -12,6 +12,9 @@
 
 {% block content %}
 
+{# ============================================================ #}
+{# HERO #}
+{# ============================================================ #}
 <section class="relative min-h-[80vh] flex items-end overflow-hidden bg-charcoal">
     <div class="absolute inset-0">
         {% if destination.featured_image %}
@@ -38,102 +41,157 @@
         {% if destination.short_description %}
             <p class="mt-6 max-w-2xl text-lg lg:text-xl text-ivory/85 leading-relaxed">{{ destination.short_description }}</p>
         {% endif %}
-        {% if destination.best_time_to_visit %}
-            <div class="mt-8 flex flex-wrap gap-x-8 gap-y-3 text-sm text-ivory/85">
-                <span class="flex items-center gap-2"><i class="fal fa-calendar-alt text-sand-300"></i> Best time: {{ destination.best_time_to_visit }}</span>
-            </div>
-        {% endif %}
     </div>
 </section>
 
-<section class="py-16 lg:py-24">
+{# ============================================================ #}
+{# QUICK FACTS BAR — centered, under hero #}
+{# ============================================================ #}
+<section class="relative -mt-12 lg:-mt-16 z-10">
     <div class="container-editorial">
-        <div class="listing-grid">
-
-            <aside class="lg:order-2 lg:sticky lg:top-28 lg:self-start">
-                <div class="bg-bone rounded-2xl p-7 lg:p-8" style="box-shadow: var(--shadow-soft);">
-                    <p class="eyebrow text-mist">Quick facts</p>
-                    <dl class="mt-4 space-y-3 text-sm">
-                        <div class="flex justify-between gap-4">
-                            <dt class="text-mist">Country</dt>
-                            <dd class="text-right">{{ destination.country }}</dd>
-                        </div>
-                        {% if destination.region %}
-                        <div class="flex justify-between gap-4">
-                            <dt class="text-mist">Region</dt>
-                            <dd class="text-right">{{ destination.region }}</dd>
-                        </div>
-                        {% endif %}
-                        {% if destination.best_time_to_visit %}
-                        <div class="flex justify-between gap-4">
-                            <dt class="text-mist">Best time</dt>
-                            <dd class="text-right">{{ destination.best_time_to_visit }}</dd>
-                        </div>
-                        {% endif %}
-                        <div class="flex justify-between gap-4">
-                            <dt class="text-mist">Views</dt>
-                            <dd class="text-right">{{ destination.view_count }}</dd>
-                        </div>
-                    </dl>
-                    <a href="{% url 'contact_page' %}" class="btn btn-primary w-full mt-6">
-                        Plan a Trip Here
+        <div class="bg-ivory rounded-2xl px-6 py-8 lg:px-12 lg:py-10 max-w-5xl mx-auto" style="box-shadow: var(--shadow-frame);">
+            <div class="grid lg:grid-cols-[1fr_auto] gap-8 lg:gap-12 items-center">
+                <div class="text-center lg:text-left">
+                    <p class="eyebrow text-mist">Plan a trip to</p>
+                    <span class="font-display text-display-sm text-charcoal block mt-2">{{ destination.name }}</span>
+                    <p class="text-xs text-mist mt-2">We'll build a custom itinerary around this destination — flights, lodges, drives, all in.</p>
+                </div>
+                <div class="flex flex-col gap-3 lg:min-w-[280px]">
+                    <a href="{% url 'contact_page' %}?destination={{ destination.slug }}" class="btn btn-primary w-full justify-center">
+                        Talk To Us About {{ destination.name|truncatewords:2 }}
                         <i class="fal fa-arrow-right"></i>
                     </a>
                 </div>
+            </div>
 
-                {% if destination.latitude and destination.longitude %}
-                <div class="mt-6 rounded-2xl overflow-hidden bg-bone">
-                    <div id="destination-map" style="height: 280px;"></div>
-                </div>
-                {% endif %}
-            </aside>
-
-            <article class="lg:order-1 max-w-3xl space-y-16 lg:space-y-20">
+            <dl class="mt-8 pt-8 border-t border-sand-200 grid grid-cols-2 lg:grid-cols-4 gap-6 text-center">
                 <div>
-                    <p class="eyebrow">About</p>
-                    <h2 class="font-display text-display-md mt-3 text-balance">About {{ destination.name }}</h2>
-                    <div class="mt-6 text-charcoal/90 leading-relaxed text-lg">{{ destination.description|linebreaks }}</div>
+                    <dt class="eyebrow text-mist">Country</dt>
+                    <dd class="font-display text-xl text-charcoal mt-2">{{ destination.country }}</dd>
                 </div>
-
-                {% if destination.wildlife %}
                 <div>
-                    <p class="eyebrow">Wildlife</p>
-                    <h2 class="font-display text-display-md mt-3 text-balance">What you'll see</h2>
-                    <div class="mt-6 text-charcoal/90 leading-relaxed text-lg">{{ destination.wildlife|linebreaks }}</div>
+                    <dt class="eyebrow text-mist">Best months</dt>
+                    <dd class="font-display text-xl text-charcoal mt-2">
+                        {% if best_months %}{{ best_months|length }}{% else %}—{% endif %}
+                    </dd>
                 </div>
-                {% endif %}
-
-                {% if destination.climate %}
                 <div>
-                    <p class="eyebrow">Climate</p>
-                    <h2 class="font-display text-display-md mt-3 text-balance">When to go</h2>
-                    <div class="mt-6 text-charcoal/90 leading-relaxed text-lg">{{ destination.climate|linebreaks }}</div>
+                    <dt class="eyebrow text-mist">Activities</dt>
+                    <dd class="font-display text-xl text-charcoal mt-2">{{ activities|length }}</dd>
                 </div>
-                {% endif %}
-
-                {% if gallery_images %}
                 <div>
-                    <p class="eyebrow">Gallery</p>
-                    <h2 class="font-display text-display-md mt-3 text-balance">From the field</h2>
-                    <div class="mt-8">{% include 'frontend/partials/_gallery.html' with images=gallery_images %}</div>
+                    <dt class="eyebrow text-mist">Lodges</dt>
+                    <dd class="font-display text-xl text-charcoal mt-2">{{ accommodations|length }}</dd>
                 </div>
-                {% endif %}
-            </article>
+            </dl>
         </div>
     </div>
 </section>
 
-{% if activities %}
-<section class="py-20 lg:py-28 bg-bone">
+{# ============================================================ #}
+{# IN-PAGE STICKY SECTION NAV #}
+{# ============================================================ #}
+{% if section_nav|length > 1 %}
+<nav class="sticky top-20 z-20 bg-ivory/95 backdrop-blur border-y border-sand-200 mt-12 lg:mt-16" aria-label="Section navigation">
     <div class="container-editorial">
-        <header class="mb-10 lg:mb-14 flex flex-wrap items-end justify-between gap-4">
+        <ol class="flex gap-1 sm:gap-2 overflow-x-auto scrollbar-hide py-3" data-section-nav>
+            {% for item in section_nav %}
+                <li>
+                    <a href="#{{ item.id }}"
+                       class="section-nav-link inline-block px-4 py-2 rounded-full text-xs tracking-wider uppercase text-mist hover:text-bush-700 hover:bg-sand-100 transition-colors whitespace-nowrap"
+                       data-section-target="{{ item.id }}">
+                        {{ item.label }}
+                    </a>
+                </li>
+            {% endfor %}
+        </ol>
+    </div>
+</nav>
+{% endif %}
+
+{# ============================================================ #}
+{# ABOUT #}
+{# ============================================================ #}
+<section id="about" class="py-16 lg:py-24 scroll-mt-32" data-section>
+    <div class="container-editorial">
+        <article class="max-w-4xl mx-auto">
+            <p class="eyebrow">About</p>
+            <h2 class="font-display text-display-md mt-3 text-balance">About {{ destination.name }}</h2>
+            <div class="mt-6 text-charcoal/90 leading-relaxed text-lg">{{ destination.description|linebreaks }}</div>
+        </article>
+    </div>
+</section>
+
+{# ============================================================ #}
+{# WILDLIFE #}
+{# ============================================================ #}
+{% if destination.wildlife %}
+<section id="wildlife" class="py-16 lg:py-20 bg-bone scroll-mt-32" data-section>
+    <div class="container-editorial">
+        <article class="max-w-4xl mx-auto">
+            <p class="eyebrow text-bush-600">Wildlife</p>
+            <h2 class="font-display text-display-md mt-3 text-balance">What you'll see</h2>
+            <div class="mt-6 text-charcoal/90 leading-relaxed text-lg">{{ destination.wildlife|linebreaks }}</div>
+        </article>
+    </div>
+</section>
+{% endif %}
+
+{# ============================================================ #}
+{# WHEN TO GO — visual 12-month calendar #}
+{# ============================================================ #}
+{% if best_months or destination.best_time_to_visit %}
+<section id="when-to-go" class="py-16 lg:py-20 scroll-mt-32" data-section>
+    <div class="container-editorial">
+        <div class="max-w-4xl mx-auto">
+            <p class="eyebrow">When to go</p>
+            <h2 class="font-display text-display-md mt-3 text-balance">The right time to visit.</h2>
+
+            {% if best_months %}
+                <div class="mt-10 grid grid-cols-6 lg:grid-cols-12 gap-2 lg:gap-3" role="list" aria-label="Best months to visit">
+                    {% for m in months_calendar %}
+                        <div class="month-pill {% if m.is_best %}month-pill--best{% endif %}" role="listitem"
+                             aria-label="{{ m.abbr }}{% if m.is_best %}, recommended{% endif %}">
+                            <span class="month-pill__abbr">{{ m.abbr }}</span>
+                            <span class="month-pill__dot" aria-hidden="true"></span>
+                        </div>
+                    {% endfor %}
+                </div>
+                <p class="mt-6 text-sm text-mist">
+                    Highlighted months are typically best for visiting.
+                    {% if destination.best_time_to_visit %}<span class="text-charcoal">{{ destination.best_time_to_visit }}.</span>{% endif %}
+                </p>
+            {% else %}
+                <div class="mt-6 text-charcoal/85 leading-relaxed text-lg">
+                    {{ destination.best_time_to_visit }}
+                </div>
+            {% endif %}
+
+            {% if destination.climate %}
+                <div class="mt-10 pt-10 border-t border-sand-200">
+                    <p class="eyebrow text-mist">Climate</p>
+                    <div class="mt-4 text-charcoal/80 leading-relaxed">{{ destination.climate|linebreaks }}</div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+{# ============================================================ #}
+{# ACTIVITIES HERE #}
+{# ============================================================ #}
+{% if activities %}
+<section id="activities" class="py-16 lg:py-20 bg-bone scroll-mt-32" data-section>
+    <div class="container-editorial">
+        <header class="mb-10 lg:mb-14 flex flex-wrap items-end justify-between gap-4 max-w-6xl mx-auto">
             <div>
                 <p class="eyebrow">Things to do</p>
                 <h2 class="font-display text-display-md mt-3 text-balance">Activities in {{ destination.name }}</h2>
             </div>
             <a href="{% url 'public_activity_by_destination' destination.slug %}" class="btn btn-ghost">View all <i class="fal fa-arrow-right"></i></a>
         </header>
-        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
             {% for act in activities %}
                 <a href="{% url 'public_activity_detail' act.slug %}" class="card group block">
                     <div class="card-media aspect-[4/5]">
@@ -155,17 +213,20 @@
 </section>
 {% endif %}
 
+{# ============================================================ #}
+{# STAY HERE #}
+{# ============================================================ #}
 {% if accommodations %}
-<section class="py-20 lg:py-28">
+<section id="stay" class="py-16 lg:py-20 scroll-mt-32" data-section>
     <div class="container-editorial">
-        <header class="mb-10 lg:mb-14 flex flex-wrap items-end justify-between gap-4">
+        <header class="mb-10 lg:mb-14 flex flex-wrap items-end justify-between gap-4 max-w-6xl mx-auto">
             <div>
                 <p class="eyebrow">Where to stay</p>
-                <h2 class="font-display text-display-md mt-3 text-balance">Lodges &amp; camps nearby</h2>
+                <h2 class="font-display text-display-md mt-3 text-balance">Lodges &amp; camps in {{ destination.name|truncatewords:3 }}</h2>
             </div>
             <a href="{% url 'public_accommodation_by_destination' destination.slug %}" class="btn btn-ghost">View all <i class="fal fa-arrow-right"></i></a>
         </header>
-        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 max-w-6xl mx-auto">
             {% for lodge in accommodations %}
                 <a href="{% url 'public_accommodation_detail' lodge.slug %}" class="group block">
                     <div class="card-media aspect-[4/5] rounded-2xl overflow-hidden bg-sand-100">
@@ -175,9 +236,9 @@
                             <img src="https://images.unsplash.com/photo-1542353436-312f0e1f67ff?w=900&q=80" alt="{{ lodge.name }}" loading="lazy">
                         {% endif %}
                     </div>
-                    <div class="pt-4">
-                        <p class="eyebrow">{{ lodge.get_accommodation_type_display }}</p>
-                        <h3 class="font-display text-xl mt-2 text-balance group-hover:text-bush-700 transition-colors">{{ lodge.name }}</h3>
+                    <div class="pt-3">
+                        <p class="eyebrow text-[10px]">{{ lodge.get_accommodation_type_display }}</p>
+                        <h3 class="font-display text-base mt-1 leading-tight text-balance group-hover:text-bush-700 transition-colors">{{ lodge.name }}</h3>
                     </div>
                 </a>
             {% endfor %}
@@ -186,23 +247,166 @@
 </section>
 {% endif %}
 
+{# ============================================================ #}
+{# ON THE MAP #}
+{# ============================================================ #}
+{% if destination.latitude and destination.longitude %}
+<section id="map" class="py-16 lg:py-20 bg-bone scroll-mt-32" data-section>
+    <div class="container-editorial">
+        <div class="max-w-6xl mx-auto">
+            <p class="eyebrow">On the map</p>
+            <h2 class="font-display text-display-md mt-3 text-balance">Where {{ destination.name|truncatewords:2 }} sits.</h2>
+            <div id="destination-map" class="mt-10 h-[55vh] lg:h-[65vh] rounded-2xl overflow-hidden bg-sand-100"></div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+{# ============================================================ #}
+{# GALLERY #}
+{# ============================================================ #}
+{% if gallery_images %}
+<section class="py-16 lg:py-20">
+    <div class="container-editorial">
+        <div class="max-w-5xl mx-auto">
+            <p class="eyebrow">Gallery</p>
+            <h2 class="font-display text-display-md mt-3 text-balance">From the field</h2>
+            <div class="mt-10">{% include 'frontend/partials/_gallery.html' with images=gallery_images %}</div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+{# ============================================================ #}
+{# INLINE TESTIMONIAL #}
+{# ============================================================ #}
+{% if inline_review %}
+<section class="py-16 lg:py-20">
+    <div class="container-editorial">
+        <figure class="max-w-3xl mx-auto text-center">
+            <div class="flex gap-1 text-clay-500 justify-center">
+                {% for i in "12345"|make_list %}{% if forloop.counter <= inline_review.rating %}<i class="fas fa-star"></i>{% endif %}{% endfor %}
+            </div>
+            <blockquote class="font-display text-2xl lg:text-3xl leading-snug mt-6 text-balance text-charcoal">"{{ inline_review.quote }}"</blockquote>
+            <figcaption class="mt-6 text-sm text-mist">— {{ inline_review.customer_name }}{% if inline_review.customer_location %}, {{ inline_review.customer_location }}{% endif %}</figcaption>
+        </figure>
+    </div>
+</section>
+{% endif %}
+
+{# ============================================================ #}
+{# TOURS THAT VISIT HERE #}
+{# ============================================================ #}
+{% if packages_visiting_here %}
+<section class="py-16 lg:py-20 bg-bone">
+    <div class="container-editorial">
+        <div class="max-w-6xl mx-auto">
+            <p class="eyebrow">Take me there</p>
+            <h2 class="font-display text-display-md mt-3 text-balance">Tours that visit {{ destination.name|truncatewords:3 }}.</h2>
+            <p class="mt-4 text-charcoal/70 max-w-2xl">
+                Pre-built itineraries that include {{ destination.name|truncatewords:2 }} — pick one as-is or use it as a starting frame.
+            </p>
+            <div class="mt-10 grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for pkg in packages_visiting_here %}
+                <a href="{% url 'packages:public_package_detail' pkg.slug %}" class="group block">
+                    <div class="aspect-[4/3] rounded-xl overflow-hidden bg-sand-100">
+                        {% if pkg.featured_image %}
+                            <img src="{{ pkg.featured_image.url }}" alt="{{ pkg.name }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy">
+                        {% endif %}
+                    </div>
+                    <p class="eyebrow mt-4">{{ pkg.get_category_display|default:pkg.category }}</p>
+                    <h3 class="font-display text-xl mt-2 text-balance group-hover:text-bush-700 transition-colors">{{ pkg.name }}</h3>
+                    <p class="mt-2 text-sm text-mist">{{ pkg.duration_days }}D · {{ pkg.duration_nights }}N · from {{ pkg.currency }} {{ pkg.final_price|floatformat:0 }}</p>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+{# ============================================================ #}
+{# FINAL CTA #}
+{# ============================================================ #}
+<section class="py-16 lg:py-24">
+    <div class="container-editorial">
+        <div class="bg-charcoal text-ivory rounded-2xl p-10 lg:p-16 text-center max-w-5xl mx-auto">
+            <p class="eyebrow text-sand-300">Ready when you are</p>
+            <h3 class="font-display text-display-sm lg:text-display-md mt-4 text-balance">Plan your trip to {{ destination.name|truncatewords:2 }}.</h3>
+            <p class="mt-4 text-ivory/80 max-w-md mx-auto">
+                Tell us when you'd like to go and we'll write back within a day with a draft itinerary built around it.
+            </p>
+            <a href="{% url 'contact_page' %}?destination={{ destination.slug }}" class="btn btn-primary bg-ivory text-charcoal hover:bg-sand-300 mt-8">
+                Start Planning
+                <i class="fal fa-arrow-right"></i>
+            </a>
+        </div>
+    </div>
+</section>
+
+{# Related destinations #}
 {% include 'frontend/partials/_related_grid.html' with items=related_destinations eyebrow='Continue exploring' title='Other places worth seeing' url_name='public_destination_detail' image_attr='featured_image' %}
+
+{# Mobile sticky bottom CTA #}
+<div class="lg:hidden fixed inset-x-0 bottom-0 z-40 bg-ivory/95 backdrop-blur border-t border-sand-200 px-4 py-3"
+     style="padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));">
+    <div class="flex items-center justify-between gap-3">
+        <div class="leading-tight">
+            <p class="text-[10px] uppercase tracking-wider text-mist">Custom trip</p>
+            <p class="font-display text-base text-charcoal truncate">{{ destination.name }}</p>
+        </div>
+        <a href="{% url 'contact_page' %}?destination={{ destination.slug }}" class="btn btn-primary flex-1 justify-center whitespace-nowrap">
+            Talk To Us
+            <i class="fal fa-arrow-right"></i>
+        </a>
+    </div>
+</div>
 
 {% endblock %}
 
 {% block extra_js %}
+{# Section-nav active state on scroll #}
+<script defer>
+document.addEventListener('DOMContentLoaded', () => {
+    const navLinks = document.querySelectorAll('[data-section-nav] [data-section-target]');
+    const sections = document.querySelectorAll('section[data-section]');
+    if (!navLinks.length || !sections.length || !('IntersectionObserver' in window)) return;
+
+    const setActive = (id) => {
+        navLinks.forEach((link) => {
+            link.classList.toggle('section-nav-link--active', link.dataset.sectionTarget === id);
+        });
+    };
+
+    const io = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+            if (entry.isIntersecting) setActive(entry.target.id);
+        });
+    }, { rootMargin: '-30% 0px -55% 0px', threshold: 0 });
+    sections.forEach((s) => io.observe(s));
+});
+</script>
+
 {% if destination.latitude and destination.longitude %}
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script defer>
-    document.addEventListener('DOMContentLoaded', () => {
-        const map = L.map('destination-map').setView([{{ destination.latitude }}, {{ destination.longitude }}], 9);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap'
-        }).addTo(map);
-        L.marker([{{ destination.latitude }}, {{ destination.longitude }}]).addTo(map)
-            .bindPopup('<b>{{ destination.name|escapejs }}</b><br>{{ destination.country|escapejs }}');
+document.addEventListener('DOMContentLoaded', () => {
+    const mapEl = document.getElementById('destination-map');
+    if (!mapEl || !window.L) return;
+    const map = L.map(mapEl, { scrollWheelZoom: false, attributionControl: false })
+        .setView([{{ destination.latitude }}, {{ destination.longitude }}], 9);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap', maxZoom: 13,
+    }).addTo(map);
+    const dot = L.divIcon({
+        className: 'route-marker',
+        html: '<span style="display:block;width:22px;height:22px;border-radius:50%;background:#3a4a2a;border:3px solid #f5f0e6;box-shadow:0 1px 4px rgba(0,0,0,.3);"></span>',
+        iconSize: [22, 22], iconAnchor: [11, 11],
     });
+    L.marker([{{ destination.latitude }}, {{ destination.longitude }}], { icon: dot }).addTo(map)
+        .bindPopup('<b>{{ destination.name|escapejs }}</b><br>{{ destination.country|escapejs }}');
+});
 </script>
 {% endif %}
 {% endblock %}
