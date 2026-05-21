@@ -727,6 +727,60 @@
     margin-bottom: 0.4rem;
   }
 
+  /* -- Choices.js theme override (dash-choices) -------------- */
+  /* Overrides the vendor stylesheet defaults so the searchable
+     multi-select matches the slate palette of the rest of the
+     dashboard. Applies only when Choices is initialised with our
+     classNames.containerOuter = 'choices dash-choices'. */
+  .dash-choices.choices {
+    margin-bottom: 0;
+    font-size: 0.8125rem;
+  }
+  .dash-choices .choices__inner {
+    background-color: white;
+    border: 1px solid var(--color-slate-300);
+    border-radius: 0.5rem;
+    min-height: 2.5rem;
+    padding: 0.35rem 0.5rem;
+    font-size: 0.8125rem;
+  }
+  .dash-choices.is-focused .choices__inner,
+  .dash-choices.is-open .choices__inner {
+    border-color: var(--color-bush-600);
+    box-shadow: 0 0 0 3px rgb(44 95 45 / 0.12);
+  }
+  .dash-choices .choices__list--multiple .choices__item {
+    background-color: var(--color-bush-600);
+    border-color: var(--color-bush-700);
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem 0.25rem 0.75rem;
+    margin: 0.15rem;
+  }
+  .dash-choices .choices__list--multiple .choices__item.is-highlighted {
+    background-color: var(--color-bush-700);
+    border-color: var(--color-bush-800);
+  }
+  .dash-choices .choices__list--dropdown,
+  .dash-choices .choices__list[aria-expanded] {
+    border: 1px solid var(--color-slate-300);
+    border-radius: 0.5rem;
+    margin-top: 0.25rem;
+    box-shadow: 0 8px 24px -8px rgb(15 23 42 / 0.18);
+  }
+  .dash-choices .choices__list--dropdown .choices__item--selectable.is-highlighted,
+  .dash-choices .choices__list[aria-expanded] .choices__item--selectable.is-highlighted {
+    background-color: var(--color-bush-50);
+    color: var(--color-bush-800);
+  }
+  .dash-choices .choices__input {
+    background-color: transparent;
+    font-size: 0.8125rem;
+    padding: 0.25rem 0.4rem;
+    color: var(--color-slate-900);
+  }
+  .dash-choices .choices__placeholder { color: var(--color-slate-400); opacity: 1; }
+
   /* Force-style any input/select/textarea inside .dash-form-field
      regardless of their existing widget classes (form-control, etc.).
      Lets us migrate Django forms without rewriting widget attrs. */

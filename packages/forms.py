@@ -37,7 +37,8 @@ class PackageForm(forms.ModelForm):
             }),
             'destinations': forms.SelectMultiple(attrs={
                 'class': 'form-select',
-                'size': '5'
+                'data-choices': 'true',
+                'data-placeholder': 'Search destinations...',
             }),
             'category': forms.Select(attrs={'class': 'form-select'}),
             'difficulty_level': forms.Select(attrs={'class': 'form-select'}),
@@ -318,7 +319,8 @@ class PackageItineraryForm(forms.ModelForm):
             }),
             'activities': forms.SelectMultiple(attrs={
                 'class': 'form-select',
-                'size': '5'
+                'data-choices': 'true',
+                'data-placeholder': 'Search activities...',
             }),
             'accommodation': forms.Select(attrs={'class': 'form-select'}),
             'breakfast_included': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
