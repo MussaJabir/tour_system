@@ -8,8 +8,9 @@
 {% include 'backend/partials/_breadcrumb.html' with crumbs=' ' %}
 {% include 'backend/partials/_page_header.html' with title=title subtitle='Tour package details, pricing, and policies.' %}
 
-<form method="post" enctype="multipart/form-data" class="grid lg:grid-cols-[1fr_280px] gap-6">
+<form method="post" data-autosave-form enctype="multipart/form-data" class="grid lg:grid-cols-[1fr_280px] gap-6">
     {% csrf_token %}
+    {% include "backend/partials/_form_autosave.html" %}
 
     <div class="space-y-6 min-w-0">
 
@@ -103,8 +104,8 @@
                     <p class="dash-card-title">Media</p>
                 </div>
             </header>
-            <div class="grid sm:grid-cols-2 gap-5">
-                {% include 'backend/partials/_dash_form_field.html' with field=form.featured_image %}
+            {% include 'backend/partials/_dash_image_field.html' with field=form.featured_image %}
+            <div class="mt-5">
                 {% include 'backend/partials/_dash_form_field.html' with field=form.video_url %}
             </div>
         </div>
@@ -182,4 +183,8 @@
     </aside>
 </form>
 
+{% endblock %}
+
+{% block extra_js %}
+    {% include 'backend/partials/_choices_setup.html' %}
 {% endblock %}

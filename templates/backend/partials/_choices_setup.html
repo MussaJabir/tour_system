@@ -1,0 +1,34 @@
+{% comment %}
+Loads Choices.js + initialises every `<select data-choices>` on the page
+with sensible defaults: searchable, removable items, no shouldSort
+(preserves the order Django sent), placeholder pulled from the field's
+data-placeholder attribute (set by the form widget).
+
+Drop this once per page that has any data-choices select — it's safe
+to include on pages without one (initialisation just no-ops).
+{% endcomment %}
+{% load static %}
+
+<link rel="stylesheet" href="{% static 'backend/vendor/choices.min.css' %}">
+<script src="{% static 'backend/vendor/choices.min.js' %}" defer></script>
+
+<script defer>
+document.addEventListener('DOMContentLoaded', () => {
+    if (!window.Choices) return;
+    document.querySelectorAll('select[data-choices]').forEach((el) => {
+        if (el.dataset.choicesInited === '1') return;
+        el.dataset.choicesInited = '1';
+        new Choices(el, {
+            removeItemButton: true,
+            shouldSort: false,
+            searchResultLimit: 50,
+            placeholder: !!el.dataset.placeholder,
+            placeholderValue: el.dataset.placeholder || null,
+            allowHTML: false,
+            classNames: {
+                containerOuter: 'choices dash-choices',
+            },
+        });
+    });
+});
+</script>

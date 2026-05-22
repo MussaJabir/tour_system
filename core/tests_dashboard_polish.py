@@ -38,7 +38,20 @@ class NoLegacyBaseReferenceTests(TestCase):
         self.assertFalse(os.path.exists(legacy),
                          "templates/backend/base.html should be deleted but still exists.")
 
-    def test_static_backend_directory_is_deleted(self):
+    def test_static_backend_contains_only_vendor(self):
+        """
+        The Phase 7.6 Operations Slate cleanup nuked the entire legacy
+        static/backend/ tree (Bootstrap admin theme, jQuery plugins,
+        Sass sources, demo images — ~54MB worth). The directory must
+        not be resurrected with anything other than third-party vendor
+        bundles (e.g. Choices.js) that the dashboard genuinely needs.
+        """
         legacy = os.path.join(settings.BASE_DIR, 'static', 'backend')
-        self.assertFalse(os.path.exists(legacy),
-                         "static/backend/ should be deleted but still exists.")
+        if not os.path.exists(legacy):
+            return
+        allowed_children = {'vendor'}
+        actual = {name for name in os.listdir(legacy) if not name.startswith('.')}
+        unexpected = actual - allowed_children
+        self.assertFalse(unexpected,
+                         f"static/backend/ should only contain {sorted(allowed_children)} — "
+                         f"found these other entries: {sorted(unexpected)}")

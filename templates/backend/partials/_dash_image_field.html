@@ -1,0 +1,186 @@
+{% comment %}
+Image upload field for dashboard forms. Drop-in replacement for the
+generic _dash_form_field.html when the bound field is an ImageField /
+FileField that accepts images.
+
+Features:
+  • Drag-and-drop drop zone (highlights on dragover)
+  • Click-to-pick fallback via the label
+  • Live preview thumbnail using URL.createObjectURL once a file is chosen
+  • Filename + KB/MB display
+  • Soft warning if the file is >5MB (doesn't block — operator decides)
+  • If editing an existing object → shows the current image as initial
+    preview, plus a Django checkbox to clear it (mirrors the default
+    ClearableFileInput behaviour)
+  • Required asterisk + Django error rendering (same look as
+    _dash_form_field.html so the form feels uniform)
+
+Usage:
+    {% include 'backend/partials/_dash_image_field.html' with field=form.featured_image %}
+
+Vars:
+    field — Django BoundField for an ImageField/FileField (required)
+    label — override label text (optional)
+    help  — override help text (optional)
+{% endcomment %}
+<div class="dash-form-field {% if field.errors %}dash-form-field--error{% endif %}"
+     x-data="dashImageField()" x-init="init($refs.input, '{{ field.value.url|default:'' }}')">
+    <label class="dash-label">
+        {{ label|default:field.label }}{% if field.field.required %} <span class="text-rose-600">*</span>{% endif %}
+    </label>
+
+    <div class="dash-dropzone"
+         :class="{
+             'dash-dropzone--dragover': dragover,
+             'dash-dropzone--has-file': hasFile,
+             'dash-dropzone--warn': sizeWarning,
+         }"
+         @dragenter.prevent="dragover = true"
+         @dragover.prevent="dragover = true"
+         @dragleave.prevent="dragover = false"
+         @drop.prevent="dragover = false; handleDrop($event)">
+
+        {# Native file input — visually hidden but reachable for click + keyboard. #}
+        <input
+            type="file"
+            name="{{ field.html_name }}"
+            id="{{ field.id_for_label }}"
+            accept="image/*"
+            class="sr-only"
+            x-ref="input"
+            @change="handleChange($event)"
+            {% if field.field.required and not field.value %}required{% endif %}
+        >
+
+        {# Idle state — no file picked, no existing value #}
+        <label for="{{ field.id_for_label }}"
+               x-show="!previewUrl"
+               class="block cursor-pointer p-6 text-center">
+            <i class="fal fa-cloud-upload-alt text-3xl text-slate-400 block"></i>
+            <p class="mt-3 text-sm font-medium text-slate-700">
+                Drop an image, or <span class="text-bush-700 underline underline-offset-2">browse files</span>
+            </p>
+            <p class="mt-1 text-xs text-slate-500">PNG / JPG / WebP — up to ~5 MB recommended.</p>
+        </label>
+
+        {# Preview state — file chosen OR existing image attached #}
+        <div x-show="previewUrl" class="p-4 flex items-start gap-4" x-cloak>
+            <div class="w-24 h-24 rounded-lg overflow-hidden bg-slate-100 flex-shrink-0">
+                <img :src="previewUrl" alt="" class="w-full h-full object-cover">
+            </div>
+            <div class="flex-1 min-w-0">
+                <p class="text-sm font-medium text-slate-900 truncate" x-text="fileName || 'Current image'"></p>
+                <p class="text-xs text-slate-500 mt-1" x-text="fileSizeLabel"></p>
+                <p x-show="sizeWarning" class="text-xs text-amber-700 mt-1" x-cloak>
+                    <i class="fal fa-exclamation-triangle"></i>
+                    Larger than 5 MB — consider compressing for faster page loads.
+                </p>
+                <div class="mt-3 flex items-center gap-3 text-xs">
+                    <label for="{{ field.id_for_label }}" class="text-bush-700 hover:text-bush-800 cursor-pointer underline underline-offset-2">
+                        Replace
+                    </label>
+                    <button type="button" @click="clear()" class="text-rose-600 hover:text-rose-700 underline underline-offset-2">
+                        Remove
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Django's ClearableFileInput emits a separate "clear" checkbox when
+       there's an existing value. We hide-and-track it ourselves so the
+       Remove button above can flip it without operators ever seeing the
+       raw checkbox. #}
+    {% if field.value and field.field.required is False %}
+    <label class="hidden">
+        <input type="checkbox" name="{{ field.html_name }}-clear" id="{{ field.id_for_label }}-clear" x-ref="clearCheckbox">
+        Clear
+    </label>
+    {% endif %}
+
+    {% if help or field.help_text %}
+        <p class="text-xs text-slate-500 mt-1">{{ help|default:field.help_text }}</p>
+    {% endif %}
+    {% if field.errors %}
+        <ul class="text-xs text-rose-600 mt-1 space-y-0.5">
+            {% for err in field.errors %}
+                <li><i class="fal fa-exclamation-circle mr-1"></i>{{ err }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+</div>
+
+<script>
+// Defined once per page; Alpine de-dupes the function reference.
+if (!window.dashImageField) {
+    window.dashImageField = function() {
+        return {
+            dragover: false,
+            previewUrl: '',
+            fileName: '',
+            fileSize: 0,
+            sizeWarning: false,
+            hasFile: false,
+            _input: null,
+            _objectUrl: null,
+
+            init(input, existingUrl) {
+                this._input = input;
+                if (existingUrl) {
+                    this.previewUrl = existingUrl;
+                    this.hasFile = true;
+                }
+            },
+
+            handleChange(e) {
+                const file = e.target.files && e.target.files[0];
+                if (file) this._setFile(file);
+            },
+
+            handleDrop(e) {
+                const file = e.dataTransfer.files && e.dataTransfer.files[0];
+                if (!file) return;
+                if (!file.type.startsWith('image/')) return;
+                // Sync into the real <input type=file>
+                const dt = new DataTransfer();
+                dt.items.add(file);
+                this._input.files = dt.files;
+                this._setFile(file);
+            },
+
+            _setFile(file) {
+                if (this._objectUrl) URL.revokeObjectURL(this._objectUrl);
+                this._objectUrl = URL.createObjectURL(file);
+                this.previewUrl = this._objectUrl;
+                this.fileName = file.name;
+                this.fileSize = file.size;
+                this.sizeWarning = file.size > 5 * 1024 * 1024;
+                this.hasFile = true;
+                // If a "clear" checkbox exists from a previous value, untick it
+                if (this.$refs.clearCheckbox) this.$refs.clearCheckbox.checked = false;
+            },
+
+            clear() {
+                if (this._objectUrl) {
+                    URL.revokeObjectURL(this._objectUrl);
+                    this._objectUrl = null;
+                }
+                this._input.value = '';
+                this.previewUrl = '';
+                this.fileName = '';
+                this.fileSize = 0;
+                this.sizeWarning = false;
+                this.hasFile = false;
+                // If editing an existing image, set the Django clear flag
+                if (this.$refs.clearCheckbox) this.$refs.clearCheckbox.checked = true;
+            },
+
+            get fileSizeLabel() {
+                if (!this.fileSize) return '';
+                if (this.fileSize < 1024 * 1024) return `${Math.round(this.fileSize / 1024)} KB`;
+                return `${(this.fileSize / (1024 * 1024)).toFixed(1)} MB`;
+            },
+        };
+    };
+}
+</script>

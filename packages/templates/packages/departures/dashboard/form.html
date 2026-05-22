@@ -8,8 +8,9 @@
 {% include 'backend/partials/_breadcrumb.html' with crumbs=' ' %}
 {% include 'backend/partials/_page_header.html' with title=title subtitle='Scheduled departure date and seat count for this package.' %}
 
-<form method="post" class="grid lg:grid-cols-[1fr_280px] gap-6">
+<form method="post" data-autosave-form class="grid lg:grid-cols-[1fr_280px] gap-6">
     {% csrf_token %}
+    {% include "backend/partials/_form_autosave.html" %}
 
     <div class="space-y-6 min-w-0">
         <div class="dash-card">
