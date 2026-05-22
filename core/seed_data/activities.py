@@ -347,8 +347,8 @@ ACTIVITIES = [
         "included_items": "Boat, guide, drinks/snacks.",
         "excluded_items": "Park fees if separate, tips.",
         "best_season": "June - October (water levels predictable).",
-        "image_slug": "Mikumi-National-Park-3",
-        "image_dir": "wildlife",
+        "image_slug": "rufiji-river-boat-safari",
+        "image_dir": "activities",
         "is_featured": True,
     },
     {
@@ -497,8 +497,8 @@ ACTIVITIES = [
         "included_items": "Guide, bottled water, entry fees to House of Wonders + slave market memorial.",
         "excluded_items": "Lunch, tips.",
         "best_season": "Year-round.",
-        "image_slug": "stone-town-1",
-        "image_dir": "wildlife",
+        "image_slug": "stone-town-walking-tour",
+        "image_dir": "activities",
         "is_featured": True,
     },
     {
