@@ -932,32 +932,36 @@ def dashboard_inquiry_detail(request, pk):
         inquiry.first_viewed_at = timezone.now()
         inquiry.save(update_fields=['viewed_by_staff', 'first_viewed_at'])
     
-    # Handle management form submission
+    # Default (unbound) forms — ensures both are always defined for the context,
+    # even when a POST falls through after a validation error.
+    management_form = InquiryManagementForm(instance=inquiry)
+    message_form = InquiryMessageForm()
+
+    # Handle management form submission. The template submits a single `action`
+    # field whose value identifies which form was posted.
     if request.method == 'POST':
-        if 'update_inquiry' in request.POST:
+        action = request.POST.get('action')
+        if action == 'update_management':
             management_form = InquiryManagementForm(request.POST, instance=inquiry)
             if management_form.is_valid():
                 management_form.save()
                 messages.success(request, 'Inquiry updated successfully.')
                 return redirect('packages:dashboard_inquiry_detail', pk=pk)
-        
-        elif 'send_message' in request.POST:
+
+        elif action == 'send_message':
             message_form = InquiryMessageForm(request.POST, request.FILES)
             if message_form.is_valid():
                 message = message_form.save(commit=False)
                 message.inquiry = inquiry
                 message.sender_staff = request.user
                 message.save()
-                
+
                 # Update inquiry last activity
                 inquiry.last_activity_at = timezone.now()
                 inquiry.save(update_fields=['last_activity_at'])
-                
+
                 messages.success(request, 'Message sent successfully.')
                 return redirect('packages:dashboard_inquiry_detail', pk=pk)
-    else:
-        management_form = InquiryManagementForm(instance=inquiry)
-        message_form = InquiryMessageForm()
     
     # Get messages
     inquiry_messages = inquiry.messages.select_related('sender_staff').order_by('created_at')
