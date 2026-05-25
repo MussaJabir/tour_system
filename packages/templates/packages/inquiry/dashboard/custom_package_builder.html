@@ -17,6 +17,15 @@
 
     <div class="space-y-6 min-w-0">
 
+        {% if form.errors %}
+            <div class="dash-card border-rose-200 bg-rose-50 text-rose-700 text-sm">
+                {% for err in form.non_field_errors %}<p>{{ err }}</p>{% endfor %}
+                {% for field in form %}
+                    {% for err in field.errors %}<p>{{ field.label }}: {{ err }}</p>{% endfor %}
+                {% endfor %}
+            </div>
+        {% endif %}
+
         <div class="dash-card">
             <header class="dash-card-header"><div><p class="dash-card-title">Basics</p></div></header>
             <div class="grid sm:grid-cols-2 gap-5">
@@ -67,14 +76,6 @@
             </div>
         </div>
 
-        {% if form.errors %}
-            <div class="dash-card border-rose-200 bg-rose-50 text-rose-700 text-sm">
-                {% for err in form.non_field_errors %}<p>{{ err }}</p>{% endfor %}
-                {% for field in form %}
-                    {% for err in field.errors %}<p>{{ field.label }}: {{ err }}</p>{% endfor %}
-                {% endfor %}
-            </div>
-        {% endif %}
     </div>
 
     <aside class="lg:sticky lg:top-20 lg:self-start space-y-4">
