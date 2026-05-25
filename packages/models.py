@@ -518,6 +518,19 @@ class BookingInquiry(TimeStampedModel):
     def __str__(self):
         return f"{self.inquiry_reference} - {self.customer_name}"
     
+    # Convenience aliases used by email helpers and templates
+    @property
+    def reference(self):
+        return self.inquiry_reference
+
+    @property
+    def full_name(self):
+        return self.customer_name
+
+    @property
+    def email(self):
+        return self.customer_email
+
     @property
     def total_travelers(self):
         return self.number_of_adults + self.number_of_children + self.number_of_infants
