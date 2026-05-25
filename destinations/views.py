@@ -208,38 +208,39 @@ def dashboard_delete_gallery_image(request, pk):
 
 def public_home(request):
     """
-    Public homepage
+    Public homepage — Safari Editorial.
+    Provides featured content for every section of the new index.html.
     """
     from activities.models import Activity
     from accommodations.models import Accommodation
-    
-    # Fetch featured destinations
-    featured_destinations = Destination.objects.filter(is_active=True, is_featured=True)[:6]
-    
-    # Fetch featured activities
+    from packages.models import Package
+    from core.models import Testimonial
+
+    featured_destinations = Destination.objects.filter(is_active=True, is_featured=True)[:5]
+    featured_packages = Package.objects.filter(is_active=True, is_featured=True)[:3]
     featured_activities = Activity.objects.filter(is_active=True, is_featured=True)[:8]
-    
-    # Fetch featured accommodations  
     featured_accommodations = Accommodation.objects.filter(is_active=True, is_featured=True)[:6]
-    
-    # Get counts for stats/counters
+    featured_testimonials = Testimonial.objects.filter(is_active=True, is_featured=True)[:6]
+
     total_destinations = Destination.objects.filter(is_active=True).count()
     total_activities = Activity.objects.filter(is_active=True).count()
     total_accommodations = Accommodation.objects.filter(is_active=True).count()
-    
-    # Get footer destinations (for footer links)
+    total_packages = Package.objects.filter(is_active=True).count()
+
     footer_destinations = Destination.objects.filter(is_active=True, is_featured=True)[:4]
-    
+
     context = {
         'featured_destinations': featured_destinations,
+        'featured_packages': featured_packages,
         'featured_activities': featured_activities,
         'featured_accommodations': featured_accommodations,
+        'featured_testimonials': featured_testimonials,
         'total_destinations': total_destinations,
         'total_activities': total_activities,
         'total_accommodations': total_accommodations,
+        'total_packages': total_packages,
         'footer_destinations': footer_destinations,
     }
-    
     return render(request, 'frontend/index.html', context)
 
 
@@ -305,31 +306,67 @@ def public_destination_detail(request, slug):
     Public destination detail page
     """
     destination = get_object_or_404(Destination, slug=slug, is_active=True)
-    
-    # Increment view count
+
     destination.increment_view_count()
-    
-    # Get gallery images
+
     gallery_images = destination.gallery_images.all()
-    
-    # Get activities available at this destination
     activities = destination.activities.filter(is_active=True)[:6]
-    
-    # Get accommodations at this destination
-    accommodations = destination.accommodations.filter(is_active=True)[:6]
-    
-    # Get related destinations (same country)
+    accommodations = destination.accommodations.filter(is_active=True)[:8]
+
     related_destinations = Destination.objects.filter(
         country=destination.country,
         is_active=True
     ).exclude(pk=destination.pk)[:4]
-    
+
+    # ------------------------------------------------------------------
+    # When-to-go: parse months out of the free-text best_time_to_visit.
+    # If we extracted 1+ months we'll render a 12-month visual calendar;
+    # otherwise we fall back to the raw prose so the user still gets info.
+    # ------------------------------------------------------------------
+    from core.utils import parse_best_months, MONTH_ABBR
+    best_months = parse_best_months(destination.best_time_to_visit)
+    months_calendar = [
+        {'index': i + 1, 'abbr': MONTH_ABBR[i], 'is_best': (i + 1) in best_months}
+        for i in range(12)
+    ]
+
+    # ------------------------------------------------------------------
+    # Cross-sell + trust: tours that visit here, plus one inline review.
+    # ------------------------------------------------------------------
+    from packages.models import Package
+    packages_visiting_here = (Package.objects
+        .filter(is_active=True, destinations=destination)
+        .distinct()[:3])
+
+    from core.models import Testimonial
+    inline_review = (Testimonial.objects
+        .filter(is_active=True, is_featured=True, rating__gte=5)
+        .order_by('?').first())
+
+    # Section nav targets — filtered to sections that actually have content
+    section_nav = [{'id': 'about', 'label': 'About'}]
+    if destination.wildlife:
+        section_nav.append({'id': 'wildlife', 'label': 'Wildlife'})
+    if best_months or destination.best_time_to_visit:
+        section_nav.append({'id': 'when-to-go', 'label': 'When to go'})
+    if activities:
+        section_nav.append({'id': 'activities', 'label': 'Activities'})
+    if accommodations:
+        section_nav.append({'id': 'stay', 'label': 'Stay here'})
+    if destination.latitude and destination.longitude:
+        section_nav.append({'id': 'map', 'label': 'On the map'})
+
     context = {
         'destination': destination,
         'gallery_images': gallery_images,
         'activities': activities,
         'accommodations': accommodations,
-        'related_destinations': related_destinations
+        'related_destinations': related_destinations,
+        'best_months': best_months,
+        'months_calendar': months_calendar,
+        'packages_visiting_here': packages_visiting_here,
+        'inline_review': inline_review,
+        'section_nav': section_nav,
     }
-    
+
     return render(request, 'destinations/public/detail.html', context)

@@ -1,0 +1,32 @@
+{% comment %}
+Dashboard stat card.
+Usage:
+    {% include 'backend/partials/_stat_card.html' with label='Revenue · 30d' value='USD 24,800' trend_value='12.4%' trend_dir='up' icon='dollar-sign' %}
+
+Vars:
+    label      — small uppercase label above the number (required)
+    value      — the headline figure (required, free-form string)
+    trend_value — e.g. '12%', '-3%' (optional)
+    trend_dir  — 'up' | 'down' | '' (optional)
+    icon       — Font Awesome name minus the `fa-` prefix (optional)
+    href       — make the whole card a link (optional)
+{% endcomment %}
+{% if href %}<a href="{{ href }}" class="dash-stat block hover:border-slate-300 transition-colors">{% else %}<div class="dash-stat">{% endif %}
+    <div class="flex items-start justify-between gap-3">
+        <div>
+            <p class="dash-stat-label">{{ label }}</p>
+            <p class="dash-stat-value">{{ value }}</p>
+            {% if trend_value %}
+                <p class="dash-stat-trend dash-stat-trend--{{ trend_dir|default:'up' }}">
+                    <i class="fal fa-arrow-{% if trend_dir == 'down' %}down{% else %}up{% endif %} text-[10px]"></i>
+                    {{ trend_value }}
+                </p>
+            {% endif %}
+        </div>
+        {% if icon %}
+            <span class="w-9 h-9 rounded-lg bg-slate-100 text-slate-500 flex items-center justify-center flex-shrink-0">
+                <i class="fal fa-{{ icon }}"></i>
+            </span>
+        {% endif %}
+    </div>
+{% if href %}</a>{% else %}</div>{% endif %}

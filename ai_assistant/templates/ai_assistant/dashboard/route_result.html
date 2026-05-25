@@ -1,77 +1,66 @@
-{% extends "backend/base.html" %}
+{% extends 'backend/base_dashboard.html' %}
+{% load static %}
 
-{% block title %}Route Result{% endblock %}
+{% block title %}Route optimisation result — AI Assistant{% endblock %}
 
-{% if job.is_running %}
-<meta http-equiv="refresh" content="4">
-{% endif %}
+{% block extra_css %}
+{% if job.is_running %}<meta http-equiv="refresh" content="4">{% endif %}
+{% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="h4 mb-0">Route Optimization — Job #{{ job.pk }}</h2>
-        <a href="{% url 'ai_assistant:route_optimize' %}" class="btn btn-outline-info btn-sm">
-            <i class="mdi mdi-plus me-1"></i>New Route
-        </a>
-    </div>
 
-    <div class="card mb-3">
-        <div class="card-header">Input Destinations</div>
-        <div class="card-body">
-            <pre class="mb-0" style="white-space:pre-wrap;">{{ job.destination_names }}</pre>
-        </div>
-    </div>
+{% include 'backend/partials/_breadcrumb.html' with crumbs=' ' %}
 
-    {% if job.status == 'pending' or job.status == 'processing' %}
-    <div class="alert alert-info">
-        <i class="mdi mdi-loading mdi-spin me-1"></i>
-        AI is calculating the optimal route — refreshing every 4 seconds.
-    </div>
-
-    {% elif job.status == 'done' %}
-    <div class="alert alert-success"><i class="mdi mdi-check-circle me-1"></i>Route optimized.</div>
-    {% if job.optimized_route %}
-    <div class="card">
-        <div class="card-header">Optimized Route</div>
-        <div class="table-responsive">
-            <table class="table table-hover mb-0">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Destination</th>
-                        <th>Drive from previous</th>
-                        <th>Notes</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for stop in job.optimized_route %}
-                    <tr>
-                        <td><span class="badge bg-info">{{ stop.order }}</span></td>
-                        <td><strong>{{ stop.name }}</strong></td>
-                        <td>
-                            {% if stop.drive_from_previous_minutes %}
-                            {{ stop.drive_from_previous_minutes }} min
-                            {% else %}
-                            — Start
-                            {% endif %}
-                        </td>
-                        <td class="text-muted small">{{ stop.notes }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
-    {% endif %}
-
-    {% elif job.status == 'failed' %}
-    <div class="alert alert-danger">
-        <strong>Failed:</strong> {{ job.error_message }}
-    </div>
-    {% endif %}
-
-    <div class="mt-3">
-        <small class="text-muted">Created {{ job.created_at }}{% if job.completed_at %} · Completed {{ job.completed_at }}{% endif %}</small>
+<div class="dash-page-header">
+    <div>
+        <p class="dash-stat-label">Route optimisation</p>
+        <h1 class="dash-page-title flex items-center gap-3">
+            Job #{{ job.pk }}
+            {% if job.status == 'done' %}{% include 'backend/partials/_status_badge.html' with label='Done' variant='success' %}
+            {% elif job.status == 'failed' %}{% include 'backend/partials/_status_badge.html' with label='Failed' variant='danger' %}
+            {% elif job.status == 'processing' %}{% include 'backend/partials/_status_badge.html' with label='Processing' variant='info' %}
+            {% else %}{% include 'backend/partials/_status_badge.html' with label='Pending' variant='warning' %}{% endif %}
+        </h1>
+        <p class="text-sm text-slate-500 mt-1">Input: {{ job.destination_names|truncatechars:80 }}</p>
     </div>
 </div>
+
+<div class="max-w-3xl">
+    {% if job.is_running %}
+    <div class="dash-card text-center py-12">
+        <span class="w-12 h-12 rounded-full bg-bush-50 text-bush-700 flex items-center justify-center mx-auto animate-pulse">
+            <i class="fal fa-spinner fa-spin text-lg"></i>
+        </span>
+        <p class="font-medium text-slate-900 mt-4">Optimising route order…</p>
+        <p class="text-sm text-slate-500 mt-2">This page auto-refreshes every 4 seconds.</p>
+    </div>
+    {% elif job.status == 'failed' %}
+    <div class="dash-card border-rose-200 bg-rose-50">
+        <p class="dash-stat-label text-rose-700">Optimisation failed</p>
+        <p class="text-sm text-rose-900 mt-2 whitespace-pre-line">{{ job.error_message|default:'(no error message recorded)' }}</p>
+    </div>
+    {% else %}
+    <div class="dash-card">
+        <header class="dash-card-header"><div><p class="dash-card-title">Suggested order</p></div></header>
+        {% if job.optimized_route %}
+        <ol class="space-y-3">
+            {% for stop in job.optimized_route %}
+            <li class="flex items-start gap-4">
+                <span class="w-8 h-8 rounded-full bg-bush-50 text-bush-700 flex items-center justify-center font-medium text-xs flex-shrink-0">{{ forloop.counter }}</span>
+                <div class="flex-1 min-w-0">
+                    <p class="text-slate-900 font-medium">{{ stop.name|default:stop }}</p>
+                    {% if stop.notes %}<p class="text-xs text-slate-500 mt-1">{{ stop.notes }}</p>{% endif %}
+                </div>
+            </li>
+            {% endfor %}
+        </ol>
+        {% else %}
+        <p class="text-sm text-slate-500 italic">No optimised route returned.</p>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <a href="{% url 'ai_assistant:home' %}" class="dash-btn dash-btn-ghost mt-6"><i class="fal fa-arrow-left"></i> Back to AI Assistant</a>
+</div>
+
 {% endblock %}

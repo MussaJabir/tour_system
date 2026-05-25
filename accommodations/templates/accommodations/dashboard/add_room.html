@@ -1,13 +1,48 @@
-{% extends 'backend/base.html' %}
+{% extends 'backend/base_dashboard.html' %}
+{% load static %}
+
+{% block title %}Add room to {{ accommodation.name }} — Dashboard{% endblock %}
+
 {% block content %}
-<div class="container-fluid">
-    <h3>{% if is_edit %}Edit{% else %}Add{% endif %} Room</h3>
-    <div class="card shadow"><div class="card-body">
-        <form method="post" enctype="multipart/form-data">{% csrf_token %}
-            {{ form.as_p }}
-            <button type="submit" class="btn btn-primary">Save</button>
-            <a href="{% url 'dashboard_accommodation_edit' accommodation.pk %}" class="btn btn-secondary">Cancel</a>
-        </form>
-    </div></div>
-</div>
+
+{% include 'backend/partials/_breadcrumb.html' with crumbs=' ' %}
+{% include 'backend/partials/_page_header.html' with title='Add room' subtitle=accommodation.name %}
+
+<form method="post" enctype="multipart/form-data" class="grid lg:grid-cols-[1fr_280px] gap-6">
+    {% csrf_token %}
+
+    <div class="space-y-6 min-w-0">
+        <div class="dash-card">
+            <header class="dash-card-header"><div><p class="dash-card-title">Room details</p></div></header>
+            <div class="grid sm:grid-cols-2 gap-5">
+                {% for field in form %}
+                    <div class="{% if field.name == 'description' or field.name == 'amenities' %}sm:col-span-2{% endif %}">
+                        {% include 'backend/partials/_dash_form_field.html' with field=field %}
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        {% if form.non_field_errors %}
+            <div class="dash-card border-rose-200 bg-rose-50 text-rose-700 text-sm">
+                {% for err in form.non_field_errors %}<p>{{ err }}</p>{% endfor %}
+            </div>
+        {% endif %}
+    </div>
+
+    <aside class="lg:sticky lg:top-20 lg:self-start space-y-4">
+        <div class="dash-card">
+            <p class="dash-card-title mb-4">Save</p>
+            <button type="submit" class="dash-btn dash-btn-primary w-full"><i class="fal fa-check"></i> Add room</button>
+            <a href="{% url 'dashboard_accommodation_edit' accommodation.pk %}" class="dash-btn dash-btn-ghost w-full mt-2 text-center justify-center">Cancel</a>
+        </div>
+
+        <div class="dash-card">
+            <p class="dash-stat-label mb-3">Accommodation</p>
+            <p class="text-sm text-slate-900">{{ accommodation.name }}</p>
+            <p class="text-xs text-slate-500 mt-1">{{ accommodation.get_accommodation_type_display }}</p>
+        </div>
+    </aside>
+</form>
+
 {% endblock %}

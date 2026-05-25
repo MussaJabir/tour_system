@@ -1,74 +1,68 @@
-{% extends "backend/base.html" %}
+{% extends 'backend/base_dashboard.html' %}
+{% load static %}
 
-{% block title %}Quote Suggestion Result{% endblock %}
+{% block title %}Quote suggestions — AI Assistant{% endblock %}
 
-{% if job.is_running %}
-<meta http-equiv="refresh" content="4">
-{% endif %}
+{% block extra_css %}
+{% if job.is_running %}<meta http-equiv="refresh" content="4">{% endif %}
+{% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="h4 mb-0">Quote Suggestion — Job #{{ job.pk }}</h2>
-        {% if job.inquiry %}
-        <a href="{% url 'packages:inquiry_detail' job.inquiry.pk %}" class="btn btn-outline-secondary btn-sm">
-            <i class="mdi mdi-arrow-left me-1"></i>Back to Inquiry
-        </a>
-        {% endif %}
-    </div>
 
-    {% if job.inquiry %}
-    <div class="card mb-3">
-        <div class="card-header">Inquiry: {{ job.inquiry.customer_name }}</div>
-        <div class="card-body">
-            <dl class="row mb-0">
-                <dt class="col-3">Package interest</dt>
-                <dd class="col-9">{{ job.inquiry.base_package.name|default:"Not specified" }}</dd>
-                <dt class="col-3">Travel date</dt>
-                <dd class="col-9">{{ job.inquiry.preferred_travel_date|default:"Flexible" }}</dd>
-                <dt class="col-3">Group</dt>
-                <dd class="col-9">{{ job.inquiry.number_of_adults }} adults, {{ job.inquiry.number_of_children }} children</dd>
-                <dt class="col-3">Budget</dt>
-                <dd class="col-9">{{ job.inquiry.get_budget_range_display }}</dd>
-            </dl>
-        </div>
-    </div>
-    {% endif %}
+{% include 'backend/partials/_breadcrumb.html' with crumbs=' ' %}
 
-    {% if job.status == 'pending' or job.status == 'processing' %}
-    <div class="alert alert-info">
-        <i class="mdi mdi-loading mdi-spin me-1"></i>
-        AI is analysing the inquiry and available packages — refreshing every 4 seconds.
+<div class="dash-page-header">
+    <div>
+        <p class="dash-stat-label">Quote suggestions</p>
+        <h1 class="dash-page-title flex items-center gap-3">
+            Job #{{ job.pk }}
+            {% if job.status == 'done' %}{% include 'backend/partials/_status_badge.html' with label='Done' variant='success' %}
+            {% elif job.status == 'failed' %}{% include 'backend/partials/_status_badge.html' with label='Failed' variant='danger' %}
+            {% elif job.status == 'processing' %}{% include 'backend/partials/_status_badge.html' with label='Processing' variant='info' %}
+            {% else %}{% include 'backend/partials/_status_badge.html' with label='Pending' variant='warning' %}{% endif %}
+        </h1>
+        <p class="text-sm text-slate-500 mt-1">For inquiry {{ job.inquiry.inquiry_reference }} · {{ job.inquiry.customer_name|default:job.inquiry.customer_email }}</p>
     </div>
+</div>
 
-    {% elif job.status == 'done' %}
-    <div class="alert alert-success"><i class="mdi mdi-check-circle me-1"></i>Suggestions ready.</div>
-    {% if job.suggestions %}
-    <div class="row g-3">
+<div class="max-w-3xl">
+    {% if job.is_running %}
+    <div class="dash-card text-center py-12">
+        <span class="w-12 h-12 rounded-full bg-bush-50 text-bush-700 flex items-center justify-center mx-auto animate-pulse">
+            <i class="fal fa-spinner fa-spin text-lg"></i>
+        </span>
+        <p class="font-medium text-slate-900 mt-4">Matching packages to this inquiry…</p>
+        <p class="text-sm text-slate-500 mt-2">This page auto-refreshes every 4 seconds.</p>
+    </div>
+    {% elif job.status == 'failed' %}
+    <div class="dash-card border-rose-200 bg-rose-50">
+        <p class="dash-stat-label text-rose-700">Suggestion failed</p>
+        <p class="text-sm text-rose-900 mt-2 whitespace-pre-line">{{ job.error_message|default:'(no error message recorded)' }}</p>
+    </div>
+    {% elif job.suggestions %}
+    <div class="space-y-3">
         {% for s in job.suggestions %}
-        <div class="col-md-4">
-            <div class="card h-100 border-success">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <strong>{{ s.package_name }}</strong>
-                    <span class="badge bg-success">{{ s.match_score }}/10</span>
+        <div class="dash-card">
+            <div class="flex items-start justify-between gap-3">
+                <div class="min-w-0">
+                    <p class="dash-stat-label">{{ s.match_score|default:0 }}% match</p>
+                    <h3 class="font-medium text-slate-900 mt-1">{{ s.package_name|default:s.name }}</h3>
+                    {% if s.reasoning %}<p class="text-sm text-slate-700 mt-2">{{ s.reasoning }}</p>{% endif %}
                 </div>
-                <div class="card-body">
-                    <p class="small text-muted">{{ s.reason }}</p>
-                </div>
+                {% if s.package_id %}
+                <a href="/dashboard/packages/{{ s.package_id }}/edit/" class="dash-btn dash-btn-sm dash-btn-secondary flex-shrink-0">Open</a>
+                {% endif %}
             </div>
         </div>
         {% endfor %}
     </div>
-    {% endif %}
-
-    {% elif job.status == 'failed' %}
-    <div class="alert alert-danger">
-        <strong>Failed:</strong> {{ job.error_message }}
+    {% else %}
+    <div class="dash-card">
+        <p class="text-sm text-slate-500 italic">No suggestions returned.</p>
     </div>
     {% endif %}
 
-    <div class="mt-3">
-        <small class="text-muted">Created {{ job.created_at }}{% if job.completed_at %} · Completed {{ job.completed_at }}{% endif %}</small>
-    </div>
+    <a href="{% url 'packages:dashboard_inquiry_detail' job.inquiry.pk %}" class="dash-btn dash-btn-ghost mt-6"><i class="fal fa-arrow-left"></i> Back to inquiry</a>
 </div>
+
 {% endblock %}

@@ -1,31 +1,134 @@
-{% extends 'frontend/base.html' %}
+{% extends 'frontend/base_modern.html' %}
 {% load static %}
-{% block title %}Accommodations | Tour System{% endblock %}
+
+{% block title %}Lodges &amp; Camps — Tour System{% endblock %}
+{% block meta_description %}Hand-picked safari lodges, tented camps, and beach hotels across Tanzania and East Africa.{% endblock %}
+
 {% block content %}
-<section class="page-banner-area pt-245 rpt-150 pb-170 rpb-100 rel z-1 bgc-lighter text-center">
-    <div class="container"><div class="banner-inner"><h1 class="page-title">{% if is_featured_page %}Featured {% endif %}Accommodations</h1></div></div>
-</section>
-<section class="accommodations-area py-100">
-    <div class="container">
-        {% if accommodations %}
-        <div class="row">
-            {% for accommodation in accommodations %}
-            <div class="col-xl-4 col-md-6 mb-30">
-                <div class="accommodation-card">
-                    {% if accommodation.featured_image %}<img src="{{ accommodation.featured_image.url }}" alt="{{ accommodation.name }}" style="width:100%;height:250px;object-fit:cover;">{% endif %}
-                    <div class="p-3">
-                        <span class="badge">{{ accommodation.get_accommodation_type_display }}</span>
-                        {% if accommodation.star_rating %}{% for i in "12345"|make_list %}{% if forloop.counter <= accommodation.star_rating %}⭐{% endif %}{% endfor %}{% endif %}
-                        <h5><a href="{% url 'public_accommodation_detail' accommodation.slug %}">{{ accommodation.name }}</a></h5>
-                        <p>{{ accommodation.short_description|truncatewords:15 }}</p>
-                        <p><strong>{{ accommodation.price_range_display }}</strong></p>
-                        <a href="{% url 'public_accommodation_detail' accommodation.slug %}" class="btn btn-primary btn-sm">View Details</a>
+
+{% include 'frontend/partials/_listing_hero.html' with eyebrow="04 — Lodges" title="Where you'll lay your head." lede="From canvas under the stars to hand-built treehouses — the lodges and camps we'd send our own family to." image="https://images.unsplash.com/photo-1542353436-312f0e1f67ff?w=2000&q=80" %}
+
+<section class="py-16 lg:py-24">
+    <div class="container-editorial">
+        <div class="listing-grid">
+
+            {# =========================== FILTERS =========================== #}
+            <aside x-data="{ open: false }" class="lg:sticky lg:top-28 lg:self-start">
+                <button type="button"
+                        class="lg:hidden btn btn-secondary w-full"
+                        @click="open = !open">
+                    <i class="fal fa-sliders-h"></i>
+                    <span x-text="open ? 'Hide filters' : 'Filters'"></span>
+                </button>
+
+                <form method="get"
+                      class="mt-4 lg:mt-0 space-y-6"
+                      :class="open ? 'block' : 'hidden lg:block'"
+                      x-cloak>
+                    <div>
+                        <label class="eyebrow text-mist block mb-2" for="search">Search</label>
+                        <input id="search" type="search" name="search" value="{{ search_query }}"
+                               placeholder="Lodge, camp…"
+                               class="w-full bg-transparent border border-sand-300 focus:border-bush-600 rounded-full px-5 py-3 text-sm outline-none transition">
                     </div>
+
+                    {% if types %}
+                    <div>
+                        <label class="eyebrow text-mist block mb-2" for="type">Type</label>
+                        <select id="type" name="type"
+                                class="w-full bg-transparent border border-sand-300 focus:border-bush-600 rounded-full px-5 py-3 text-sm outline-none transition appearance-none">
+                            <option value="">Any type</option>
+                            {% for val, label in types %}
+                                <option value="{{ val }}" {% if val == selected_type %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    {% endif %}
+
+                    {% if ratings %}
+                    <div>
+                        <label class="eyebrow text-mist block mb-2" for="rating">Star rating</label>
+                        <select id="rating" name="rating"
+                                class="w-full bg-transparent border border-sand-300 focus:border-bush-600 rounded-full px-5 py-3 text-sm outline-none transition appearance-none">
+                            <option value="">Any rating</option>
+                            {% for val, label in ratings %}
+                                <option value="{{ val }}" {% if val|stringformat:"s" == selected_rating %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    {% endif %}
+
+                    {% if destinations %}
+                    <div>
+                        <label class="eyebrow text-mist block mb-2" for="destination">Destination</label>
+                        <select id="destination" name="destination"
+                                class="w-full bg-transparent border border-sand-300 focus:border-bush-600 rounded-full px-5 py-3 text-sm outline-none transition appearance-none">
+                            <option value="">Any destination</option>
+                            {% for dest in destinations %}
+                                <option value="{{ dest.slug }}" {% if dest.slug == selected_destination %}selected{% endif %}>{{ dest.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    {% endif %}
+
+                    <div class="flex gap-3 pt-2">
+                        <button type="submit" class="btn btn-primary flex-1">Apply</button>
+                        {% if search_query or selected_type or selected_rating or selected_destination %}
+                            <a href="{% url 'public_accommodation_list' %}" class="btn btn-secondary flex-1 text-center">Reset</a>
+                        {% endif %}
+                    </div>
+                </form>
+            </aside>
+
+            {# =========================== RESULTS =========================== #}
+            <div>
+                <header class="mb-8 lg:mb-10">
+                    <p class="eyebrow text-mist">Showing</p>
+                    <p class="font-display text-2xl lg:text-3xl mt-1">
+                        {{ accommodations.paginator.count }} lodge{{ accommodations.paginator.count|pluralize }} &amp; camp{{ accommodations.paginator.count|pluralize }}
+                    </p>
+                </header>
+
+                <div class="grid sm:grid-cols-2 xl:grid-cols-3 gap-6">
+                    {% for lodge in accommodations %}
+                        <a href="{% url 'public_accommodation_detail' lodge.slug %}" class="group block">
+                            <div class="card-media aspect-[4/5] rounded-2xl overflow-hidden bg-sand-100 relative">
+                                {% if lodge.featured_image %}
+                                    <img src="{{ lodge.featured_image.url }}" alt="{{ lodge.name }}" loading="lazy">
+                                {% else %}
+                                    <img src="https://images.unsplash.com/photo-1542353436-312f0e1f67ff?w=900&q=80" alt="{{ lodge.name }}" loading="lazy">
+                                {% endif %}
+                                {% if lodge.star_rating %}
+                                    <div class="absolute top-4 right-4 bg-ivory/95 text-charcoal px-3 py-1 rounded-full text-xs flex items-center gap-1">
+                                        {% for i in "12345"|make_list %}
+                                            {% if forloop.counter <= lodge.star_rating %}<i class="fas fa-star text-clay-500 text-[10px]"></i>{% endif %}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="pt-5">
+                                <p class="eyebrow">{{ lodge.get_accommodation_type_display }}</p>
+                                <h3 class="font-display text-xl lg:text-2xl mt-2 text-balance group-hover:text-bush-700 transition-colors">{{ lodge.name }}</h3>
+                                {% if lodge.destination %}
+                                    <p class="text-sm text-mist mt-1 flex items-center gap-2">
+                                        <i class="fal fa-map-marker-alt"></i> {{ lodge.destination.name }}
+                                    </p>
+                                {% endif %}
+                                {% if lodge.short_description %}
+                                    <p class="mt-3 text-mist text-sm leading-relaxed line-clamp-2">{{ lodge.short_description }}</p>
+                                {% endif %}
+                            </div>
+                        </a>
+                    {% empty %}
+                        {% include 'frontend/partials/_listing_empty.html' with title='No lodges match those filters.' subtitle='Try clearing the type or rating filter.' reset_url=request.path %}
+                    {% endfor %}
                 </div>
+
+                {% include 'frontend/partials/_listing_pagination.html' with page_obj=accommodations querystring=request.GET.urlencode %}
             </div>
-            {% endfor %}
+
         </div>
-        {% else %}<div class="alert alert-info">No accommodations found.</div>{% endif %}
     </div>
 </section>
+
 {% endblock %}

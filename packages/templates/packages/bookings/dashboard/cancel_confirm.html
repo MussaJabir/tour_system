@@ -1,46 +1,41 @@
-{% extends "backend/base.html" %}
+{% extends 'backend/base_dashboard.html' %}
 {% load static %}
 
-{% block title %}Cancel Booking{% endblock %}
+{% block title %}Cancel booking {{ booking.booking_reference }} — Dashboard{% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card border-danger">
-                <div class="card-header bg-danger text-white">
-                    <strong>Cancel Booking</strong>
-                </div>
-                <div class="card-body">
-                    <p>Are you sure you want to cancel booking <strong>{{ booking.booking_reference }}</strong>?</p>
 
-                    <dl class="row mb-3">
-                        <dt class="col-5">Package</dt>
-                        <dd class="col-7">{{ booking.package.name }}</dd>
+{% include 'backend/partials/_breadcrumb.html' with crumbs=' ' %}
 
-                        <dt class="col-5">Customer</dt>
-                        <dd class="col-7">
-                            {% if booking.inquiry %}{{ booking.inquiry.customer_name }}{% else %}—{% endif %}
-                        </dd>
+<div class="max-w-xl mx-auto">
+    <div class="dash-card text-center py-12">
+        <span class="w-14 h-14 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center mx-auto">
+            <i class="fal fa-ban text-xl"></i>
+        </span>
+        <h1 class="font-medium text-slate-900 text-lg mt-5">Cancel this booking?</h1>
+        <p class="text-sm text-slate-500 mt-2 max-w-sm mx-auto">
+            The booking status will be set to <strong>Cancelled</strong>. The seat is released back to the departure. Refund flow is handled separately on the Payments tab.
+        </p>
 
-                        <dt class="col-5">Departure</dt>
-                        <dd class="col-7">{{ booking.departure_date|date:"M d, Y" }}</dd>
-
-                        <dt class="col-5">Total Paid</dt>
-                        <dd class="col-7">{{ booking.currency }} {{ booking.total_paid }}</dd>
-                    </dl>
-
-                    <p class="text-danger small">This action will send a cancellation notification to staff and the customer.</p>
-
-                    <form method="post" class="d-flex gap-2">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-danger">Yes, Cancel Booking</button>
-                        <a href="{% url 'packages:dashboard_booking_detail' booking.pk %}"
-                           class="btn btn-outline-secondary">Go Back</a>
-                    </form>
-                </div>
-            </div>
+        <div class="mt-6 px-6 py-4 bg-slate-50 rounded-lg text-left text-sm">
+            <p><strong class="text-slate-900 font-mono">{{ booking.booking_reference }}</strong></p>
+            <p class="text-slate-500 mt-1">{{ booking.package.name }} · {{ booking.departure_date|date:'d M Y' }}</p>
+            {% if booking.inquiry %}<p class="text-slate-500">{{ booking.inquiry.customer_name|default:booking.inquiry.customer_email }}</p>{% endif %}
+            <p class="text-slate-700 mt-2 font-medium">{{ booking.currency }} {{ booking.quoted_price|floatformat:0 }}</p>
         </div>
+
+        <form method="post" class="mt-6 space-y-3 text-left">
+            {% csrf_token %}
+            <div class="dash-form-field">
+                <label class="dash-label" for="reason">Cancellation reason (internal)</label>
+                <textarea id="reason" name="cancellation_reason" placeholder="Optional — why was this cancelled?"></textarea>
+            </div>
+            <div class="flex flex-wrap gap-2 justify-center pt-2">
+                <a href="{% url 'packages:dashboard_booking_detail' booking.pk %}" class="dash-btn dash-btn-ghost">Keep booking</a>
+                <button type="submit" class="dash-btn dash-btn-danger"><i class="fal fa-ban"></i> Cancel booking</button>
+            </div>
+        </form>
     </div>
 </div>
+
 {% endblock %}

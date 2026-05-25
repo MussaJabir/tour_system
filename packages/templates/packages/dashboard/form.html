@@ -1,644 +1,190 @@
-{% extends "backend/base.html" %}
+{% extends 'backend/base_dashboard.html' %}
 {% load static %}
 
-{% block title %}{% if form.instance.pk %}Edit Package{% else %}Create Package{% endif %}{% endblock %}
-
-{% block extra_css %}
-<style>
-    .form-section {
-        background: #fff;
-        border-radius: 8px;
-        padding: 25px;
-        margin-bottom: 20px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    }
-    
-    .form-section h5 {
-        color: #495057;
-        font-weight: 600;
-        margin-bottom: 20px;
-        padding-bottom: 10px;
-        border-bottom: 2px solid #f0f0f0;
-    }
-    
-    .form-section h5 i {
-        color: #667eea;
-        margin-right: 8px;
-    }
-    
-    .checkbox-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-        gap: 10px;
-        margin-top: 10px;
-    }
-    
-    .checkbox-item {
-        display: flex;
-        align-items: center;
-        padding: 8px 12px;
-        background: #f8f9fa;
-        border-radius: 5px;
-        transition: all 0.2s;
-    }
-    
-    .checkbox-item:hover {
-        background: #e9ecef;
-    }
-    
-    .checkbox-item input[type="checkbox"] {
-        margin-right: 8px;
-        cursor: pointer;
-    }
-    
-    .checkbox-item label {
-        margin: 0;
-        cursor: pointer;
-        flex: 1;
-    }
-    
-    .help-text {
-        font-size: 0.875rem;
-        color: #6c757d;
-        margin-top: 5px;
-        display: block;
-    }
-    
-    .required-field::after {
-        content: " *";
-        color: #dc3545;
-    }
-    
-    .image-preview {
-        max-width: 200px;
-        max-height: 200px;
-        margin-top: 10px;
-        border-radius: 5px;
-    }
-    
-    .btn-group-actions {
-        position: sticky;
-        bottom: 20px;
-        background: white;
-        padding: 15px;
-        border-radius: 8px;
-        box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
-        z-index: 10;
-    }
-</style>
-{% endblock %}
+{% block title %}{{ title|default:'Package form' }} — Dashboard{% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <!-- Page Header -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center">
+
+{% include 'backend/partials/_breadcrumb.html' with crumbs=' ' %}
+{% include 'backend/partials/_page_header.html' with title=title subtitle='Tour package details, pricing, and policies.' %}
+
+<form method="post" data-autosave-form enctype="multipart/form-data" class="grid lg:grid-cols-[1fr_280px] gap-6">
+    {% csrf_token %}
+    {% include "backend/partials/_form_autosave.html" %}
+
+    <div class="space-y-6 min-w-0">
+
+        <div class="dash-card">
+            <header class="dash-card-header">
                 <div>
-                    <h4 class="mb-1">{% if form.instance.pk %}Edit Package{% else %}Create New Package{% endif %}</h4>
-                    <p class="text-muted mb-0">
-                        <i class="mdi mdi-information-outline"></i> 
-                        {% if form.instance.pk %}
-                            Update package details below
-                        {% else %}
-                            Fill in the form below to create a new tour package
-                        {% endif %}
-                    </p>
+                    <p class="dash-card-title">Basics</p>
+                    <p class="text-sm text-slate-500 mt-1">What this trip is and where it goes</p>
                 </div>
-                <a href="{% url 'packages:dashboard_package_list' %}" class="btn btn-outline-secondary">
-                    <i class="mdi mdi-arrow-left"></i> Back to List
-                </a>
+            </header>
+            <div class="grid sm:grid-cols-2 gap-5">
+                {% include 'backend/partials/_dash_form_field.html' with field=form.name %}
+                {% include 'backend/partials/_dash_form_field.html' with field=form.category %}
+            </div>
+            <div class="mt-5">{% include 'backend/partials/_dash_form_field.html' with field=form.destinations help='Hold ⌘/Ctrl to select multiple' %}</div>
+            <div class="mt-5">{% include 'backend/partials/_dash_form_field.html' with field=form.short_description %}</div>
+            <div class="mt-5">{% include 'backend/partials/_dash_form_field.html' with field=form.description %}</div>
+            <div class="mt-5">{% include 'backend/partials/_dash_form_field.html' with field=form.highlights %}</div>
+        </div>
+
+        <div class="dash-card">
+            <header class="dash-card-header">
+                <div>
+                    <p class="dash-card-title">Duration &amp; group</p>
+                </div>
+            </header>
+            <div class="grid sm:grid-cols-2 gap-5">
+                {% include 'backend/partials/_dash_form_field.html' with field=form.duration_days %}
+                {% include 'backend/partials/_dash_form_field.html' with field=form.duration_nights %}
+                {% include 'backend/partials/_dash_form_field.html' with field=form.group_size_min %}
+                {% include 'backend/partials/_dash_form_field.html' with field=form.group_size_max %}
+                {% include 'backend/partials/_dash_form_field.html' with field=form.difficulty_level %}
+                {% include 'backend/partials/_dash_form_field.html' with field=form.max_bookings %}
             </div>
         </div>
-    </div>
 
-    <!-- Form -->
-    <form method="post" enctype="multipart/form-data" id="packageForm">
-        {% csrf_token %}
-        
-        <!-- Display ALL form errors -->
-        {% if form.errors %}
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <i class="mdi mdi-alert-circle-outline me-2"></i>
-                <strong>Please fix the following errors:</strong>
-                <ul class="mb-0 mt-2">
-                    {% for field in form %}
-                        {% if field.errors %}
-                            {% for error in field.errors %}
-                                <li><strong>{{ field.label }}:</strong> {{ error }}</li>
-                            {% endfor %}
-                        {% endif %}
-                    {% endfor %}
-                    {% if form.non_field_errors %}
-                        {% for error in form.non_field_errors %}
-                            <li>{{ error }}</li>
-                        {% endfor %}
-                    {% endif %}
-                </ul>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        <div class="dash-card">
+            <header class="dash-card-header">
+                <div>
+                    <p class="dash-card-title">Pricing</p>
+                </div>
+            </header>
+            <div class="grid sm:grid-cols-3 gap-5">
+                {% include 'backend/partials/_dash_form_field.html' with field=form.price_per_person %}
+                {% include 'backend/partials/_dash_form_field.html' with field=form.currency %}
+                {% include 'backend/partials/_dash_form_field.html' with field=form.discount_percentage %}
+            </div>
+        </div>
+
+        <div class="dash-card">
+            <header class="dash-card-header">
+                <div>
+                    <p class="dash-card-title">Availability</p>
+                </div>
+            </header>
+            <div class="grid sm:grid-cols-3 gap-5">
+                {% include 'backend/partials/_dash_form_field.html' with field=form.availability_status %}
+                {% include 'backend/partials/_dash_form_field.html' with field=form.start_date %}
+                {% include 'backend/partials/_dash_form_field.html' with field=form.end_date %}
+            </div>
+        </div>
+
+        <div class="dash-card">
+            <header class="dash-card-header">
+                <div>
+                    <p class="dash-card-title">What's included</p>
+                </div>
+            </header>
+            <div class="grid sm:grid-cols-2 gap-5">
+                {% include 'backend/partials/_dash_form_field.html' with field=form.included_items %}
+                {% include 'backend/partials/_dash_form_field.html' with field=form.excluded_items %}
+            </div>
+            <div class="mt-5">{% include 'backend/partials/_dash_form_field.html' with field=form.requirements %}</div>
+        </div>
+
+        <div class="dash-card">
+            <header class="dash-card-header">
+                <div>
+                    <p class="dash-card-title">Policies</p>
+                </div>
+            </header>
+            <div class="space-y-5">
+                {% include 'backend/partials/_dash_form_field.html' with field=form.cancellation_policy %}
+                {% include 'backend/partials/_dash_form_field.html' with field=form.terms_and_conditions %}
+            </div>
+        </div>
+
+        <div class="dash-card">
+            <header class="dash-card-header">
+                <div>
+                    <p class="dash-card-title">Media</p>
+                </div>
+            </header>
+            {% include 'backend/partials/_dash_image_field.html' with field=form.featured_image %}
+            <div class="mt-5">
+                {% include 'backend/partials/_dash_form_field.html' with field=form.video_url %}
+            </div>
+        </div>
+
+        <div class="dash-card">
+            <header class="dash-card-header">
+                <div>
+                    <p class="dash-card-title">SEO</p>
+                </div>
+            </header>
+            <div class="space-y-5">
+                {% include 'backend/partials/_dash_form_field.html' with field=form.meta_title %}
+                {% include 'backend/partials/_dash_form_field.html' with field=form.meta_description %}
+                {% include 'backend/partials/_dash_form_field.html' with field=form.meta_keywords %}
+            </div>
+        </div>
+
+        {% if form.non_field_errors %}
+            <div class="dash-card border-rose-200 bg-rose-50 text-rose-700 text-sm">
+                {% for err in form.non_field_errors %}<p>{{ err }}</p>{% endfor %}
             </div>
         {% endif %}
-
-        <!-- Basic Information Section -->
-        <div class="form-section">
-            <h5><i class="mdi mdi-information"></i> Basic Information</h5>
-            <div class="row">
-                <div class="col-md-8">
-                    <div class="mb-3">
-                        <label for="{{ form.name.id_for_label }}" class="form-label required-field">Package Name</label>
-                        {{ form.name }}
-                        {% if form.name.errors %}
-                            <div class="text-danger small mt-1">{{ form.name.errors }}</div>
-                        {% endif %}
-                        {% if form.name.help_text %}
-                            <small class="help-text">{{ form.name.help_text }}</small>
-                        {% endif %}
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="mb-3">
-                        <label for="{{ form.category.id_for_label }}" class="form-label required-field">Category</label>
-                        {{ form.category }}
-                        {% if form.category.errors %}
-                            <div class="text-danger small mt-1">{{ form.category.errors }}</div>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-            
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="mb-3">
-                        <label for="{{ form.short_description.id_for_label }}" class="form-label required-field">Short Description</label>
-                        {{ form.short_description }}
-                        {% if form.short_description.errors %}
-                            <div class="text-danger small mt-1">{{ form.short_description.errors }}</div>
-                        {% endif %}
-                        {% if form.short_description.help_text %}
-                            <small class="help-text">{{ form.short_description.help_text }}</small>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-            
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="mb-3">
-                        <label for="{{ form.description.id_for_label }}" class="form-label required-field">Full Description</label>
-                        {{ form.description }}
-                        {% if form.description.errors %}
-                            <div class="text-danger small mt-1">{{ form.description.errors }}</div>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Destinations Section -->
-        <div class="form-section">
-            <h5><i class="mdi mdi-map-marker-multiple"></i> Destinations</h5>
-            <div class="mb-3">
-                <label for="{{ form.destinations.id_for_label }}" class="form-label">Included Destinations</label>
-                {{ form.destinations }}
-                {% if form.destinations.errors %}
-                    <div class="text-danger small mt-2">{{ form.destinations.errors }}</div>
-                {% endif %}
-                <small class="help-text">Hold Ctrl/Cmd to select multiple destinations</small>
-            </div>
-        </div>
-
-        <!-- Duration & Difficulty Section -->
-        <div class="form-section">
-            <h5><i class="mdi mdi-clock-outline"></i> Duration & Difficulty</h5>
-            <div class="row">
-                <div class="col-md-3">
-                    <div class="mb-3">
-                        <label for="{{ form.duration_days.id_for_label }}" class="form-label required-field">Duration (Days)</label>
-                        {{ form.duration_days }}
-                        {% if form.duration_days.errors %}
-                            <div class="text-danger small mt-1">{{ form.duration_days.errors }}</div>
-                        {% endif %}
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="mb-3">
-                        <label for="{{ form.duration_nights.id_for_label }}" class="form-label">Duration (Nights)</label>
-                        {{ form.duration_nights }}
-                        {% if form.duration_nights.errors %}
-                            <div class="text-danger small mt-1">{{ form.duration_nights.errors }}</div>
-                        {% endif %}
-                        <small class="help-text">Auto-calculated if left empty</small>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="mb-3">
-                        <label for="{{ form.difficulty_level.id_for_label }}" class="form-label required-field">Difficulty Level</label>
-                        {{ form.difficulty_level }}
-                        {% if form.difficulty_level.errors %}
-                            <div class="text-danger small mt-1">{{ form.difficulty_level.errors }}</div>
-                        {% endif %}
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="mb-3">
-                        <label for="{{ form.group_size_min.id_for_label }}" class="form-label required-field">Min Group Size</label>
-                        {{ form.group_size_min }}
-                        {% if form.group_size_min.errors %}
-                            <div class="text-danger small mt-1">{{ form.group_size_min.errors }}</div>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-3">
-                    <div class="mb-3">
-                        <label for="{{ form.group_size_max.id_for_label }}" class="form-label">Max Group Size</label>
-                        {{ form.group_size_max }}
-                        {% if form.group_size_max.errors %}
-                            <div class="text-danger small mt-1">{{ form.group_size_max.errors }}</div>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Pricing Section -->
-        <div class="form-section">
-            <h5><i class="mdi mdi-currency-usd"></i> Pricing Information</h5>
-            <div class="row">
-                <div class="col-md-4">
-                    <div class="mb-3">
-                        <label for="{{ form.price_per_person.id_for_label }}" class="form-label required-field">Price Per Person</label>
-                        {{ form.price_per_person }}
-                        {% if form.price_per_person.errors %}
-                            <div class="text-danger small mt-1">{{ form.price_per_person.errors }}</div>
-                        {% endif %}
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="mb-3">
-                        <label for="{{ form.discount_percentage.id_for_label }}" class="form-label">Discount (%)</label>
-                        {{ form.discount_percentage }}
-                        {% if form.discount_percentage.errors %}
-                            <div class="text-danger small mt-1">{{ form.discount_percentage.errors }}</div>
-                        {% endif %}
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="mb-3">
-                        <label for="{{ form.currency.id_for_label }}" class="form-label">Currency</label>
-                        {{ form.currency }}
-                        {% if form.currency.errors %}
-                            <div class="text-danger small mt-1">{{ form.currency.errors }}</div>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Availability Section -->
-        <div class="form-section">
-            <h5><i class="mdi mdi-calendar-check"></i> Availability & Booking</h5>
-            <div class="row">
-                <div class="col-md-3">
-                    <div class="mb-3">
-                        <label for="{{ form.availability_status.id_for_label }}" class="form-label required-field">Availability Status</label>
-                        {{ form.availability_status }}
-                        {% if form.availability_status.errors %}
-                            <div class="text-danger small mt-1">{{ form.availability_status.errors }}</div>
-                        {% endif %}
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="mb-3">
-                        <label for="{{ form.max_bookings.id_for_label }}" class="form-label required-field">Maximum Bookings</label>
-                        {{ form.max_bookings }}
-                        {% if form.max_bookings.errors %}
-                            <div class="text-danger small mt-1">{{ form.max_bookings.errors }}</div>
-                        {% endif %}
-                        <small class="help-text">Total bookings allowed</small>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="mb-3">
-                        <label for="{{ form.start_date.id_for_label }}" class="form-label">Start Date</label>
-                        {{ form.start_date }}
-                        {% if form.start_date.errors %}
-                            <div class="text-danger small mt-1">{{ form.start_date.errors }}</div>
-                        {% endif %}
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="mb-3">
-                        <label for="{{ form.end_date.id_for_label }}" class="form-label">End Date</label>
-                        {{ form.end_date }}
-                        {% if form.end_date.errors %}
-                            <div class="text-danger small mt-1">{{ form.end_date.errors }}</div>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Media Section -->
-        <div class="form-section">
-            <h5><i class="mdi mdi-image"></i> Media</h5>
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="mb-3">
-                        <label for="{{ form.featured_image.id_for_label }}" class="form-label">Featured Image</label>
-                        {{ form.featured_image }}
-                        {% if form.featured_image.errors %}
-                            <div class="text-danger small mt-1">{{ form.featured_image.errors }}</div>
-                        {% endif %}
-                        {% if form.instance.featured_image %}
-                            <div class="mt-2">
-                                <img src="{{ form.instance.featured_image.url }}" alt="Current featured image" class="image-preview">
-                                <small class="d-block mt-1 text-muted">Current image (upload new to replace)</small>
-                            </div>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-            
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="mb-3">
-                        <label for="{{ form.video_url.id_for_label }}" class="form-label">Video URL (YouTube/Vimeo)</label>
-                        {{ form.video_url }}
-                        {% if form.video_url.errors %}
-                            <div class="text-danger small mt-1">{{ form.video_url.errors }}</div>
-                        {% endif %}
-                        {% if form.video_url.help_text %}
-                            <small class="help-text">{{ form.video_url.help_text }}</small>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Additional Details Section -->
-        <div class="form-section">
-            <h5><i class="mdi mdi-text-box-multiple"></i> Additional Details</h5>
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="mb-3">
-                        <label for="{{ form.highlights.id_for_label }}" class="form-label">Highlights</label>
-                        {{ form.highlights }}
-                        {% if form.highlights.errors %}
-                            <div class="text-danger small mt-1">{{ form.highlights.errors }}</div>
-                        {% endif %}
-                        {% if form.highlights.help_text %}
-                            <small class="help-text">{{ form.highlights.help_text }}</small>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-            
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="mb-3">
-                        <label for="{{ form.included_items.id_for_label }}" class="form-label">What's Included</label>
-                        {{ form.included_items }}
-                        {% if form.included_items.errors %}
-                            <div class="text-danger small mt-1">{{ form.included_items.errors }}</div>
-                        {% endif %}
-                        {% if form.included_items.help_text %}
-                            <small class="help-text">{{ form.included_items.help_text }}</small>
-                        {% endif %}
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="mb-3">
-                        <label for="{{ form.excluded_items.id_for_label }}" class="form-label">What's Excluded</label>
-                        {{ form.excluded_items }}
-                        {% if form.excluded_items.errors %}
-                            <div class="text-danger small mt-1">{{ form.excluded_items.errors }}</div>
-                        {% endif %}
-                        {% if form.excluded_items.help_text %}
-                            <small class="help-text">{{ form.excluded_items.help_text }}</small>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-            
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="mb-3">
-                        <label for="{{ form.requirements.id_for_label }}" class="form-label">Requirements</label>
-                        {{ form.requirements }}
-                        {% if form.requirements.errors %}
-                            <div class="text-danger small mt-1">{{ form.requirements.errors }}</div>
-                        {% endif %}
-                        {% if form.requirements.help_text %}
-                            <small class="help-text">{{ form.requirements.help_text }}</small>
-                        {% endif %}
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="mb-3">
-                        <label for="{{ form.cancellation_policy.id_for_label }}" class="form-label required-field">Cancellation Policy</label>
-                        {{ form.cancellation_policy }}
-                        {% if form.cancellation_policy.errors %}
-                            <div class="text-danger small mt-1">{{ form.cancellation_policy.errors }}</div>
-                        {% endif %}
-                        {% if form.cancellation_policy.help_text %}
-                            <small class="help-text">{{ form.cancellation_policy.help_text }}</small>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-            
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="mb-3">
-                        <label for="{{ form.terms_and_conditions.id_for_label }}" class="form-label">Terms & Conditions</label>
-                        {{ form.terms_and_conditions }}
-                        {% if form.terms_and_conditions.errors %}
-                            <div class="text-danger small mt-1">{{ form.terms_and_conditions.errors }}</div>
-                        {% endif %}
-                        {% if form.terms_and_conditions.help_text %}
-                            <small class="help-text">{{ form.terms_and_conditions.help_text }}</small>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Status & Settings Section -->
-        <div class="form-section">
-            <h5><i class="mdi mdi-cog"></i> Status & Settings</h5>
-            <div class="row">
-                <div class="col-md-3">
-                    <div class="mb-3">
-                        <div class="form-check form-switch">
-                            {{ form.is_active }}
-                            <label class="form-check-label" for="{{ form.is_active.id_for_label }}">
-                                Active (Visible to public)
-                            </label>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="mb-3">
-                        <div class="form-check form-switch">
-                            {{ form.is_featured }}
-                            <label class="form-check-label" for="{{ form.is_featured.id_for_label }}">
-                                Featured Package
-                            </label>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="mb-3">
-                        <div class="form-check form-switch">
-                            {{ form.is_customizable }}
-                            <label class="form-check-label" for="{{ form.is_customizable.id_for_label }}">
-                                Customizable
-                            </label>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="mb-3">
-                        <label for="{{ form.order.id_for_label }}" class="form-label">Display Order</label>
-                        {{ form.order }}
-                        {% if form.order.errors %}
-                            <div class="text-danger small mt-1">{{ form.order.errors }}</div>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- SEO Section (Optional) -->
-        <div class="form-section">
-            <h5><i class="mdi mdi-magnify"></i> SEO Settings (Optional)</h5>
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="mb-3">
-                        <label for="{{ form.meta_title.id_for_label }}" class="form-label">Meta Title</label>
-                        {{ form.meta_title }}
-                        {% if form.meta_title.errors %}
-                            <div class="text-danger small mt-1">{{ form.meta_title.errors }}</div>
-                        {% endif %}
-                        <small class="help-text">Auto-generated if left empty</small>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="mb-3">
-                        <label for="{{ form.meta_description.id_for_label }}" class="form-label">Meta Description</label>
-                        {{ form.meta_description }}
-                        {% if form.meta_description.errors %}
-                            <div class="text-danger small mt-1">{{ form.meta_description.errors }}</div>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Action Buttons -->
-        <div class="btn-group-actions">
-            <div class="d-flex justify-content-between align-items-center">
-                <a href="{% url 'packages:dashboard_package_list' %}" class="btn btn-outline-secondary">
-                    <i class="mdi mdi-close"></i> Cancel
-                </a>
-                <div>
-                    <button type="submit" name="save_and_continue" class="btn btn-outline-primary me-2">
-                        <i class="mdi mdi-content-save"></i> Save & Continue Editing
-                    </button>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="mdi mdi-check"></i> {% if form.instance.pk %}Update Package{% else %}Create Package{% endif %}
-                    </button>
-                </div>
-            </div>
-        </div>
-    </form>
-
-    {% if form.instance.pk %}
-    <!-- Additional Management Sections (Only for existing packages) -->
-    <div class="row mt-4">
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-body text-center">
-                    <i class="mdi mdi-image-multiple" style="font-size: 48px; color: #667eea;"></i>
-                    <h5 class="mt-3">Gallery Images</h5>
-                    <p class="text-muted">Manage package photos</p>
-                    <a href="{% url 'packages:dashboard_package_image_add' form.instance.pk %}" class="btn btn-sm btn-primary">
-                        <i class="mdi mdi-plus"></i> Add Images
-                    </a>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-body text-center">
-                    <i class="mdi mdi-map-marker-path" style="font-size: 48px; color: #667eea;"></i>
-                    <h5 class="mt-3">Itinerary</h5>
-                    <p class="text-muted">Day-by-day schedule</p>
-                    <a href="{% url 'packages:dashboard_package_itinerary_add' form.instance.pk %}" class="btn btn-sm btn-primary">
-                        <i class="mdi mdi-plus"></i> Add Itinerary
-                    </a>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-body text-center">
-                    <i class="mdi mdi-check-circle" style="font-size: 48px; color: #667eea;"></i>
-                    <h5 class="mt-3">Inclusions</h5>
-                    <p class="text-muted">What's included/excluded</p>
-                    <a href="{% url 'packages:dashboard_package_inclusion_add' form.instance.pk %}" class="btn btn-sm btn-primary">
-                        <i class="mdi mdi-plus"></i> Add Inclusions
-                    </a>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="card-body text-center">
-                    <i class="mdi mdi-calendar-clock" style="font-size: 48px; color: #667eea;"></i>
-                    <h5 class="mt-3">Departures</h5>
-                    <p class="text-muted">Departure dates &amp; seats</p>
-                    <a href="{% url 'packages:dashboard_departure_list' package_pk=form.instance.pk %}" class="btn btn-sm btn-primary">
-                        <i class="mdi mdi-calendar-check"></i> Manage Departures
-                    </a>
-                </div>
-            </div>
-        </div>
     </div>
-    {% endif %}
-</div>
+
+    <aside class="lg:sticky lg:top-20 lg:self-start space-y-4">
+        <div class="dash-card">
+            <p class="dash-card-title mb-4">Publish</p>
+            <button type="submit" class="dash-btn dash-btn-primary w-full">
+                <i class="fal fa-check"></i> Save package
+            </button>
+            <a href="{% url 'packages:dashboard_package_list' %}" class="dash-btn dash-btn-ghost w-full mt-2 text-center justify-center">Cancel</a>
+
+            <div class="mt-5 pt-5 border-t border-slate-200 space-y-3 text-xs">
+                <label class="flex items-start gap-2 cursor-pointer">
+                    {{ form.is_active }}
+                    <span>
+                        <span class="block text-slate-700 font-medium">Active</span>
+                        <span class="text-slate-500">Shown publicly</span>
+                    </span>
+                </label>
+                <label class="flex items-start gap-2 cursor-pointer">
+                    {{ form.is_featured }}
+                    <span>
+                        <span class="block text-slate-700 font-medium">Featured</span>
+                        <span class="text-slate-500">Homepage spotlight</span>
+                    </span>
+                </label>
+                <label class="flex items-start gap-2 cursor-pointer">
+                    {{ form.is_customizable }}
+                    <span>
+                        <span class="block text-slate-700 font-medium">Customisable</span>
+                        <span class="text-slate-500">Allow tweaks via inquiry</span>
+                    </span>
+                </label>
+            </div>
+        </div>
+
+        {% if package %}
+        <div class="dash-card">
+            <p class="dash-stat-label mb-3">Related</p>
+            <ul class="text-sm space-y-2">
+                <li><a href="{% url 'packages:dashboard_departure_list' package.pk %}" class="text-slate-700 hover:text-bush-700 flex items-center gap-2"><i class="fal fa-calendar-alt"></i> Departures</a></li>
+                <li><a href="{% url 'packages:dashboard_package_itinerary_add' package.pk %}" class="text-slate-700 hover:text-bush-700 flex items-center gap-2"><i class="fal fa-route"></i> Add itinerary day</a></li>
+                <li><a href="{% url 'packages:dashboard_package_inclusion_add' package.pk %}" class="text-slate-700 hover:text-bush-700 flex items-center gap-2"><i class="fal fa-check"></i> Add inclusion</a></li>
+                <li><a href="{% url 'packages:dashboard_package_image_add' package.pk %}" class="text-slate-700 hover:text-bush-700 flex items-center gap-2"><i class="fal fa-image"></i> Add image</a></li>
+            </ul>
+        </div>
+        <div class="dash-card">
+            <p class="dash-stat-label mb-3">Danger zone</p>
+            <a href="{% url 'packages:dashboard_package_delete' package.pk %}" class="dash-btn dash-btn-secondary w-full text-rose-600 border-rose-200 hover:bg-rose-50 hover:border-rose-300">
+                <i class="fal fa-trash"></i> Delete package
+            </a>
+        </div>
+        {% endif %}
+    </aside>
+</form>
+
 {% endblock %}
 
 {% block extra_js %}
-<script>
-    // Form validation and enhancements
-    document.addEventListener('DOMContentLoaded', function() {
-        const form = document.getElementById('packageForm');
-        
-        // Auto-calculate nights from days
-        const daysInput = document.querySelector('input[name="duration_days"]');
-        const nightsInput = document.querySelector('input[name="duration_nights"]');
-        
-        if (daysInput && nightsInput) {
-            daysInput.addEventListener('change', function() {
-                if (this.value && !nightsInput.value) {
-                    nightsInput.value = Math.max(0, parseInt(this.value) - 1);
-                }
-            });
-        }
-        
-        // Form submission confirmation
-        form.addEventListener('submit', function(e) {
-            const submitBtn = e.submitter;
-            if (submitBtn) {
-                submitBtn.disabled = true;
-                submitBtn.innerHTML = '<i class="mdi mdi-loading mdi-spin"></i> Saving...';
-            }
-        });
-    });
-</script>
+    {% include 'backend/partials/_choices_setup.html' %}
 {% endblock %}
-

@@ -1,0 +1,41 @@
+{% comment %}
+"You might also like" strip for detail pages. 4-up grid using _card.html.
+
+Usage:
+    {% include 'frontend/partials/_related_grid.html' with items=related_packages eyebrow='Continue exploring' title='Related tours' url_name='packages:public_package_detail' image_attr='featured_image' meta_template='{duration_days}D · {currency} {price_per_person}' %}
+
+Caller passes:
+    items       — list of objects with .name, .slug, .{image_attr}
+    eyebrow     — small label above title
+    title       — section heading
+    url_name    — Django URL name to reverse with .slug
+    image_attr  — attribute to read image from (default: featured_image)
+    fallback    — fallback image URL when item has no image
+{% endcomment %}
+{% if items %}
+<section class="py-24 lg:py-32 bg-bone">
+    <div class="container-editorial">
+        <header class="mb-10 lg:mb-14">
+            {% if eyebrow %}<p class="eyebrow">{{ eyebrow }}</p>{% endif %}
+            <h2 class="font-display text-display-md mt-3 text-balance">{{ title|default:'You might also like' }}</h2>
+        </header>
+        <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {% for item in items %}
+                <a href="{% url url_name item.slug %}" class="card group block">
+                    <div class="card-media aspect-[4/5]">
+                        {% if image_attr == 'featured_image' and item.featured_image %}
+                            <img src="{{ item.featured_image.url }}" alt="{{ item.name }}" loading="lazy">
+                        {% else %}
+                            <img src="{{ fallback|default:'https://images.unsplash.com/photo-1535941339077-2dd1c7963098?w=900&q=80' }}" alt="{{ item.name }}" loading="lazy">
+                        {% endif %}
+                        <div class="hero-overlay opacity-55 group-hover:opacity-75 transition-opacity duration-500"></div>
+                        <div class="absolute bottom-0 inset-x-0 p-5 text-ivory">
+                            <h3 class="font-display text-lg leading-tight text-balance">{{ item.name }}</h3>
+                        </div>
+                    </div>
+                </a>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}

@@ -1,230 +1,412 @@
-{% extends 'frontend/base.html' %}
+{% extends 'frontend/base_modern.html' %}
 {% load static %}
 
-{% block title %}{{ destination.get_meta_title }} | Tour System{% endblock %}
-{% block title2 %}{{ destination.get_meta_title }} | Tour System{% endblock %}
-
+{% block title %}{{ destination.get_meta_title }} — Tour System{% endblock %}
 {% block meta_description %}{{ destination.get_meta_description }}{% endblock %}
 {% block og_description %}{{ destination.get_meta_description }}{% endblock %}
-
 {% block meta_keywords %}{{ destination.meta_keywords }}{% endblock %}
-
 {% block canonical %}<link rel="canonical" href="{{ request.build_absolute_uri }}">{% endblock %}
-
 {% block og_type %}place{% endblock %}
 {% block og_url %}{{ request.build_absolute_uri }}{% endblock %}
 {% block og_image %}{% if destination.featured_image %}{{ request.scheme }}://{{ request.get_host }}{{ destination.featured_image.url }}{% endif %}{% endblock %}
 
-{% block meta_tags %}{% endblock %}
-
 {% block content %}
-<!-- Page Banner Start -->
-<section class="page-banner-area pt-245 rpt-150 pb-170 rpb-100 rel z-1 bgc-lighter text-center">
-    <div class="container">
-        <div class="banner-inner rpt-10">
-            <h1 class="page-title" data-aos="fade-up" data-aos-duration="1500" data-aos-offset="50">
-                {{ destination.name }}
-            </h1>
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb justify-content-center" data-aos="fade-up" data-aos-delay="200" data-aos-duration="1500" data-aos-offset="50">
-                    <li class="breadcrumb-item"><a href="{% url 'public_home' %}">Home</a></li>
-                    <li class="breadcrumb-item"><a href="{% url 'public_destination_list' %}">Destinations</a></li>
-                    <li class="breadcrumb-item active">{{ destination.name }}</li>
-                </ol>
-            </nav>
-        </div>
+
+{# ============================================================ #}
+{# HERO #}
+{# ============================================================ #}
+<section class="relative min-h-[80vh] flex items-end overflow-hidden bg-charcoal">
+    <div class="absolute inset-0">
+        {% if destination.featured_image %}
+            <img src="{{ destination.featured_image.url }}" alt="{{ destination.name }}" class="w-full h-full object-cover">
+        {% else %}
+            <img src="https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?w=2400&q=80" alt="{{ destination.name }}" class="w-full h-full object-cover">
+        {% endif %}
+        <div class="absolute inset-0 bg-gradient-to-t from-charcoal/95 via-charcoal/40 to-charcoal/30"></div>
     </div>
-    <div class="wave-shapes">
-        <img class="shape one" src="{% static 'frontend/assets/images/shapes/page-banner-wave1.png' %}" alt="Wave Shape">
-        <img class="shape two" src="{% static 'frontend/assets/images/shapes/page-banner-wave2.png' %}" alt="Wave Shape">
+
+    <div class="container-editorial relative pt-40 pb-16 lg:pb-24 text-ivory w-full">
+        <nav aria-label="Breadcrumb" class="text-xs tracking-wider uppercase opacity-70">
+            <a href="{% url 'public_home' %}" class="hover:underline">Home</a>
+            <span class="mx-2">/</span>
+            <a href="{% url 'public_destination_list' %}" class="hover:underline">Destinations</a>
+            <span class="mx-2">/</span>
+            <span class="opacity-70">{{ destination.name }}</span>
+        </nav>
+
+        <p class="eyebrow text-sand-200 mt-6">{{ destination.country }}{% if destination.region %} · {{ destination.region }}{% endif %}</p>
+        <h1 class="font-display text-display-lg lg:text-display-xl mt-4 text-balance max-w-5xl leading-[1.02] text-ivory">
+            {{ destination.name }}
+        </h1>
+        {% if destination.short_description %}
+            <p class="mt-6 max-w-2xl text-lg lg:text-xl text-ivory/85 leading-relaxed">{{ destination.short_description }}</p>
+        {% endif %}
     </div>
 </section>
-<!-- Page Banner End -->
 
-<!-- Destination Details Area start -->
-<section class="destination-details-area py-100">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-8">
-                <!-- Featured Image -->
-                {% if destination.featured_image %}
-                <div class="destination-details-content" data-aos="fade-up" data-aos-duration="1500" data-aos-offset="50">
-                    <div class="image mb-40">
-                        <img src="{{ destination.featured_image.url }}" alt="{{ destination.name }}">
-                    </div>
+{# ============================================================ #}
+{# QUICK FACTS BAR — centered, under hero #}
+{# ============================================================ #}
+<section class="relative -mt-12 lg:-mt-16 z-10">
+    <div class="container-editorial">
+        <div class="bg-ivory rounded-2xl px-6 py-8 lg:px-12 lg:py-10 max-w-5xl mx-auto" style="box-shadow: var(--shadow-frame);">
+            <div class="grid lg:grid-cols-[1fr_auto] gap-8 lg:gap-12 items-center">
+                <div class="text-center lg:text-left">
+                    <p class="eyebrow text-mist">Plan a trip to</p>
+                    <span class="font-display text-display-sm text-charcoal block mt-2">{{ destination.name }}</span>
+                    <p class="text-xs text-mist mt-2">We'll build a custom itinerary around this destination — flights, lodges, drives, all in.</p>
                 </div>
-                {% endif %}
-
-                <!-- Description -->
-                <div class="destination-details-content" data-aos="fade-up" data-aos-delay="50" data-aos-duration="1500" data-aos-offset="50">
-                    <h3>About {{ destination.name }}</h3>
-                    <div class="description">
-                        {{ destination.description|linebreaks }}
-                    </div>
-                </div>
-
-                <!-- Wildlife -->
-                {% if destination.wildlife %}
-                <div class="destination-details-content mt-40" data-aos="fade-up" data-aos-delay="100" data-aos-duration="1500" data-aos-offset="50">
-                    <h4>Wildlife</h4>
-                    <div class="description">
-                        {{ destination.wildlife|linebreaks }}
-                    </div>
-                </div>
-                {% endif %}
-
-                <!-- Climate -->
-                {% if destination.climate %}
-                <div class="destination-details-content mt-40" data-aos="fade-up" data-aos-delay="150" data-aos-duration="1500" data-aos-offset="50">
-                    <h4>Climate Information</h4>
-                    <div class="description">
-                        {{ destination.climate|linebreaks }}
-                    </div>
-                </div>
-                {% endif %}
-
-                <!-- Gallery -->
-                {% if gallery_images %}
-                <div class="destination-details-content mt-40" data-aos="fade-up" data-aos-delay="200" data-aos-duration="1500" data-aos-offset="50">
-                    <h3>Gallery</h3>
-                    <div class="row mt-30">
-                        {% for image in gallery_images %}
-                        <div class="col-md-4 col-sm-6 mb-30">
-                            <div class="gallery-item">
-                                <a href="{{ image.image.url }}" class="popup-image">
-                                    <img src="{{ image.image.url }}" alt="{{ image.caption|default:'Gallery Image' }}">
-                                </a>
-                                {% if image.caption %}
-                                <p class="text-center mt-2">{{ image.caption }}</p>
-                                {% endif %}
-                            </div>
-                        </div>
-                        {% endfor %}
-                    </div>
-                </div>
-                {% endif %}
-
-                <!-- Video -->
-                {% if destination.video_url %}
-                <div class="destination-details-content mt-40" data-aos="fade-up" data-aos-delay="250" data-aos-duration="1500" data-aos-offset="50">
-                    <h3>Video Tour</h3>
-                    <div class="video-wrapper mt-30">
-                        <iframe width="100%" height="450" src="{{ destination.video_url }}" frameborder="0" allowfullscreen></iframe>
-                    </div>
-                </div>
-                {% endif %}
-
-                <!-- Activities at this Destination -->
-                {% if activities %}
-                <div class="destination-details-content mt-50" data-aos="fade-up" data-aos-delay="300" data-aos-duration="1500" data-aos-offset="50">
-                    <div class="d-flex justify-content-between align-items-center mb-30">
-                        <h3>Activities Available</h3>
-                        <a href="{% url 'public_activity_by_destination' destination.slug %}" class="theme-btn style-two btn-sm">
-                            <span data-hover="View All">View All</span>
-                            <i class="fal fa-arrow-right"></i>
-                        </a>
-                    </div>
-                    <div class="row">
-                        {% for activity in activities %}
-                        <div class="col-md-4 mb-30">
-                            <div class="activity-card">
-                                {% if activity.featured_image %}
-                                <div class="activity-image">
-                                    <img src="{{ activity.featured_image.url }}" alt="{{ activity.name }}">
-                                    <span class="difficulty-badge {{ activity.difficulty }}">{{ activity.get_difficulty_display }}</span>
-                                </div>
-                                {% endif %}
-                                <div class="activity-content p-3">
-                                    <span class="category">{{ activity.get_category_display }}</span>
-                                    <h5><a href="{% url 'public_activity_detail' activity.slug %}">{{ activity.name }}</a></h5>
-                                    <ul class="activity-meta">
-                                        <li><i class="fal fa-clock"></i> {{ activity.duration_display }}</li>
-                                        <li><i class="fal fa-dollar-sign"></i> {{ activity.price_display }}</li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                        {% endfor %}
-                    </div>
-                </div>
-                {% endif %}
-            </div>
-
-            <!-- Sidebar -->
-            <div class="col-lg-4">
-                <div class="blog-sidebar">
-                    <!-- Quick Info -->
-                    <div class="widget widget-info" data-aos="fade-up" data-aos-duration="1500" data-aos-offset="50">
-                        <h5 class="widget-title">Quick Info</h5>
-                        <ul class="list-style-three">
-                            <li>
-                                <span class="icon"><i class="fal fa-map-marked-alt"></i></span>
-                                <strong>Country:</strong> {{ destination.country }}
-                            </li>
-                            {% if destination.region %}
-                            <li>
-                                <span class="icon"><i class="fal fa-location"></i></span>
-                                <strong>Region:</strong> {{ destination.region }}
-                            </li>
-                            {% endif %}
-                            {% if destination.best_time_to_visit %}
-                            <li>
-                                <span class="icon"><i class="fal fa-calendar-alt"></i></span>
-                                <strong>Best Time:</strong> {{ destination.best_time_to_visit }}
-                            </li>
-                            {% endif %}
-                            <li>
-                                <span class="icon"><i class="fal fa-eye"></i></span>
-                                <strong>Views:</strong> {{ destination.view_count }}
-                            </li>
-                        </ul>
-                    </div>
-
-                    <!-- Map -->
-                    {% if destination.latitude and destination.longitude %}
-                    <div class="widget widget-map mt-30" data-aos="fade-up" data-aos-delay="50" data-aos-duration="1500" data-aos-offset="50">
-                        <h5 class="widget-title">Location</h5>
-                        <div id="map" style="height: 300px; width: 100%;"></div>
-                    </div>
-                    {% endif %}
-
-                    <!-- CTA -->
-                    <div class="widget widget-cta mt-30" data-aos="fade-up" data-aos-delay="100" data-aos-duration="1500" data-aos-offset="50">
-                        <div class="cta-content text-center p-4 bgc-secondary text-white">
-                            <h4>Ready to Explore?</h4>
-                            <p>Book your adventure today!</p>
-                            <a href="#" class="theme-btn style-two bgc-white">
-                                <span data-hover="Book Now">Book Now</span>
-                                <i class="fal fa-arrow-right"></i>
-                            </a>
-                        </div>
-                    </div>
+                <div class="flex flex-col gap-3 lg:min-w-[280px]">
+                    <a href="{% url 'contact_page' %}?destination={{ destination.slug }}" class="btn btn-primary w-full justify-center">
+                        Talk To Us About {{ destination.name|truncatewords:2 }}
+                        <i class="fal fa-arrow-right"></i>
+                    </a>
                 </div>
             </div>
+
+            <dl class="mt-8 pt-8 border-t border-sand-200 grid grid-cols-2 lg:grid-cols-4 gap-6 text-center">
+                <div>
+                    <dt class="eyebrow text-mist">Country</dt>
+                    <dd class="font-display text-xl text-charcoal mt-2">{{ destination.country }}</dd>
+                </div>
+                <div>
+                    <dt class="eyebrow text-mist">Best months</dt>
+                    <dd class="font-display text-xl text-charcoal mt-2">
+                        {% if best_months %}{{ best_months|length }}{% else %}—{% endif %}
+                    </dd>
+                </div>
+                <div>
+                    <dt class="eyebrow text-mist">Activities</dt>
+                    <dd class="font-display text-xl text-charcoal mt-2">{{ activities|length }}</dd>
+                </div>
+                <div>
+                    <dt class="eyebrow text-mist">Lodges</dt>
+                    <dd class="font-display text-xl text-charcoal mt-2">{{ accommodations|length }}</dd>
+                </div>
+            </dl>
         </div>
     </div>
 </section>
-<!-- Destination Details Area end -->
+
+{# ============================================================ #}
+{# IN-PAGE STICKY SECTION NAV #}
+{# ============================================================ #}
+{% if section_nav|length > 1 %}
+<nav class="sticky top-20 z-20 bg-ivory/95 backdrop-blur border-y border-sand-200 mt-12 lg:mt-16" aria-label="Section navigation">
+    <div class="container-editorial">
+        <ol class="flex gap-1 sm:gap-2 overflow-x-auto scrollbar-hide py-3" data-section-nav>
+            {% for item in section_nav %}
+                <li>
+                    <a href="#{{ item.id }}"
+                       class="section-nav-link inline-block px-4 py-2 rounded-full text-xs tracking-wider uppercase text-mist hover:text-bush-700 hover:bg-sand-100 transition-colors whitespace-nowrap"
+                       data-section-target="{{ item.id }}">
+                        {{ item.label }}
+                    </a>
+                </li>
+            {% endfor %}
+        </ol>
+    </div>
+</nav>
+{% endif %}
+
+{# ============================================================ #}
+{# ABOUT #}
+{# ============================================================ #}
+<section id="about" class="py-16 lg:py-24 scroll-mt-32" data-section>
+    <div class="container-editorial">
+        <article class="max-w-4xl mx-auto">
+            <p class="eyebrow">About</p>
+            <h2 class="font-display text-display-md mt-3 text-balance">About {{ destination.name }}</h2>
+            <div class="mt-6 text-charcoal/90 leading-relaxed text-lg">{{ destination.description|linebreaks }}</div>
+        </article>
+    </div>
+</section>
+
+{# ============================================================ #}
+{# WILDLIFE #}
+{# ============================================================ #}
+{% if destination.wildlife %}
+<section id="wildlife" class="py-16 lg:py-20 bg-bone scroll-mt-32" data-section>
+    <div class="container-editorial">
+        <article class="max-w-4xl mx-auto">
+            <p class="eyebrow text-bush-600">Wildlife</p>
+            <h2 class="font-display text-display-md mt-3 text-balance">What you'll see</h2>
+            <div class="mt-6 text-charcoal/90 leading-relaxed text-lg">{{ destination.wildlife|linebreaks }}</div>
+        </article>
+    </div>
+</section>
+{% endif %}
+
+{# ============================================================ #}
+{# WHEN TO GO — visual 12-month calendar #}
+{# ============================================================ #}
+{% if best_months or destination.best_time_to_visit %}
+<section id="when-to-go" class="py-16 lg:py-20 scroll-mt-32" data-section>
+    <div class="container-editorial">
+        <div class="max-w-4xl mx-auto">
+            <p class="eyebrow">When to go</p>
+            <h2 class="font-display text-display-md mt-3 text-balance">The right time to visit.</h2>
+
+            {% if best_months %}
+                <div class="mt-10 grid grid-cols-6 lg:grid-cols-12 gap-2 lg:gap-3" role="list" aria-label="Best months to visit">
+                    {% for m in months_calendar %}
+                        <div class="month-pill {% if m.is_best %}month-pill--best{% endif %}" role="listitem"
+                             aria-label="{{ m.abbr }}{% if m.is_best %}, recommended{% endif %}">
+                            <span class="month-pill__abbr">{{ m.abbr }}</span>
+                            <span class="month-pill__dot" aria-hidden="true"></span>
+                        </div>
+                    {% endfor %}
+                </div>
+                <p class="mt-6 text-sm text-mist">
+                    Highlighted months are typically best for visiting.
+                    {% if destination.best_time_to_visit %}<span class="text-charcoal">{{ destination.best_time_to_visit }}.</span>{% endif %}
+                </p>
+            {% else %}
+                <div class="mt-6 text-charcoal/85 leading-relaxed text-lg">
+                    {{ destination.best_time_to_visit }}
+                </div>
+            {% endif %}
+
+            {% if destination.climate %}
+                <div class="mt-10 pt-10 border-t border-sand-200">
+                    <p class="eyebrow text-mist">Climate</p>
+                    <div class="mt-4 text-charcoal/80 leading-relaxed">{{ destination.climate|linebreaks }}</div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+{# ============================================================ #}
+{# ACTIVITIES HERE #}
+{# ============================================================ #}
+{% if activities %}
+<section id="activities" class="py-16 lg:py-20 bg-bone scroll-mt-32" data-section>
+    <div class="container-editorial">
+        <header class="mb-10 lg:mb-14 flex flex-wrap items-end justify-between gap-4 max-w-6xl mx-auto">
+            <div>
+                <p class="eyebrow">Things to do</p>
+                <h2 class="font-display text-display-md mt-3 text-balance">Activities in {{ destination.name }}</h2>
+            </div>
+            <a href="{% url 'public_activity_by_destination' destination.slug %}" class="btn btn-ghost">View all <i class="fal fa-arrow-right"></i></a>
+        </header>
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+            {% for act in activities %}
+                <a href="{% url 'public_activity_detail' act.slug %}" class="card group block">
+                    <div class="card-media aspect-[4/5]">
+                        {% if act.featured_image %}
+                            <img src="{{ act.featured_image.url }}" alt="{{ act.name }}" loading="lazy">
+                        {% else %}
+                            <img src="https://images.unsplash.com/photo-1516426122078-c23e76319801?w=600&q=80" alt="{{ act.name }}" loading="lazy">
+                        {% endif %}
+                        <div class="hero-overlay opacity-55 group-hover:opacity-75 transition-opacity duration-500"></div>
+                        <div class="absolute bottom-0 inset-x-0 p-5 text-ivory">
+                            <p class="eyebrow text-sand-200">{{ act.get_category_display }}</p>
+                            <h3 class="font-display text-xl mt-2 text-balance">{{ act.name }}</h3>
+                        </div>
+                    </div>
+                </a>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+{# ============================================================ #}
+{# STAY HERE #}
+{# ============================================================ #}
+{% if accommodations %}
+<section id="stay" class="py-16 lg:py-20 scroll-mt-32" data-section>
+    <div class="container-editorial">
+        <header class="mb-10 lg:mb-14 flex flex-wrap items-end justify-between gap-4 max-w-6xl mx-auto">
+            <div>
+                <p class="eyebrow">Where to stay</p>
+                <h2 class="font-display text-display-md mt-3 text-balance">Lodges &amp; camps in {{ destination.name|truncatewords:3 }}</h2>
+            </div>
+            <a href="{% url 'public_accommodation_by_destination' destination.slug %}" class="btn btn-ghost">View all <i class="fal fa-arrow-right"></i></a>
+        </header>
+        <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 max-w-6xl mx-auto">
+            {% for lodge in accommodations %}
+                <a href="{% url 'public_accommodation_detail' lodge.slug %}" class="group block">
+                    <div class="card-media aspect-[4/5] rounded-2xl overflow-hidden bg-sand-100">
+                        {% if lodge.featured_image %}
+                            <img src="{{ lodge.featured_image.url }}" alt="{{ lodge.name }}" loading="lazy">
+                        {% else %}
+                            <img src="https://images.unsplash.com/photo-1542353436-312f0e1f67ff?w=900&q=80" alt="{{ lodge.name }}" loading="lazy">
+                        {% endif %}
+                    </div>
+                    <div class="pt-3">
+                        <p class="eyebrow text-[10px]">{{ lodge.get_accommodation_type_display }}</p>
+                        <h3 class="font-display text-base mt-1 leading-tight text-balance group-hover:text-bush-700 transition-colors">{{ lodge.name }}</h3>
+                    </div>
+                </a>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+{# ============================================================ #}
+{# ON THE MAP #}
+{# ============================================================ #}
+{% if destination.latitude and destination.longitude %}
+<section id="map" class="py-16 lg:py-20 bg-bone scroll-mt-32" data-section>
+    <div class="container-editorial">
+        <div class="max-w-6xl mx-auto">
+            <p class="eyebrow">On the map</p>
+            <h2 class="font-display text-display-md mt-3 text-balance">Where {{ destination.name|truncatewords:2 }} sits.</h2>
+            <div id="destination-map" class="mt-10 h-[55vh] lg:h-[65vh] rounded-2xl overflow-hidden bg-sand-100"></div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+{# ============================================================ #}
+{# GALLERY #}
+{# ============================================================ #}
+{% if gallery_images %}
+<section class="py-16 lg:py-20">
+    <div class="container-editorial">
+        <div class="max-w-5xl mx-auto">
+            <p class="eyebrow">Gallery</p>
+            <h2 class="font-display text-display-md mt-3 text-balance">From the field</h2>
+            <div class="mt-10">{% include 'frontend/partials/_gallery.html' with images=gallery_images %}</div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+{# ============================================================ #}
+{# INLINE TESTIMONIAL #}
+{# ============================================================ #}
+{% if inline_review %}
+<section class="py-16 lg:py-20">
+    <div class="container-editorial">
+        <figure class="max-w-3xl mx-auto text-center">
+            <div class="flex gap-1 text-clay-500 justify-center">
+                {% for i in "12345"|make_list %}{% if forloop.counter <= inline_review.rating %}<i class="fas fa-star"></i>{% endif %}{% endfor %}
+            </div>
+            <blockquote class="font-display text-2xl lg:text-3xl leading-snug mt-6 text-balance text-charcoal">"{{ inline_review.quote }}"</blockquote>
+            <figcaption class="mt-6 text-sm text-mist">— {{ inline_review.customer_name }}{% if inline_review.customer_location %}, {{ inline_review.customer_location }}{% endif %}</figcaption>
+        </figure>
+    </div>
+</section>
+{% endif %}
+
+{# ============================================================ #}
+{# TOURS THAT VISIT HERE #}
+{# ============================================================ #}
+{% if packages_visiting_here %}
+<section class="py-16 lg:py-20 bg-bone">
+    <div class="container-editorial">
+        <div class="max-w-6xl mx-auto">
+            <p class="eyebrow">Take me there</p>
+            <h2 class="font-display text-display-md mt-3 text-balance">Tours that visit {{ destination.name|truncatewords:3 }}.</h2>
+            <p class="mt-4 text-charcoal/70 max-w-2xl">
+                Pre-built itineraries that include {{ destination.name|truncatewords:2 }} — pick one as-is or use it as a starting frame.
+            </p>
+            <div class="mt-10 grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for pkg in packages_visiting_here %}
+                <a href="{% url 'packages:public_package_detail' pkg.slug %}" class="group block">
+                    <div class="aspect-[4/3] rounded-xl overflow-hidden bg-sand-100">
+                        {% if pkg.featured_image %}
+                            <img src="{{ pkg.featured_image.url }}" alt="{{ pkg.name }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy">
+                        {% endif %}
+                    </div>
+                    <p class="eyebrow mt-4">{{ pkg.get_category_display|default:pkg.category }}</p>
+                    <h3 class="font-display text-xl mt-2 text-balance group-hover:text-bush-700 transition-colors">{{ pkg.name }}</h3>
+                    <p class="mt-2 text-sm text-mist">{{ pkg.duration_days }}D · {{ pkg.duration_nights }}N · from {{ pkg.currency }} {{ pkg.final_price|floatformat:0 }}</p>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+{# ============================================================ #}
+{# FINAL CTA #}
+{# ============================================================ #}
+<section class="py-16 lg:py-24">
+    <div class="container-editorial">
+        <div class="bg-charcoal text-ivory rounded-2xl p-10 lg:p-16 text-center max-w-5xl mx-auto">
+            <p class="eyebrow text-sand-300">Ready when you are</p>
+            <h3 class="font-display text-display-sm lg:text-display-md mt-4 text-balance">Plan your trip to {{ destination.name|truncatewords:2 }}.</h3>
+            <p class="mt-4 text-ivory/80 max-w-md mx-auto">
+                Tell us when you'd like to go and we'll write back within a day with a draft itinerary built around it.
+            </p>
+            <a href="{% url 'contact_page' %}?destination={{ destination.slug }}" class="btn btn-primary bg-ivory text-charcoal hover:bg-sand-300 mt-8">
+                Start Planning
+                <i class="fal fa-arrow-right"></i>
+            </a>
+        </div>
+    </div>
+</section>
+
+{# Related destinations #}
+{% include 'frontend/partials/_related_grid.html' with items=related_destinations eyebrow='Continue exploring' title='Other places worth seeing' url_name='public_destination_detail' image_attr='featured_image' %}
+
+{# Mobile sticky bottom CTA #}
+<div class="lg:hidden fixed inset-x-0 bottom-0 z-40 bg-ivory/95 backdrop-blur border-t border-sand-200 px-4 py-3"
+     style="padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));">
+    <div class="flex items-center justify-between gap-3">
+        <div class="leading-tight">
+            <p class="text-[10px] uppercase tracking-wider text-mist">Custom trip</p>
+            <p class="font-display text-base text-charcoal truncate">{{ destination.name }}</p>
+        </div>
+        <a href="{% url 'contact_page' %}?destination={{ destination.slug }}" class="btn btn-primary flex-1 justify-center whitespace-nowrap">
+            Talk To Us
+            <i class="fal fa-arrow-right"></i>
+        </a>
+    </div>
+</div>
+
 {% endblock %}
 
 {% block extra_js %}
+{# Section-nav active state on scroll #}
+<script defer>
+document.addEventListener('DOMContentLoaded', () => {
+    const navLinks = document.querySelectorAll('[data-section-nav] [data-section-target]');
+    const sections = document.querySelectorAll('section[data-section]');
+    if (!navLinks.length || !sections.length || !('IntersectionObserver' in window)) return;
+
+    const setActive = (id) => {
+        navLinks.forEach((link) => {
+            link.classList.toggle('section-nav-link--active', link.dataset.sectionTarget === id);
+        });
+    };
+
+    const io = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+            if (entry.isIntersecting) setActive(entry.target.id);
+        });
+    }, { rootMargin: '-30% 0px -55% 0px', threshold: 0 });
+    sections.forEach((s) => io.observe(s));
+});
+</script>
+
 {% if destination.latitude and destination.longitude %}
-<!-- Leaflet CSS and JS -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        var map = L.map('map').setView([{{ destination.latitude }}, {{ destination.longitude }}], 10);
-        
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        }).addTo(map);
-        
-        L.marker([{{ destination.latitude }}, {{ destination.longitude }}]).addTo(map)
-            .bindPopup('<b>{{ destination.name }}</b><br>{{ destination.country }}')
-            .openPopup();
+<script defer>
+document.addEventListener('DOMContentLoaded', () => {
+    const mapEl = document.getElementById('destination-map');
+    if (!mapEl || !window.L) return;
+    const map = L.map(mapEl, { scrollWheelZoom: false, attributionControl: false })
+        .setView([{{ destination.latitude }}, {{ destination.longitude }}], 9);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap', maxZoom: 13,
+    }).addTo(map);
+    const dot = L.divIcon({
+        className: 'route-marker',
+        html: '<span style="display:block;width:22px;height:22px;border-radius:50%;background:#3a4a2a;border:3px solid #f5f0e6;box-shadow:0 1px 4px rgba(0,0,0,.3);"></span>',
+        iconSize: [22, 22], iconAnchor: [11, 11],
     });
+    L.marker([{{ destination.latitude }}, {{ destination.longitude }}], { icon: dot }).addTo(map)
+        .bindPopup('<b>{{ destination.name|escapejs }}</b><br>{{ destination.country|escapejs }}');
+});
 </script>
 {% endif %}
 {% endblock %}
-

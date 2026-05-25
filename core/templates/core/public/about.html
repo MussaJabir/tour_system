@@ -1,0 +1,149 @@
+{% extends 'frontend/base_modern.html' %}
+{% load static %}
+
+{% block title %}About — Tour System{% endblock %}
+{% block meta_description %}A Tanzania-based safari operator. Locally run since 2014. Bespoke trips across East Africa.{% endblock %}
+
+{% block content %}
+
+{# ============================================================ #}
+{# HERO #}
+{# ============================================================ #}
+<section class="relative min-h-[72vh] flex items-end overflow-hidden bg-charcoal">
+    <div class="absolute inset-0">
+        <img src="https://images.unsplash.com/photo-1535941339077-2dd1c7963098?w=2400&q=80" alt="Tanzania landscape" class="w-full h-full object-cover">
+        <div class="absolute inset-0 bg-gradient-to-t from-charcoal/95 via-charcoal/40 to-charcoal/20"></div>
+    </div>
+    <div class="container-editorial relative pt-40 pb-16 lg:pb-24 text-ivory w-full">
+        <nav aria-label="Breadcrumb" class="text-xs tracking-wider uppercase opacity-70">
+            <a href="{% url 'public_home' %}" class="hover:underline">Home</a>
+            <span class="mx-2">/</span>
+            <span class="opacity-70">About</span>
+        </nav>
+        <p class="eyebrow text-sand-200 mt-6">About us</p>
+        <h1 class="font-display text-display-lg lg:text-display-xl mt-4 text-balance max-w-5xl leading-[1.02] text-ivory">
+            We build trips. Locals build us.
+        </h1>
+        <p class="mt-6 max-w-2xl text-lg lg:text-xl text-ivory/85 leading-relaxed">
+            A Tanzanian-owned, Arusha-based tour operator running bespoke East African journeys since 2014.
+        </p>
+    </div>
+</section>
+
+{# ============================================================ #}
+{# STORY #}
+{# ============================================================ #}
+<section class="py-20 lg:py-28">
+    <div class="container-editorial max-w-4xl">
+        <p class="eyebrow">Our story</p>
+        <h2 class="font-display text-display-md mt-3 text-balance">Built by guides, run for travellers.</h2>
+        <div class="mt-8 text-charcoal/90 leading-relaxed text-lg space-y-5 max-w-prose">
+            <p>
+                We started in 2014 with one Land Cruiser, three guides, and a stubborn idea: that the best Tanzania trips aren't the ones with the longest brochure — they're the ones built around the people on them.
+            </p>
+            <p>
+                Ten years later we're a small Arusha-based team running bespoke safaris, Kilimanjaro climbs, and Zanzibar extensions for travellers who want the trip to feel like a story they choose to tell, not a checklist they tick off.
+            </p>
+            <p>
+                We don't run group tours. We don't share itineraries between clients. Every trip is designed from the ground up around your dates, pace, and the parks you actually want to see.
+            </p>
+        </div>
+    </div>
+</section>
+
+{# ============================================================ #}
+{# VALUES #}
+{# ============================================================ #}
+<section class="py-20 lg:py-28 bg-bone">
+    <div class="container-editorial">
+        <header class="mb-12 lg:mb-16 max-w-2xl">
+            <p class="eyebrow">What we stand for</p>
+            <h2 class="font-display text-display-md mt-3 text-balance">Three things we won't budge on.</h2>
+        </header>
+
+        <div class="grid md:grid-cols-3 gap-8 lg:gap-10">
+            <div class="bg-ivory rounded-2xl p-8" style="box-shadow: var(--shadow-soft);">
+                <span class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-bush-700 text-ivory">
+                    <i class="fal fa-map-marked-alt"></i>
+                </span>
+                <h3 class="font-display text-xl lg:text-2xl mt-5 text-balance">Local first</h3>
+                <p class="mt-3 text-mist leading-relaxed">Every itinerary is built and led by guides who grew up walking these parks. No outsourcing to remote agents.</p>
+            </div>
+
+            <div class="bg-ivory rounded-2xl p-8" style="box-shadow: var(--shadow-soft);">
+                <span class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-bush-700 text-ivory">
+                    <i class="fal fa-route"></i>
+                </span>
+                <h3 class="font-display text-xl lg:text-2xl mt-5 text-balance">Bespoke always</h3>
+                <p class="mt-3 text-mist leading-relaxed">No fixed groups, no shared itineraries. Each trip is yours — your dates, your pace, your wishlist.</p>
+            </div>
+
+            <div class="bg-ivory rounded-2xl p-8" style="box-shadow: var(--shadow-soft);">
+                <span class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-bush-700 text-ivory">
+                    <i class="fal fa-receipt"></i>
+                </span>
+                <h3 class="font-display text-xl lg:text-2xl mt-5 text-balance">Honest pricing</h3>
+                <p class="mt-3 text-mist leading-relaxed">What we quote is what you pay. Park fees, conservation levies, and tips for the team are spelled out up front.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+{# ============================================================ #}
+{# TEAM (placeholder grid) #}
+{# ============================================================ #}
+<section class="py-20 lg:py-28">
+    <div class="container-editorial">
+        <header class="mb-12 lg:mb-16 max-w-2xl">
+            <p class="eyebrow">The team</p>
+            <h2 class="font-display text-display-md mt-3 text-balance">Faces from Arusha.</h2>
+            <p class="mt-4 text-mist max-w-md">The people you'll actually email, meet at the airport, and ride with from park to park.</p>
+        </header>
+
+        <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {% for member in '1234'|make_list %}
+            <div>
+                <div class="aspect-[4/5] bg-sand-100 rounded-2xl overflow-hidden">
+                    <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=600&q=80" alt="Team member" class="w-full h-full object-cover">
+                </div>
+                <div class="pt-4">
+                    <p class="eyebrow">Trip designer</p>
+                    <h3 class="font-display text-xl mt-2">Team Member {{ member }}</h3>
+                    <p class="text-sm text-mist mt-1">Arusha</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <p class="text-xs text-mist mt-8 italic">Real team photos coming soon — we're a small crew and we don't auto-generate.</p>
+    </div>
+</section>
+
+{# ============================================================ #}
+{# CTA #}
+{# ============================================================ #}
+<section class="py-24 lg:py-32 bg-bush-700 text-ivory relative overflow-hidden">
+    <div class="absolute inset-0 opacity-25 mix-blend-overlay">
+        <img src="https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?w=2000&q=80" alt="" class="w-full h-full object-cover">
+    </div>
+    <div class="container-editorial relative text-center">
+        <p class="eyebrow text-sand-300">Come say hi</p>
+        <h2 class="font-display text-display-lg mt-6 text-balance max-w-3xl mx-auto">
+            Got a trip in mind? Let's chat.
+        </h2>
+        <p class="mt-6 text-ivory/80 max-w-xl mx-auto">
+            Tell us roughly where, when, and how you want to travel — we'll write back within a day.
+        </p>
+        <div class="mt-10 flex flex-wrap justify-center gap-3">
+            <a href="{% url 'contact_page' %}" class="btn btn-primary bg-ivory text-charcoal hover:bg-sand-300">
+                Get In Touch
+                <i class="fal fa-arrow-right"></i>
+            </a>
+            <a href="{% url 'packages:public_package_list' %}" class="btn btn-secondary border-ivory/60 text-ivory hover:bg-ivory hover:text-charcoal">
+                Browse Tours
+            </a>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

@@ -1,74 +1,48 @@
-{% extends "backend/base.html" %}
+{% extends 'backend/base_dashboard.html' %}
 {% load static %}
 
-{% block title %}{{ title }}{% endblock %}
+{% block title %}{{ title }} — Dashboard{% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h4 class="mb-0">{{ title }}</h4>
-        <a href="{% url 'packages:dashboard_departure_list' package_pk=package.pk %}"
-           class="btn btn-outline-secondary btn-sm">
-            <i class="mdi mdi-arrow-left"></i> Back to Departures
-        </a>
-    </div>
 
-    <div class="row justify-content-center">
-        <div class="col-lg-6">
-            <div class="card">
-                <div class="card-header">
-                    <h6 class="mb-0">{{ package.name }}</h6>
-                </div>
-                <div class="card-body">
-                    <form method="post" novalidate>
-                        {% csrf_token %}
+{% include 'backend/partials/_breadcrumb.html' with crumbs=' ' %}
+{% include 'backend/partials/_page_header.html' with title=title subtitle='Scheduled departure date and seat count for this package.' %}
 
-                        {% if form.non_field_errors %}
-                        <div class="alert alert-danger">{{ form.non_field_errors }}</div>
-                        {% endif %}
+<form method="post" data-autosave-form class="grid lg:grid-cols-[1fr_280px] gap-6">
+    {% csrf_token %}
+    {% include "backend/partials/_form_autosave.html" %}
 
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Departure Date <span class="text-danger">*</span></label>
-                            {{ form.departure_date }}
-                            {% if form.departure_date.errors %}
-                            <div class="text-danger small mt-1">{{ form.departure_date.errors }}</div>
-                            {% endif %}
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Max Seats <span class="text-danger">*</span></label>
-                            {{ form.max_seats }}
-                            {% if form.max_seats.errors %}
-                            <div class="text-danger small mt-1">{{ form.max_seats.errors }}</div>
-                            {% endif %}
-                            <div class="form-text">Total seats available for this departure.</div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Status</label>
-                            {{ form.status }}
-                            {% if form.status.errors %}
-                            <div class="text-danger small mt-1">{{ form.status.errors }}</div>
-                            {% endif %}
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Notes</label>
-                            {{ form.notes }}
-                            {% if form.notes.errors %}
-                            <div class="text-danger small mt-1">{{ form.notes.errors }}</div>
-                            {% endif %}
-                        </div>
-
-                        <div class="d-flex gap-2">
-                            <button type="submit" class="btn btn-primary">Save Departure</button>
-                            <a href="{% url 'packages:dashboard_departure_list' package_pk=package.pk %}"
-                               class="btn btn-outline-secondary">Cancel</a>
-                        </div>
-                    </form>
-                </div>
+    <div class="space-y-6 min-w-0">
+        <div class="dash-card">
+            <header class="dash-card-header"><div><p class="dash-card-title">Departure details</p></div></header>
+            <div class="grid sm:grid-cols-2 gap-5">
+                {% for field in form %}
+                    <div class="{% if field.name == 'notes' %}sm:col-span-2{% endif %}">
+                        {% include 'backend/partials/_dash_form_field.html' with field=field %}
+                    </div>
+                {% endfor %}
             </div>
         </div>
+
+        {% if form.non_field_errors %}
+            <div class="dash-card border-rose-200 bg-rose-50 text-rose-700 text-sm">
+                {% for err in form.non_field_errors %}<p>{{ err }}</p>{% endfor %}
+            </div>
+        {% endif %}
     </div>
-</div>
+
+    <aside class="lg:sticky lg:top-20 lg:self-start space-y-4">
+        <div class="dash-card">
+            <p class="dash-card-title mb-4">Actions</p>
+            <button type="submit" class="dash-btn dash-btn-primary w-full"><i class="fal fa-check"></i> Save departure</button>
+            <a href="{% url 'packages:dashboard_departure_list' package.pk %}" class="dash-btn dash-btn-ghost w-full mt-2 text-center justify-center">Cancel</a>
+        </div>
+
+        <div class="dash-card">
+            <p class="dash-stat-label mb-3">Package</p>
+            <p class="text-sm text-slate-900">{{ package.name }}</p>
+        </div>
+    </aside>
+</form>
+
 {% endblock %}

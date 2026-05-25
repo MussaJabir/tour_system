@@ -1,0 +1,30 @@
+{% comment %}
+Wraps a Django form field with the Safari Editorial input styling.
+
+Usage:
+    {% include 'frontend/partials/_form_field.html' with field=form.email %}
+    {% include 'frontend/partials/_form_field.html' with field=form.message rows=4 %}
+    {% include 'frontend/partials/_form_field.html' with field=form.subject label='What can we help with?' help='Optional' %}
+
+Vars:
+    field — Django BoundField (required)
+    label — override label text (optional; defaults to field.label)
+    help  — override help text (optional; defaults to field.help_text)
+    rows  — for textarea fields (optional)
+{% endcomment %}
+<div class="form-field {% if field.errors %}form-field--error{% endif %}">
+    <label class="eyebrow text-mist block mb-2" for="{{ field.id_for_label }}">
+        {{ label|default:field.label }}{% if field.field.required %} <span class="text-clay-500">*</span>{% endif %}
+    </label>
+    {{ field }}
+    {% if help or field.help_text %}
+        <p class="text-xs text-mist mt-1.5">{{ help|default:field.help_text }}</p>
+    {% endif %}
+    {% if field.errors %}
+        <ul class="text-xs text-clay-600 mt-1.5 space-y-1">
+            {% for err in field.errors %}
+                <li><i class="fal fa-exclamation-circle mr-1"></i>{{ err }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+</div>

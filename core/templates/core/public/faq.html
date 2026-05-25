@@ -1,103 +1,91 @@
-{% extends 'frontend/base.html' %}
+{% extends 'frontend/base_modern.html' %}
 {% load static %}
 
-{% block title %}{{ page_title }} - Tour Management{% endblock %}
+{% block title %}FAQ — Tour System{% endblock %}
+{% block meta_description %}Frequently asked questions about safaris, bookings, payment, cancellation, and travelling with Tour System.{% endblock %}
 
 {% block content %}
-<!-- Page Header -->
-<section class="page-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 100px 0 60px;">
-    <div class="container">
-        <div class="row">
-            <div class="col-12 text-center text-white">
-                <h1 class="display-4 fw-bold mb-3" data-aos="fade-up">
-                    <i class="mdi mdi-help-circle-outline me-2"></i>
-                    Frequently Asked Questions
-                </h1>
-                <p class="lead mb-0" data-aos="fade-up" data-aos-delay="100">
-                    Find answers to common questions about our tours and services
-                </p>
+
+{% include 'frontend/partials/_listing_hero.html' with eyebrow='FAQ' title='Things worth knowing before you go.' lede='Answers to the questions we hear most often. Still stuck? Send us a note.' image='https://images.unsplash.com/photo-1535941339077-2dd1c7963098?w=2000&q=80' %}
+
+<section class="py-16 lg:py-24">
+    <div class="container-editorial max-w-4xl">
+
+        {# Category filter chips #}
+        {% if categories %}
+        <nav aria-label="FAQ categories" class="flex flex-wrap gap-2 justify-center mb-12 lg:mb-16">
+            <a href="{% url 'faq_page' %}"
+               class="px-5 py-2 rounded-full text-sm transition
+                      {% if not selected_category %}bg-charcoal text-ivory{% else %}bg-bone text-charcoal hover:bg-sand-200{% endif %}">
+                All
+            </a>
+            {% for c in categories %}
+            <a href="?category={{ c.category }}"
+               class="px-5 py-2 rounded-full text-sm transition
+                      {% if selected_category == c.category %}bg-charcoal text-ivory{% else %}bg-bone text-charcoal hover:bg-sand-200{% endif %}">
+                {{ c.category|title }} <span class="text-mist ml-1">({{ c.count }})</span>
+            </a>
+            {% endfor %}
+        </nav>
+        {% endif %}
+
+        {# Accordion #}
+        {% if faqs %}
+        <div class="space-y-3" x-data="{ openId: null }">
+            {% for faq in faqs %}
+            <div class="bg-bone rounded-2xl overflow-hidden">
+                <button type="button"
+                        @click="openId = openId === {{ faq.pk }} ? null : {{ faq.pk }}"
+                        class="w-full flex items-start justify-between gap-6 text-left px-6 py-5 lg:px-8 lg:py-6 group"
+                        :aria-expanded="openId === {{ faq.pk }}">
+                    <div class="flex-1">
+                        <p class="eyebrow text-mist">{{ faq.get_category_display }}</p>
+                        <h3 class="font-display text-lg lg:text-xl mt-1 text-balance">{{ faq.question }}</h3>
+                    </div>
+                    <span class="flex-shrink-0 w-9 h-9 rounded-full bg-ivory text-charcoal flex items-center justify-center transition-transform duration-300"
+                          :class="openId === {{ faq.pk }} ? 'rotate-45 bg-bush-700 text-ivory' : ''">
+                        <i class="fal fa-plus"></i>
+                    </span>
+                </button>
+                <div x-show="openId === {{ faq.pk }}"
+                     x-transition:enter="transition ease-out duration-300"
+                     x-transition:enter-start="opacity-0 -translate-y-2"
+                     x-transition:enter-end="opacity-100 translate-y-0"
+                     x-transition:leave="transition ease-in duration-150"
+                     x-cloak>
+                    <div class="px-6 pb-6 lg:px-8 lg:pb-8 text-charcoal/90 leading-relaxed">
+                        {{ faq.answer|linebreaks }}
+                    </div>
+                </div>
             </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-20">
+            <i class="fal fa-question-circle text-mist text-5xl"></i>
+            <h3 class="font-display text-2xl mt-6">No questions in this category yet.</h3>
+            <p class="text-mist mt-3">Try a different category or send us your question directly.</p>
+            <a href="{% url 'contact_page' %}" class="btn btn-secondary mt-8 inline-flex">
+                Ask us
+                <i class="fal fa-arrow-right"></i>
+            </a>
+        </div>
+        {% endif %}
+
+        {# Still stuck CTA #}
+        <div class="mt-16 lg:mt-20 bg-charcoal text-ivory rounded-2xl p-10 lg:p-14 text-center">
+            <p class="eyebrow text-sand-300">Still stuck?</p>
+            <h3 class="font-display text-display-sm lg:text-display-md mt-4 text-balance">Ask a real human.</h3>
+            <p class="mt-4 text-ivory/80 max-w-md mx-auto">
+                Every message reaches the Arusha team — usually replied to the same day.
+            </p>
+            <a href="{% url 'contact_page' %}" class="btn btn-primary bg-ivory text-charcoal hover:bg-sand-300 mt-8">
+                Send a Message
+                <i class="fal fa-arrow-right"></i>
+            </a>
         </div>
     </div>
 </section>
 
-<!-- FAQ Section -->
-<section class="py-5">
-    <div class="container">
-        <div class="row">
-            <!-- Category Filter Sidebar -->
-            <div class="col-lg-3 mb-4" data-aos="fade-right">
-                <div class="card border-0 shadow-sm sticky-top" style="top: 20px;">
-                    <div class="card-body">
-                        <h5 class="mb-3">
-                            <i class="mdi mdi-filter-variant me-2 text-primary"></i>
-                            Categories
-                        </h5>
-                        <div class="list-group list-group-flush">
-                            <a href="{% url 'faq_page' %}" class="list-group-item list-group-item-action {% if not selected_category %}active{% endif %}">
-                                <i class="mdi mdi-view-grid-outline me-2"></i>All FAQs
-                                <span class="badge bg-primary rounded-pill float-end">{{ faqs.count }}</span>
-                            </a>
-                            {% for cat in categories %}
-                                <a href="{% url 'faq_page' %}?category={{ cat.category }}" class="list-group-item list-group-item-action {% if selected_category == cat.category %}active{% endif %}">
-                                    <i class="mdi mdi-circle-small me-2"></i>{{ cat.get_category_display }}
-                                    <span class="badge bg-secondary rounded-pill float-end">{{ cat.count }}</span>
-                                </a>
-                            {% endfor %}
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- FAQ List -->
-            <div class="col-lg-9" data-aos="fade-left">
-                {% if faqs %}
-                    <div class="accordion" id="faqAccordion">
-                        {% for faq in faqs %}
-                            <div class="accordion-item border-0 shadow-sm mb-3">
-                                <h2 class="accordion-header" id="heading{{ faq.id }}">
-                                    <button class="accordion-button {% if not forloop.first %}collapsed{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ faq.id }}" aria-expanded="{% if forloop.first %}true{% else %}false{% endif %}" aria-controls="collapse{{ faq.id }}">
-                                        {% if faq.is_featured %}
-                                            <i class="mdi mdi-star text-warning me-2"></i>
-                                        {% endif %}
-                                        <span class="fw-semibold">{{ faq.question }}</span>
-                                    </button>
-                                </h2>
-                                <div id="collapse{{ faq.id }}" class="accordion-collapse collapse {% if forloop.first %}show{% endif %}" aria-labelledby="heading{{ faq.id }}" data-bs-parent="#faqAccordion">
-                                    <div class="accordion-body">
-                                        <div class="text-muted">{{ faq.answer|linebreaks }}</div>
-                                        <div class="mt-3 pt-3 border-top">
-                                            <span class="badge bg-secondary">{{ faq.get_category_display }}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        {% endfor %}
-                    </div>
-                {% else %}
-                    <div class="card border-0 shadow-sm">
-                        <div class="card-body text-center py-5">
-                            <i class="mdi mdi-help-circle-outline display-1 text-muted mb-3"></i>
-                            <h3 class="h5">No FAQs Found</h3>
-                            <p class="text-muted mb-0">No questions available in this category.</p>
-                        </div>
-                    </div>
-                {% endif %}
-                
-                <!-- Still Have Questions? -->
-                <div class="card border-0 shadow-lg mt-5" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                    <div class="card-body text-center text-white p-5">
-                        <i class="mdi mdi-email-outline display-4 mb-3"></i>
-                        <h3 class="mb-3">Still Have Questions?</h3>
-                        <p class="mb-4">Can't find what you're looking for? Our team is here to help!</p>
-                        <a href="{% url 'contact_page' %}" class="btn btn-light btn-lg px-5">
-                            <i class="mdi mdi-message-text-outline me-2"></i>Contact Us
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
 {% endblock %}
 

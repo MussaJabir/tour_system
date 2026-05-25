@@ -34,6 +34,11 @@ db.sqlite3-journal
 /staticfiles/
 /media/
 
+# Raw, un-normalised image folder used as a seed source before being
+# copied (slug-normalised) into core/seed_data/images/. Kept locally
+# for the developer's convenience; never committed.
+/IMAGES/
+
 # Environment variables
 .env
 .env.local
@@ -67,3 +72,6 @@ celerybeat.pid
 *.bak
 *.backup
 *.sql
+
+.playwright-mcp/
+phase*.png

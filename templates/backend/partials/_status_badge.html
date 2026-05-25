@@ -1,0 +1,13 @@
+{% comment %}
+Status badge using the semantic palette.
+Usage:
+    {% include 'backend/partials/_status_badge.html' with label='Confirmed' variant='success' %}
+
+Variant → colour:
+    success  — emerald (confirmed, completed, paid, approved)
+    warning  — amber   (pending, awaiting, deposit_paid)
+    danger   — rose    (cancelled, refunded, rejected, expired)
+    info     — sky     (in_progress, draft, sent)
+    neutral  — slate   (anything else)
+{% endcomment %}
+<span class="dash-badge dash-badge-{{ variant|default:'neutral' }}">{{ label }}</span>

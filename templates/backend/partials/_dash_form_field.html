@@ -1,0 +1,30 @@
+{% comment %}
+Dashboard form field wrapper. Like the public _form_field.html but
+uses .dash-label + .dash-input styling (denser, slate palette).
+
+Usage:
+    {% include 'backend/partials/_dash_form_field.html' with field=form.name %}
+    {% include 'backend/partials/_dash_form_field.html' with field=form.bio rows=4 %}
+    {% include 'backend/partials/_dash_form_field.html' with field=form.subject label='What about?' help='Optional' %}
+
+Vars:
+    field — Django BoundField (required)
+    label — override label text (optional; defaults to field.label)
+    help  — override help text (optional; defaults to field.help_text)
+{% endcomment %}
+<div class="dash-form-field {% if field.errors %}dash-form-field--error{% endif %}">
+    <label class="dash-label" for="{{ field.id_for_label }}">
+        {{ label|default:field.label }}{% if field.field.required %} <span class="text-rose-600">*</span>{% endif %}
+    </label>
+    {{ field }}
+    {% if help or field.help_text %}
+        <p class="text-xs text-slate-500 mt-1">{{ help|default:field.help_text }}</p>
+    {% endif %}
+    {% if field.errors %}
+        <ul class="text-xs text-rose-600 mt-1 space-y-0.5">
+            {% for err in field.errors %}
+                <li><i class="fal fa-exclamation-circle mr-1"></i>{{ err }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+</div>

@@ -1,0 +1,19 @@
+{% comment %}
+A titled card section inside a dashboard form. Page passes title +
+description plus the actual fields via {% block fields %}.
+
+Pattern:
+    <div class="dash-card">
+        <header class="dash-card-header">
+            <div>
+                <p class="dash-card-title">Section title</p>
+                <p class="text-sm text-slate-500">helper</p>
+            </div>
+        </header>
+        {% block fields %}{% endblock %}
+    </div>
+
+Used inline in templates rather than as {% include %} because the
+content is page-specific. This file is reference only — copy/paste
+the inline pattern in your form templates.
+{% endcomment %}

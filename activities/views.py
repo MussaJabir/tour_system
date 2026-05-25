@@ -282,27 +282,98 @@ def public_activity_detail(request, slug):
     Public activity detail page
     """
     activity = get_object_or_404(Activity, slug=slug, is_active=True)
-    
-    # Increment view count (only for non-staff)
+
     if not (request.user.is_authenticated and request.user.is_staff):
         activity.increment_view_count()
-    
-    # Get gallery images
+
     gallery_images = activity.gallery_images.all()
-    
-    # Get related activities (same destination or category)
+
     related_activities = Activity.objects.filter(
         is_active=True
     ).filter(
         Q(destination=activity.destination) | Q(category=activity.category)
     ).exclude(pk=activity.pk)[:4]
-    
+
+    # ------------------------------------------------------------------
+    # Inline trust elements + cross-sell to packages.
+    # ------------------------------------------------------------------
+    from core.models import Testimonial
+    inline_review_top = (Testimonial.objects
+        .filter(is_active=True, is_featured=True, rating__gte=5)
+        .order_by('?').first())
+    inline_review_bottom = (Testimonial.objects
+        .filter(is_active=True, is_featured=True, rating__gte=5)
+        .exclude(pk=inline_review_top.pk if inline_review_top else 0)
+        .order_by('?').first())
+
+    # Packages that include this activity in any itinerary day
+    from packages.models import Package
+    packages_with_activity = (Package.objects
+        .filter(is_active=True, itineraries__activities=activity)
+        .distinct()[:3])
+
+    # ------------------------------------------------------------------
+    # "What to expect" — static per-category 3-step (Before/During/After).
+    # ------------------------------------------------------------------
+    EXPECT_BY_CATEGORY = {
+        'game_drive': [
+            ("Before", "Early start", "Wake before dawn, a quick coffee at camp, and your guide is at the wheel before the gates open. The cool of first light is when predators are most active."),
+            ("During", "On the move", "Open-sided 4×4 with a roof hatch. Your guide reads tracks, listens to alarm calls from other vehicles, and angles for the best photographic light."),
+            ("After", "Back to camp", "Brunch under the trees, mid-day downtime, then a second drive in the golden hour. Sundowner drinks at a private spot if conditions allow."),
+        ],
+        'wildlife_viewing': [
+            ("Before", "Set the scene", "Brief with your guide about the species you're hoping to see and the most likely times and locations to find them."),
+            ("During", "Quiet patience", "Spotting is a slow craft. You'll move at the pace of the bush — pauses for tracks, calls, and movement, with binocular work in between."),
+            ("After", "Recap & log", "Back at camp, your guide walks through what you saw, often with sketches and species photos. Birding lists kept on request."),
+        ],
+        'cultural': [
+            ("Before", "Brief & context", "Your guide explains the cultural norms before arrival — what to ask, what not to photograph, how to greet elders."),
+            ("During", "Visit & exchange", "Walk through the village or boma with a local interpreter. Buy directly from artisans if you'd like; nothing is staged."),
+            ("After", "Reflection", "Time to absorb. Discussion with your guide back at the vehicle about what you saw and what surprised you."),
+        ],
+        'hiking': [
+            ("Before", "Gear check", "Boots tested, daypack with water and snacks, weather check. Brief on terrain and pace."),
+            ("During", "On the trail", "Walking pace set by the slowest in the group — nobody gets left behind. Pauses at viewpoints, often with bush tea."),
+            ("After", "Recover", "Back to lodge for a hot shower, lunch, and a quiet afternoon. Sore-knee tip: walking poles available on request."),
+        ],
+        'climbing': [
+            ("Before", "Acclimatisation", "Pre-trip briefing on altitude, gear list verification, and a fitness check with your lead guide."),
+            ("During", "Day by day", "Slow walking pace ('pole pole'), water every hour, full meals served by your support team at each camp."),
+            ("After", "Descent & celebration", "Descent is typically faster than ascent. Hot meal at base, certificate ceremony, and transfer to a recovery lodge."),
+        ],
+        'water_sports': [
+            ("Before", "Suit up", "Brief on conditions, safety gear fitted, snorkel/dive equipment checked."),
+            ("During", "In the water", "Guided session with marine specialist. Underwater visibility and species sightings logged."),
+            ("After", "Warm down", "Fresh water rinse, shaded lounge, light meal back at the boat or beach club."),
+        ],
+        'cycling': [
+            ("Before", "Bike fit", "Bike sized to you, helmets fitted, route reviewed with your guide."),
+            ("During", "Ride", "Easy off-road pace. Your guide rides ahead, support vehicle behind for water and any swap-outs."),
+            ("After", "Cool down", "Stretches at the end, transfer back to lodge, lunch waiting."),
+        ],
+        'photography': [
+            ("Before", "Setup", "Camera settings reviewed with your photographic guide. Time of day chosen for the right light."),
+            ("During", "On the shot", "Positioned for optimal angles. Your guide is also a photographer — happy to spot or to make the shot for you."),
+            ("After", "Review", "Quick playback back at the vehicle or camp. Tips and editing pointers from your guide."),
+        ],
+    }
+    DEFAULT_EXPECT = [
+        ("Before", "Brief & prep", "Your guide walks you through what to expect, kit check, and the day's plan."),
+        ("During", "The experience", "Led by an expert. Pace, stops, and depth tuned to your group."),
+        ("After", "Wind down", "Return to your lodge or hotel for refreshments and a chance to absorb what you saw."),
+    ]
+    expect_steps = EXPECT_BY_CATEGORY.get(activity.category, DEFAULT_EXPECT)
+
     context = {
         'activity': activity,
         'gallery_images': gallery_images,
         'related_activities': related_activities,
+        'inline_review_top': inline_review_top,
+        'inline_review_bottom': inline_review_bottom,
+        'packages_with_activity': packages_with_activity,
+        'expect_steps': expect_steps,
     }
-    
+
     return render(request, 'activities/public/detail.html', context)
 
 

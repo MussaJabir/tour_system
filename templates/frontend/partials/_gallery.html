@@ -1,0 +1,22 @@
+{% comment %}
+Editorial image gallery. Asymmetric masonry-ish 3-col grid.
+
+Usage:
+    {% include 'frontend/partials/_gallery.html' with images=gallery_images %}
+
+Vars:
+    images — iterable of objects each with .image.url (Django ImageField)
+{% endcomment %}
+{% if images %}
+<div class="grid grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-4">
+    {% for img in images %}
+        <a href="{{ img.image.url }}"
+           class="block overflow-hidden rounded-2xl group {% if forloop.first %}lg:col-span-2 lg:row-span-2 aspect-[4/3]{% else %}aspect-square{% endif %}">
+            <img src="{{ img.image.url }}"
+                 alt="{% if img.caption %}{{ img.caption }}{% else %}Gallery image{% endif %}"
+                 loading="lazy"
+                 class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
+        </a>
+    {% endfor %}
+</div>
+{% endif %}

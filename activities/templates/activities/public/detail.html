@@ -1,258 +1,332 @@
-{% extends 'frontend/base.html' %}
+{% extends 'frontend/base_modern.html' %}
 {% load static %}
 
-{% block title %}{{ activity.get_meta_title }} | Tour System{% endblock %}
-{% block title2 %}{{ activity.get_meta_title }} | Tour System{% endblock %}
-
+{% block title %}{{ activity.get_meta_title }} — Tour System{% endblock %}
 {% block meta_description %}{{ activity.get_meta_description }}{% endblock %}
 {% block og_description %}{{ activity.get_meta_description }}{% endblock %}
-
 {% block meta_keywords %}{{ activity.meta_keywords }}{% endblock %}
-
 {% block canonical %}<link rel="canonical" href="{{ request.build_absolute_uri }}">{% endblock %}
-
-{% block og_type %}website{% endblock %}
+{% block og_type %}article{% endblock %}
 {% block og_url %}{{ request.build_absolute_uri }}{% endblock %}
 {% block og_image %}{% if activity.featured_image %}{{ request.scheme }}://{{ request.get_host }}{{ activity.featured_image.url }}{% endif %}{% endblock %}
 
-{% block meta_tags %}{% endblock %}
-
 {% block content %}
-<!-- Page Banner -->
-<section class="page-banner-area pt-245 rpt-150 pb-170 rpb-100 rel z-1 bgc-lighter text-center">
-    <div class="container">
-        <div class="banner-inner rpt-10">
-            <h1 class="page-title" data-aos="fade-up" data-aos-duration="1500" data-aos-offset="50">
-                {{ activity.name }}
-            </h1>
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb justify-content-center" data-aos="fade-up" data-aos-delay="200" data-aos-duration="1500" data-aos-offset="50">
-                    <li class="breadcrumb-item"><a href="{% url 'public_home' %}">Home</a></li>
-                    <li class="breadcrumb-item"><a href="{% url 'public_destination_detail' activity.destination.slug %}">{{ activity.destination.name }}</a></li>
-                    <li class="breadcrumb-item"><a href="{% url 'public_activity_list' %}">Activities</a></li>
-                    <li class="breadcrumb-item active">{{ activity.name }}</li>
-                </ol>
-            </nav>
-        </div>
+
+{# ============================================================ #}
+{# HERO #}
+{# ============================================================ #}
+<section class="relative min-h-[80vh] flex items-end overflow-hidden bg-charcoal">
+    <div class="absolute inset-0">
+        {% if activity.featured_image %}
+            <img src="{{ activity.featured_image.url }}" alt="{{ activity.name }}" class="w-full h-full object-cover">
+        {% else %}
+            <img src="https://images.unsplash.com/photo-1516426122078-c23e76319801?w=2400&q=80" alt="{{ activity.name }}" class="w-full h-full object-cover">
+        {% endif %}
+        <div class="absolute inset-0 bg-gradient-to-t from-charcoal/95 via-charcoal/40 to-charcoal/30"></div>
     </div>
-    <div class="wave-shapes">
-        <img class="shape one" src="{% static 'frontend/assets/images/shapes/page-banner-wave1.png' %}" alt="Wave Shape">
-        <img class="shape two" src="{% static 'frontend/assets/images/shapes/page-banner-wave2.png' %}" alt="Wave Shape">
+
+    <div class="container-editorial relative pt-40 pb-16 lg:pb-24 text-ivory w-full">
+        <nav aria-label="Breadcrumb" class="text-xs tracking-wider uppercase opacity-70">
+            <a href="{% url 'public_home' %}" class="hover:underline">Home</a>
+            <span class="mx-2">/</span>
+            <a href="{% url 'public_activity_list' %}" class="hover:underline">Activities</a>
+            <span class="mx-2">/</span>
+            <span class="opacity-70">{{ activity.name }}</span>
+        </nav>
+
+        <p class="eyebrow text-sand-200 mt-6">{{ activity.get_category_display }} · {{ activity.destination.name }}</p>
+        <h1 class="font-display text-display-lg lg:text-display-xl mt-4 text-balance max-w-5xl leading-[1.02] text-ivory">{{ activity.name }}</h1>
+        {% if activity.short_description %}
+            <p class="mt-6 max-w-2xl text-lg lg:text-xl text-ivory/85 leading-relaxed">{{ activity.short_description }}</p>
+        {% endif %}
+
+        <div class="mt-8 flex flex-wrap gap-x-8 gap-y-3 text-sm text-ivory/85">
+            <span class="flex items-center gap-2"><i class="fal fa-clock text-sand-300"></i> {{ activity.duration_display }}</span>
+            <span class="flex items-center gap-2"><i class="fal fa-mountain text-sand-300"></i> {{ activity.get_difficulty_display }}</span>
+            {% if activity.min_age %}<span class="flex items-center gap-2"><i class="fal fa-user text-sand-300"></i> Min age {{ activity.min_age }}</span>{% endif %}
+            {% if activity.max_group_size %}<span class="flex items-center gap-2"><i class="fal fa-users text-sand-300"></i> Max {{ activity.max_group_size }}</span>{% endif %}
+        </div>
     </div>
 </section>
 
-<!-- Activity Details -->
-<section class="activity-details-area py-100">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-8">
-                <!-- Featured Image -->
-                {% if activity.featured_image %}
-                <div class="activity-details-content" data-aos="fade-up" data-aos-duration="1500" data-aos-offset="50">
-                    <div class="image mb-40">
-                        <img src="{{ activity.featured_image.url }}" alt="{{ activity.name }}" class="rounded">
-                    </div>
+{# ============================================================ #}
+{# PRICE BLOCK — centered, under hero #}
+{# ============================================================ #}
+<section class="relative -mt-12 lg:-mt-16 z-10">
+    <div class="container-editorial">
+        <div class="bg-ivory rounded-2xl px-6 py-8 lg:px-12 lg:py-10 max-w-5xl mx-auto" style="box-shadow: var(--shadow-frame);">
+            <div class="grid lg:grid-cols-[1fr_auto] gap-8 lg:gap-12 items-center">
+                <div class="text-center lg:text-left">
+                    <p class="eyebrow text-mist">From, per person</p>
+                    <span class="font-display text-display-md text-charcoal block mt-2">{{ activity.currency }} {{ activity.price_per_person|floatformat:0 }}</span>
+                    <p class="text-xs text-mist mt-2">Add to a tailored safari — your guide handles the booking.</p>
                 </div>
-                {% endif %}
-
-                <!-- Description -->
-                <div class="activity-details-content" data-aos="fade-up" data-aos-delay="50" data-aos-duration="1500" data-aos-offset="50">
-                    <h3>About This Activity</h3>
-                    <div class="description">
-                        {{ activity.description|linebreaks }}
-                    </div>
+                <div class="flex flex-col gap-3 lg:min-w-[280px]">
+                    <a href="{% url 'contact_page' %}?activity={{ activity.slug }}" class="btn btn-primary w-full justify-center">
+                        Add To My Trip
+                        <i class="fal fa-arrow-right"></i>
+                    </a>
+                    <a href="{% url 'contact_page' %}" class="btn btn-ghost w-full justify-center">
+                        Ask a question
+                    </a>
                 </div>
-
-                <!-- What's Included/Excluded -->
-                {% if activity.included_items or activity.excluded_items %}
-                <div class="activity-details-content mt-40" data-aos="fade-up" data-aos-delay="100" data-aos-duration="1500" data-aos-offset="50">
-                    <div class="row">
-                        {% if activity.included_items %}
-                        <div class="col-md-6">
-                            <h4>✅ What's Included</h4>
-                            <div class="description">
-                                {{ activity.included_items|linebreaks }}
-                            </div>
-                        </div>
-                        {% endif %}
-                        {% if activity.excluded_items %}
-                        <div class="col-md-6">
-                            <h4>❌ What's NOT Included</h4>
-                            <div class="description">
-                                {{ activity.excluded_items|linebreaks }}
-                            </div>
-                        </div>
-                        {% endif %}
-                    </div>
-                </div>
-                {% endif %}
-
-                <!-- Requirements -->
-                {% if activity.requirements %}
-                <div class="activity-details-content mt-40" data-aos="fade-up" data-aos-delay="150" data-aos-duration="1500" data-aos-offset="50">
-                    <h4>Requirements</h4>
-                    <div class="description">
-                        {{ activity.requirements|linebreaks }}
-                    </div>
-                </div>
-                {% endif %}
-
-                <!-- Gallery -->
-                {% if gallery_images %}
-                <div class="activity-details-content mt-40" data-aos="fade-up" data-aos-delay="200" data-aos-duration="1500" data-aos-offset="50">
-                    <h3>Gallery</h3>
-                    <div class="row mt-30">
-                        {% for image in gallery_images %}
-                        <div class="col-md-4 col-sm-6 mb-30">
-                            <div class="gallery-item">
-                                <a href="{{ image.image.url }}" class="popup-image">
-                                    <img src="{{ image.image.url }}" alt="{{ image.caption|default:'Gallery Image' }}" class="rounded">
-                                </a>
-                                {% if image.caption %}
-                                <p class="text-center mt-2">{{ image.caption }}</p>
-                                {% endif %}
-                            </div>
-                        </div>
-                        {% endfor %}
-                    </div>
-                </div>
-                {% endif %}
-
-                <!-- Video -->
-                {% if activity.video_url %}
-                <div class="activity-details-content mt-40" data-aos="fade-up" data-aos-delay="250" data-aos-duration="1500" data-aos-offset="50">
-                    <h3>Video</h3>
-                    <div class="video-wrapper mt-30">
-                        <iframe width="100%" height="450" src="{{ activity.video_url }}" frameborder="0" allowfullscreen></iframe>
-                    </div>
-                </div>
-                {% endif %}
-
-                <!-- Related Activities -->
-                {% if related_activities %}
-                <div class="activity-details-content mt-50" data-aos="fade-up" data-aos-delay="300" data-aos-duration="1500" data-aos-offset="50">
-                    <h3>Related Activities</h3>
-                    <div class="row mt-30">
-                        {% for related in related_activities %}
-                        <div class="col-md-6 mb-30">
-                            <div class="activity-item">
-                                <div class="image">
-                                    {% if related.featured_image %}
-                                    <img src="{{ related.featured_image.url }}" alt="{{ related.name }}">
-                                    {% endif %}
-                                </div>
-                                <div class="content">
-                                    <h5><a href="{% url 'public_activity_detail' related.slug %}">{{ related.name }}</a></h5>
-                                    <span class="price">{{ related.price_display }}</span>
-                                </div>
-                            </div>
-                        </div>
-                        {% endfor %}
-                    </div>
-                </div>
-                {% endif %}
             </div>
 
-            <!-- Sidebar -->
-            <div class="col-lg-4">
-                <div class="blog-sidebar">
-                    <!-- Quick Info -->
-                    <div class="widget widget-info" data-aos="fade-up" data-aos-duration="1500" data-aos-offset="50">
-                        <h5 class="widget-title">Quick Info</h5>
-                        <ul class="list-style-three">
-                            <li>
-                                <span class="icon"><i class="fal fa-map-marker-alt"></i></span>
-                                <strong>Destination:</strong> 
-                                <a href="{% url 'public_destination_detail' activity.destination.slug %}">{{ activity.destination.name }}</a>
-                            </li>
-                            <li>
-                                <span class="icon"><i class="fal fa-tag"></i></span>
-                                <strong>Category:</strong> {{ activity.get_category_display }}
-                            </li>
-                            <li>
-                                <span class="icon"><i class="fal fa-signal-alt"></i></span>
-                                <strong>Difficulty:</strong> {{ activity.get_difficulty_display }}
-                            </li>
-                            <li>
-                                <span class="icon"><i class="fal fa-clock"></i></span>
-                                <strong>Duration:</strong> {{ activity.duration_display }}
-                            </li>
-                            {% if activity.min_age %}
-                            <li>
-                                <span class="icon"><i class="fal fa-child"></i></span>
-                                <strong>Min Age:</strong> {{ activity.min_age }} years
-                            </li>
-                            {% endif %}
-                            {% if activity.max_group_size %}
-                            <li>
-                                <span class="icon"><i class="fal fa-users"></i></span>
-                                <strong>Max Group:</strong> {{ activity.max_group_size }} people
-                            </li>
-                            {% endif %}
-                            {% if activity.best_season %}
-                            <li>
-                                <span class="icon"><i class="fal fa-calendar-alt"></i></span>
-                                <strong>Best Season:</strong> {{ activity.best_season }}
-                            </li>
-                            {% endif %}
-                            <li>
-                                <span class="icon"><i class="fal fa-eye"></i></span>
-                                <strong>Views:</strong> {{ activity.view_count }}
-                            </li>
-                        </ul>
-                    </div>
-
-                    <!-- Pricing -->
-                    <div class="widget widget-pricing mt-30" data-aos="fade-up" data-aos-delay="50" data-aos-duration="1500" data-aos-offset="50">
-                        <div class="pricing-box text-center p-4 bgc-lighter">
-                            <h6>Price Per Person</h6>
-                            <h3 class="price-tag">{{ activity.price_display }}</h3>
-                            <a href="#" class="theme-btn style-two mt-3">
-                                <span data-hover="Book Now">Book Now</span>
-                                <i class="fal fa-arrow-right"></i>
-                            </a>
-                        </div>
-                    </div>
-
-                    <!-- CTA -->
-                    <div class="widget widget-cta mt-30" data-aos="fade-up" data-aos-delay="100" data-aos-duration="1500" data-aos-offset="50">
-                        <div class="cta-content text-center p-4 bgc-secondary text-white">
-                            <h4>Have Questions?</h4>
-                            <p>Contact us for more information</p>
-                            <a href="#" class="theme-btn style-two bgc-white">
-                                <span data-hover="Contact Us">Contact Us</span>
-                                <i class="fal fa-envelope"></i>
-                            </a>
-                        </div>
-                    </div>
+            <dl class="mt-8 pt-8 border-t border-sand-200 grid grid-cols-2 lg:grid-cols-4 gap-6 text-center">
+                <div>
+                    <dt class="eyebrow text-mist">Duration</dt>
+                    <dd class="font-display text-xl text-charcoal mt-2">{{ activity.duration_display }}</dd>
                 </div>
+                <div>
+                    <dt class="eyebrow text-mist">Difficulty</dt>
+                    <dd class="font-display text-xl text-charcoal mt-2">{{ activity.get_difficulty_display }}</dd>
+                </div>
+                <div>
+                    <dt class="eyebrow text-mist">Where</dt>
+                    <dd class="font-display text-xl text-charcoal mt-2">{{ activity.destination.name|truncatewords:2 }}</dd>
+                </div>
+                <div>
+                    <dt class="eyebrow text-mist">Group</dt>
+                    <dd class="font-display text-xl text-charcoal mt-2">{% if activity.max_group_size %}Max {{ activity.max_group_size }}{% else %}Private{% endif %}</dd>
+                </div>
+            </dl>
+
+            {% if inline_review_top %}
+            <figure class="mt-8 pt-8 border-t border-sand-200 flex items-start gap-4">
+                <div class="flex gap-0.5 text-clay-500 mt-1">
+                    {% for i in "12345"|make_list %}{% if forloop.counter <= inline_review_top.rating %}<i class="fas fa-star text-xs"></i>{% endif %}{% endfor %}
+                </div>
+                <blockquote class="flex-1">
+                    <p class="text-charcoal/85 italic leading-relaxed">"{{ inline_review_top.quote|truncatechars:180 }}"</p>
+                    <figcaption class="mt-2 text-xs text-mist">— {{ inline_review_top.customer_name }}{% if inline_review_top.customer_location %}, {{ inline_review_top.customer_location }}{% endif %}</figcaption>
+                </blockquote>
+            </figure>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+{# ============================================================ #}
+{# MAIN — wide editorial article #}
+{# ============================================================ #}
+<section class="py-16 lg:py-24">
+    <div class="container-editorial">
+        <article class="max-w-4xl mx-auto space-y-20 lg:space-y-24">
+
+            {# About #}
+            <div>
+                <p class="eyebrow">About</p>
+                <h2 class="font-display text-display-md mt-3 text-balance">About this activity</h2>
+                <div class="mt-6 text-charcoal/90 leading-relaxed text-lg">{{ activity.description|linebreaks }}</div>
+            </div>
+
+            {# What to expect — 3-card timeline #}
+            {% if expect_steps %}
+            <div>
+                <p class="eyebrow">What to expect</p>
+                <h2 class="font-display text-display-md mt-3 text-balance">How the day unfolds</h2>
+                <div class="mt-8 grid md:grid-cols-3 gap-6 lg:gap-8">
+                    {% for step in expect_steps %}
+                    <div class="bg-bone rounded-2xl p-7 flex flex-col">
+                        <span class="w-10 h-10 rounded-full bg-bush-700 text-ivory flex items-center justify-center font-display text-sm">{{ forloop.counter }}</span>
+                        <p class="eyebrow mt-5">{{ step.0 }}</p>
+                        <h3 class="font-display text-xl mt-2 text-balance">{{ step.1 }}</h3>
+                        <p class="mt-3 text-sm text-charcoal/80 leading-relaxed flex-1">{{ step.2 }}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            {# Requirements #}
+            {% if activity.requirements %}
+            <div>
+                <p class="eyebrow">Before you go</p>
+                <h2 class="font-display text-display-md mt-3 text-balance">Requirements</h2>
+                <div class="mt-6 text-charcoal/90 leading-relaxed text-lg">{{ activity.requirements|linebreaks }}</div>
+            </div>
+            {% endif %}
+
+        </article>
+    </div>
+</section>
+
+{# ============================================================ #}
+{# WHERE THIS HAPPENS — destination map #}
+{# ============================================================ #}
+{% if activity.destination.latitude and activity.destination.longitude %}
+<section class="py-16 lg:py-20 bg-bone">
+    <div class="container-editorial">
+        <div class="max-w-5xl mx-auto grid lg:grid-cols-[1fr_1.4fr] gap-8 lg:gap-12 items-start">
+            <div>
+                <p class="eyebrow">Where this happens</p>
+                <h2 class="font-display text-display-md mt-3 text-balance">{{ activity.destination.name }}</h2>
+                {% if activity.destination.short_description %}
+                    <p class="mt-5 text-charcoal/80 leading-relaxed">{{ activity.destination.short_description }}</p>
+                {% endif %}
+                <a href="{% url 'public_destination_detail' activity.destination.slug %}" class="btn btn-ghost mt-6 inline-flex">
+                    Explore {{ activity.destination.name|truncatewords:2 }}
+                    <i class="fal fa-arrow-right"></i>
+                </a>
+            </div>
+            <div id="activity-location-map" class="h-[50vh] lg:h-[60vh] rounded-2xl overflow-hidden bg-sand-100"></div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+{# ============================================================ #}
+{# INCLUDED / NOT INCLUDED #}
+{# ============================================================ #}
+{% if activity.included_items or activity.excluded_items %}
+<section class="py-16 lg:py-20">
+    <div class="container-editorial">
+        <div class="max-w-5xl mx-auto">
+            <p class="eyebrow">Plain pricing</p>
+            <h2 class="font-display text-display-md mt-3 text-balance">What's in (and what's not).</h2>
+            <div class="mt-10 grid md:grid-cols-2 gap-10 lg:gap-16">
+                {% if activity.included_items %}
+                <div>
+                    <p class="eyebrow text-bush-600">Included</p>
+                    <div class="mt-4 text-charcoal/90 leading-relaxed">{{ activity.included_items|linebreaks }}</div>
+                </div>
+                {% endif %}
+                {% if activity.excluded_items %}
+                <div>
+                    <p class="eyebrow text-clay-500">Not included</p>
+                    <div class="mt-4 text-charcoal/70 leading-relaxed">{{ activity.excluded_items|linebreaks }}</div>
+                </div>
+                {% endif %}
             </div>
         </div>
     </div>
 </section>
+{% endif %}
+
+{# ============================================================ #}
+{# GALLERY #}
+{# ============================================================ #}
+{% if gallery_images %}
+<section class="py-16 lg:py-20 bg-bone">
+    <div class="container-editorial">
+        <div class="max-w-5xl mx-auto">
+            <p class="eyebrow">Gallery</p>
+            <h2 class="font-display text-display-md mt-3 text-balance">In action</h2>
+            <div class="mt-10">{% include 'frontend/partials/_gallery.html' with images=gallery_images %}</div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+{# ============================================================ #}
+{# INLINE REVIEW #2 #}
+{# ============================================================ #}
+{% if inline_review_bottom %}
+<section class="py-16 lg:py-20">
+    <div class="container-editorial">
+        <figure class="max-w-3xl mx-auto text-center">
+            <div class="flex gap-1 text-clay-500 justify-center">
+                {% for i in "12345"|make_list %}{% if forloop.counter <= inline_review_bottom.rating %}<i class="fas fa-star"></i>{% endif %}{% endfor %}
+            </div>
+            <blockquote class="font-display text-2xl lg:text-3xl leading-snug mt-6 text-balance text-charcoal">"{{ inline_review_bottom.quote }}"</blockquote>
+            <figcaption class="mt-6 text-sm text-mist">— {{ inline_review_bottom.customer_name }}{% if inline_review_bottom.customer_location %}, {{ inline_review_bottom.customer_location }}{% endif %}</figcaption>
+        </figure>
+    </div>
+</section>
+{% endif %}
+
+{# ============================================================ #}
+{# TOURS THAT INCLUDE THIS ACTIVITY #}
+{# ============================================================ #}
+{% if packages_with_activity %}
+<section class="py-16 lg:py-20 bg-bone">
+    <div class="container-editorial">
+        <div class="max-w-5xl mx-auto">
+            <p class="eyebrow">Easiest way to do this</p>
+            <h2 class="font-display text-display-md mt-3 text-balance">Tours that include {{ activity.name|truncatewords:3 }}.</h2>
+            <p class="mt-4 text-charcoal/70 max-w-2xl">
+                Want this experience as part of a full safari? These curated journeys bundle it in.
+            </p>
+            <div class="mt-10 grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for pkg in packages_with_activity %}
+                <a href="{% url 'packages:public_package_detail' pkg.slug %}" class="group block">
+                    <div class="aspect-[4/3] rounded-xl overflow-hidden bg-sand-100">
+                        {% if pkg.featured_image %}
+                            <img src="{{ pkg.featured_image.url }}" alt="{{ pkg.name }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy">
+                        {% endif %}
+                    </div>
+                    <p class="eyebrow mt-4">{{ pkg.get_category_display|default:pkg.category }}</p>
+                    <h3 class="font-display text-xl mt-2 text-balance group-hover:text-bush-700 transition-colors">{{ pkg.name }}</h3>
+                    <p class="mt-2 text-sm text-mist">{{ pkg.duration_days }}D · {{ pkg.duration_nights }}N · from {{ pkg.currency }} {{ pkg.final_price|floatformat:0 }}</p>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+{# ============================================================ #}
+{# FINAL CTA #}
+{# ============================================================ #}
+<section class="py-16 lg:py-24">
+    <div class="container-editorial">
+        <div class="bg-charcoal text-ivory rounded-2xl p-10 lg:p-16 text-center max-w-5xl mx-auto">
+            <p class="eyebrow text-sand-300">Ready when you are</p>
+            <h3 class="font-display text-display-sm lg:text-display-md mt-4 text-balance">Add it to your trip.</h3>
+            <p class="mt-4 text-ivory/80 max-w-md mx-auto">
+                Tell us when you're travelling and we'll work {{ activity.name|truncatewords:3 }} into a tailored itinerary.
+            </p>
+            <a href="{% url 'contact_page' %}?activity={{ activity.slug }}" class="btn btn-primary bg-ivory text-charcoal hover:bg-sand-300 mt-8">
+                Add To My Trip
+                <i class="fal fa-arrow-right"></i>
+            </a>
+        </div>
+    </div>
+</section>
+
+{# Related activities #}
+{% include 'frontend/partials/_related_grid.html' with items=related_activities eyebrow='Continue exploring' title='Other activities you might like' url_name='public_activity_detail' image_attr='featured_image' %}
+
+{# Mobile sticky bottom CTA #}
+<div class="lg:hidden fixed inset-x-0 bottom-0 z-40 bg-ivory/95 backdrop-blur border-t border-sand-200 px-4 py-3"
+     style="padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));">
+    <div class="flex items-center justify-between gap-3">
+        <div class="leading-tight">
+            <p class="text-[10px] uppercase tracking-wider text-mist">From, per person</p>
+            <p class="font-display text-lg text-charcoal">{{ activity.currency }} {{ activity.price_per_person|floatformat:0 }}</p>
+        </div>
+        <a href="{% url 'contact_page' %}?activity={{ activity.slug }}" class="btn btn-primary flex-1 justify-center">
+            Add To My Trip
+            <i class="fal fa-arrow-right"></i>
+        </a>
+    </div>
+</div>
+
 {% endblock %}
 
-{% block extra_css %}
-<style>
-.activity-item .image img {
-    width: 100%;
-    height: 200px;
-    object-fit: cover;
-    border-radius: 10px;
-}
-.activity-item .content {
-    padding: 15px 0;
-}
-.price-tag {
-    color: #f7921e;
-    font-size: 32px;
-    font-weight: 700;
-    margin: 10px 0;
-}
-.pricing-box {
-    border-radius: 10px;
-    border: 2px solid #f7921e;
-}
-</style>
+{% block extra_js %}
+{% if activity.destination.latitude and activity.destination.longitude %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script defer>
+document.addEventListener('DOMContentLoaded', () => {
+    const mapEl = document.getElementById('activity-location-map');
+    if (!mapEl || !window.L) return;
+    const lat = {{ activity.destination.latitude }};
+    const lng = {{ activity.destination.longitude }};
+    const map = L.map(mapEl, { scrollWheelZoom: false, attributionControl: false }).setView([lat, lng], 8);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap', maxZoom: 11,
+    }).addTo(map);
+    const dot = L.divIcon({
+        className: 'route-marker',
+        html: '<span style="display:block;width:20px;height:20px;border-radius:50%;background:#3a4a2a;border:3px solid #f5f0e6;box-shadow:0 1px 4px rgba(0,0,0,.3);"></span>',
+        iconSize: [20, 20], iconAnchor: [10, 10],
+    });
+    L.marker([lat, lng], { icon: dot }).addTo(map)
+        .bindPopup('<b>{{ activity.destination.name|escapejs }}</b>');
+});
+</script>
+{% endif %}
 {% endblock %}
-

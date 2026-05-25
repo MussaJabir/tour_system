@@ -1,0 +1,57 @@
+{% comment %}
+Wrapper for dashboard data tables. Provides the styled card shell + an
+optional toolbar with search + filter pills + bulk-action slot.
+
+Page templates fill in the actual <table> markup via the `{% block table %}`
+slot — column definitions vary too much to generalise here.
+
+Usage (in a page template):
+
+    {% include 'backend/partials/_data_table.html' with search_placeholder='Search packages…' filter_form_html=filter_html %}
+    {% block table %}
+        <table class="dash-table">
+          <thead>…</thead>
+          <tbody>…</tbody>
+        </table>
+    {% endblock %}
+
+Or use as a wrapper with named children — pages can also opt out of the
+toolbar by passing no search_placeholder.
+
+Vars:
+    search_placeholder — text for the search input (omit to hide search)
+    search_value       — current ?search= value (default empty)
+    filter_form_html   — pre-rendered filter pills/selects (optional)
+    show_count         — int total count to display (optional)
+    count_label        — singular noun, will be pluralised (default: 'result')
+{% endcomment %}
+<section class="bg-white border border-slate-200 rounded-xl overflow-hidden">
+
+    {% if search_placeholder or filter_form_html or show_count %}
+    <div class="px-4 py-3 border-b border-slate-200 flex flex-wrap items-center gap-3">
+
+        {% if search_placeholder %}
+        <form method="get" class="relative flex-1 min-w-[200px] max-w-md">
+            <i class="fal fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm pointer-events-none"></i>
+            <input type="search" name="search" value="{{ search_value|default:'' }}"
+                   placeholder="{{ search_placeholder }}"
+                   class="dash-input pl-9">
+        </form>
+        {% endif %}
+
+        {% if filter_form_html %}
+            {{ filter_form_html|safe }}
+        {% endif %}
+
+        {% if show_count is not None %}
+        <span class="ml-auto text-xs text-slate-500">
+            {{ show_count }} {{ count_label|default:'result' }}{{ show_count|pluralize }}
+        </span>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <div class="overflow-x-auto">
+        {% block table %}{% endblock %}
+    </div>
+</section>

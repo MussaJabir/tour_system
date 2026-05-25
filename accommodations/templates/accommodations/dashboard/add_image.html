@@ -1,13 +1,29 @@
-{% extends 'backend/base.html' %}
+{% extends 'backend/base_dashboard.html' %}
+{% load static %}
+
+{% block title %}Add image to {{ accommodation.name }} — Dashboard{% endblock %}
+
 {% block content %}
-<div class="container-fluid">
-    <h3>Add Gallery Image</h3>
-    <div class="card shadow"><div class="card-body">
-        <form method="post" enctype="multipart/form-data">{% csrf_token %}
-            {{ form.as_p }}
-            <button type="submit" class="btn btn-primary">Upload</button>
-            <a href="{% url 'dashboard_accommodation_edit' accommodation.pk %}" class="btn btn-secondary">Cancel</a>
-        </form>
-    </div></div>
+
+{% include 'backend/partials/_breadcrumb.html' with crumbs=' ' %}
+{% include 'backend/partials/_page_header.html' with title='Add gallery image' subtitle=accommodation.name %}
+
+<div class="max-w-2xl">
+    <form method="post" enctype="multipart/form-data" class="space-y-6">
+        {% csrf_token %}
+        <div class="dash-card">
+            <header class="dash-card-header"><div><p class="dash-card-title">Image</p></div></header>
+            <div class="space-y-5">
+                {% for field in form %}
+                    {% include 'backend/partials/_dash_form_field.html' with field=field %}
+                {% endfor %}
+            </div>
+        </div>
+        <div class="flex gap-2">
+            <button type="submit" class="dash-btn dash-btn-primary"><i class="fal fa-upload"></i> Upload image</button>
+            <a href="{% url 'dashboard_accommodation_edit' accommodation.pk %}" class="dash-btn dash-btn-ghost">Cancel</a>
+        </div>
+    </form>
 </div>
+
 {% endblock %}

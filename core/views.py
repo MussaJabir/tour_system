@@ -17,7 +17,8 @@ from django.core.mail import send_mail, EmailMessage
 from django.conf import settings
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods, require_POST
-from django.db.models import Q, Count
+from django.db.models import Q, Count, Sum, DecimalField
+from django.db.models.functions import Coalesce, TruncMonth, TruncDate
 from django.utils import timezone
 
 from .models import ContactMessage, NewsletterSubscriber, FAQ, Testimonial
@@ -34,8 +35,9 @@ from .forms import (
 from destinations.models import Destination
 from activities.models import Activity
 from accommodations.models import Accommodation
-from packages.models import Package, BookingInquiry, CustomPackage
+from packages.models import Package, BookingInquiry, CustomPackage, Booking
 from datetime import timedelta
+from decimal import Decimal
 
 
 # ==================== AUTH VIEWS ====================
@@ -69,88 +71,185 @@ def staff_logout(request):
 @staff_member_required
 def dashboard_home(request):
     """
-    Main dashboard homepage with overview statistics and charts.
+    Dashboard overview — Operations Slate.
+
+    Surfaces the four headline KPIs (inquiries, bookings, revenue,
+    conversion) plus 30-day trend + 6-month revenue series for the
+    Chart.js panels, plus the two recent-activity tables.
     """
-    # Get date range for last 30 days
-    today = timezone.now()
-    last_30_days = today - timedelta(days=30)
-    last_7_days = today - timedelta(days=7)
-    
-    # Calculate key statistics
-    stats = {
-        # Content stats
-        'total_packages': Package.objects.filter(is_active=True).count(),
-        'total_destinations': Destination.objects.filter(is_active=True).count(),
-        'total_accommodations': Accommodation.objects.filter(is_active=True).count(),
-        'total_activities': Activity.objects.filter(is_active=True).count(),
-        
-        # New this week
-        'new_packages_week': Package.objects.filter(created_at__gte=last_7_days).count(),
-        'new_destinations_week': Destination.objects.filter(created_at__gte=last_7_days).count(),
-        'new_accommodations_week': Accommodation.objects.filter(created_at__gte=last_7_days).count(),
-        'new_activities_week': Activity.objects.filter(created_at__gte=last_7_days).count(),
-        
-        # Inquiries
-        'pending_inquiries': BookingInquiry.objects.filter(status='pending').count(),
-        'total_inquiries': BookingInquiry.objects.count(),
-        'new_inquiries_week': BookingInquiry.objects.filter(created_at__gte=last_7_days).count(),
-        
-        # Custom packages
-        'custom_packages_pending': CustomPackage.objects.filter(status='pending').count(),
-        'custom_packages_total': CustomPackage.objects.count(),
-        'custom_packages_approved': CustomPackage.objects.filter(status='approved').count(),
-        
-        # Contact messages
-        'new_contact_messages': ContactMessage.objects.filter(status='new').count(),
+    now = timezone.now()
+    today = now.date()
+    range_30 = now - timedelta(days=30)
+    range_60 = now - timedelta(days=60)
+
+    # -- Headline KPIs (last 30 days) -------------------------------------
+    inquiries_30d = BookingInquiry.objects.filter(created_at__gte=range_30).count()
+    inquiries_prev_30d = BookingInquiry.objects.filter(
+        created_at__gte=range_60, created_at__lt=range_30
+    ).count()
+
+    booked_qs = Booking.objects.exclude(status__in=['cancelled', 'refunded'])
+    bookings_30d = booked_qs.filter(created_at__gte=range_30).count()
+    bookings_prev_30d = booked_qs.filter(
+        created_at__gte=range_60, created_at__lt=range_30
+    ).count()
+
+    revenue_30d = booked_qs.filter(created_at__gte=range_30).aggregate(
+        total=Coalesce(Sum('quoted_price'), Decimal('0'), output_field=DecimalField())
+    )['total']
+    revenue_prev_30d = booked_qs.filter(
+        created_at__gte=range_60, created_at__lt=range_30
+    ).aggregate(
+        total=Coalesce(Sum('quoted_price'), Decimal('0'), output_field=DecimalField())
+    )['total']
+
+    # Inquiry → booking conversion (last 30d)
+    conversion = (bookings_30d / inquiries_30d * 100) if inquiries_30d else 0
+
+    def _trend(now_v, prev_v):
+        """Return {'label': '+18%' or None, 'dir': 'up'|'down'|None}.
+
+        Returns ``{'label': None, 'dir': None}`` when there's no prior
+        period to compare against — caller / template can skip rendering.
+        """
+        if prev_v == 0:
+            return {'label': None, 'dir': None}
+        pct = (now_v - prev_v) / prev_v * 100
+        if pct == 0:
+            return {'label': '0%', 'dir': None}
+        direction = 'up' if pct > 0 else 'down'
+        sign = '+' if pct > 0 else '-'
+        return {'label': f"{sign}{round(abs(pct))}%", 'dir': direction}
+
+    kpi_trends = {
+        'inquiries': _trend(inquiries_30d, inquiries_prev_30d),
+        'bookings':  _trend(bookings_30d, bookings_prev_30d),
+        'revenue':   _trend(float(revenue_30d), float(revenue_prev_30d)),
     }
-    
-    # Recent inquiries (last 5)
-    recent_inquiries = BookingInquiry.objects.select_related('base_package').order_by('-created_at')[:5]
-    
-    # Most viewed content
-    top_destinations = Destination.objects.filter(is_active=True).order_by('-view_count')[:5]
-    top_packages = Package.objects.filter(is_active=True).order_by('-view_count')[:5]
-    top_accommodations = Accommodation.objects.filter(is_active=True).order_by('-view_count')[:5]
-    
-    # Featured content
-    featured_packages = Package.objects.filter(is_featured=True, is_active=True)[:4]
-    
-    # Package category distribution (for pie chart)
-    package_categories = Package.objects.filter(is_active=True).values('category').annotate(
-        count=Count('id')
-    ).order_by('-count')
-    
-    # Inquiries by status (for chart)
-    inquiry_status_counts = BookingInquiry.objects.values('status').annotate(
-        count=Count('id')
-    ).order_by('status')
-    
-    # Inquiries trend (last 7 days) for line chart
-    inquiry_trend = []
-    for i in range(6, -1, -1):
-        date = (today - timedelta(days=i)).date()
-        count = BookingInquiry.objects.filter(
-            created_at__date=date
-        ).count()
-        inquiry_trend.append({
-            'date': date.strftime('%b %d'),
-            'count': count
-        })
-    
+
+    # -- Daily booking trend (last 30 days) ------------------------------
+    bookings_daily = (
+        booked_qs.filter(created_at__gte=range_30)
+        .annotate(d=TruncDate('created_at'))
+        .values('d')
+        .annotate(c=Count('id'))
+    )
+    bookings_daily_map = {row['d']: row['c'] for row in bookings_daily}
+    booking_trend_labels = []
+    booking_trend_data = []
+    for i in range(29, -1, -1):
+        day = today - timedelta(days=i)
+        booking_trend_labels.append(day.strftime('%b %d'))
+        booking_trend_data.append(bookings_daily_map.get(day, 0))
+
+    # -- Revenue by month (last 6 months) --------------------------------
+    six_months_ago = (now.replace(day=1) - timedelta(days=1)).replace(day=1) - timedelta(days=150)
+    revenue_by_month = (
+        booked_qs.filter(created_at__gte=six_months_ago)
+        .annotate(m=TruncMonth('created_at'))
+        .values('m')
+        .annotate(total=Sum('quoted_price'))
+        .order_by('m')
+    )
+    revenue_labels = []
+    revenue_data = []
+    for row in revenue_by_month:
+        revenue_labels.append(row['m'].strftime('%b %Y'))
+        revenue_data.append(float(row['total'] or 0))
+
+    # -- Recent activity --------------------------------------------------
+    recent_inquiries = (
+        BookingInquiry.objects.select_related('base_package')
+        .order_by('-created_at')[:6]
+    )
+    recent_bookings = (
+        Booking.objects.select_related('package')
+        .order_by('-created_at')[:6]
+    )
+
+    # -- Side stats (less prominent) ------------------------------------
+    pending_inquiries = BookingInquiry.objects.filter(status='pending').count()
+    pending_quotes = CustomPackage.objects.filter(status='pending').count()
+    new_messages = ContactMessage.objects.filter(status='new').count()
+
+    total_packages = Package.objects.filter(is_active=True).count()
+    total_destinations = Destination.objects.filter(is_active=True).count()
+    total_activities = Activity.objects.filter(is_active=True).count()
+    total_accommodations = Accommodation.objects.filter(is_active=True).count()
+
+    # -- Get-started checklist (visible until all 4 catalog buckets non-empty)
+    # Order matters — destinations seed everything else, package depends on the
+    # other three. Each step carries its own resolved URL so the template
+    # stays dumb.
+    from django.urls import reverse as _reverse
+    getting_started_steps = [
+        {
+            'label': 'Add your first destination',
+            'description': 'Where do your trips go? Serengeti, Ngorongoro, Zanzibar — start with one.',
+            'icon': 'map-marked-alt',
+            'href': _reverse('dashboard_destination_create'),
+            'done': total_destinations > 0,
+        },
+        {
+            'label': 'Add an activity',
+            'description': 'Game drives, hot-air balloons, cultural visits — the experiences guests book.',
+            'icon': 'binoculars',
+            'href': _reverse('dashboard_activity_create'),
+            'done': total_activities > 0,
+        },
+        {
+            'label': 'Add a lodge or camp',
+            'description': 'The accommodations your itineraries route through.',
+            'icon': 'bed',
+            'href': _reverse('dashboard_accommodation_create'),
+            'done': total_accommodations > 0,
+        },
+        {
+            'label': 'Build your first tour package',
+            'description': 'Combine the above into a saleable multi-day itinerary with pricing.',
+            'icon': 'route',
+            'href': _reverse('packages:dashboard_package_create'),
+            'done': total_packages > 0,
+        },
+    ]
+    getting_started_visible = not all(step['done'] for step in getting_started_steps)
+    getting_started_done_count = sum(1 for step in getting_started_steps if step['done'])
+
     context = {
-        'stats': stats,
+        # Headline KPIs
+        'inquiries_30d': inquiries_30d,
+        'bookings_30d': bookings_30d,
+        'revenue_30d': revenue_30d,
+        'conversion_pct': round(conversion, 1),
+        'kpi_trends': kpi_trends,
+
+        # Chart datasets (rendered into <script> by template via |safe + json_script equivalent)
+        'booking_trend_labels': booking_trend_labels,
+        'booking_trend_data': booking_trend_data,
+        'revenue_labels': revenue_labels,
+        'revenue_data': revenue_data,
+
+        # Recent activity
         'recent_inquiries': recent_inquiries,
-        'top_destinations': top_destinations,
-        'top_packages': top_packages,
-        'top_accommodations': top_accommodations,
-        'featured_packages': featured_packages,
-        'package_categories': package_categories,
-        'inquiry_status_counts': inquiry_status_counts,
-        'inquiry_trend': inquiry_trend,
-        'page_title': 'Dashboard Overview',
-        'active_menu': 'dashboard',
+        'recent_bookings': recent_bookings,
+
+        # Side stats
+        'pending_inquiries': pending_inquiries,
+        'pending_quotes': pending_quotes,
+        'new_messages': new_messages,
+
+        # Catalog totals (for the right-rail card)
+        'total_packages': total_packages,
+        'total_destinations': total_destinations,
+        'total_activities': total_activities,
+        'total_accommodations': total_accommodations,
+
+        # Get-started checklist (auto-hides when catalog is fully seeded)
+        'getting_started_steps': getting_started_steps,
+        'getting_started_visible': getting_started_visible,
+        'getting_started_done_count': getting_started_done_count,
+        'getting_started_total': len(getting_started_steps),
     }
-    
     return render(request, 'core/dashboard/index.html', context)
 
 
@@ -280,6 +379,11 @@ def newsletter_unsubscribe(request, token):
     except Exception as e:
         messages.error(request, '❌ Invalid unsubscribe link.')
         return redirect('public_home')
+
+
+def about_page(request):
+    """Public about-us page. Static — no DB queries needed."""
+    return render(request, 'core/public/about.html')
 
 
 def faq_page(request):
@@ -878,3 +982,35 @@ def dashboard_testimonial_delete(request, pk):
     testimonial.delete()
     messages.success(request, '✅ Testimonial deleted successfully.')
     return redirect('dashboard_testimonial_list')
+
+
+# ============================================================================
+# STYLEGUIDE — Safari Editorial design system reference (Phase 6.0)
+# ============================================================================
+
+from django.http import Http404
+
+
+def styleguide(request):
+    """
+    Renders the Safari Editorial design system reference.
+    Only available when settings.DEBUG is True — production returns 404.
+    """
+    if not settings.DEBUG:
+        raise Http404("Styleguide is only available in DEBUG mode.")
+    return render(request, 'frontend/_styleguide.html', {
+        'shades': ['50', '100', '200', '300', '400', '500', '600', '700', '800', '900'],
+    })
+
+
+def dashboard_styleguide(request):
+    """
+    Renders the Operations Slate design system reference for the staff dashboard.
+    Only available when settings.DEBUG is True — production returns 404.
+    """
+    if not settings.DEBUG:
+        raise Http404("Dashboard styleguide is only available in DEBUG mode.")
+    return render(request, 'backend/_styleguide.html', {
+        'slate_shades': ['50', '100', '200', '300', '400', '500', '600', '700', '800', '900'],
+        'bush_shades': ['50', '100', '200', '300', '400', '500', '600', '700', '800', '900'],
+    })

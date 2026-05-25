@@ -1,114 +1,80 @@
-{% extends "backend/base.html" %}
+{% extends 'backend/base_dashboard.html' %}
+{% load static %}
 
-{% block title %}AI Assistant{% endblock %}
+{% block title %}AI Assistant — Dashboard{% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="h4 mb-0"><i class="mdi mdi-robot me-2"></i>AI Assistant</h2>
-        <a href="/admin/ai_assistant/aiconfiguration/" class="btn btn-outline-secondary btn-sm">
-            <i class="mdi mdi-cog me-1"></i>Configure AI
-        </a>
-    </div>
 
-    {% if not config %}
-    <div class="alert alert-warning">
-        <i class="mdi mdi-alert me-1"></i>
-        No active AI configuration found.
-        <a href="/admin/ai_assistant/aiconfiguration/add/" class="alert-link">Add one in Admin</a>
-        to enable all AI features.
-    </div>
-    {% else %}
-    <div class="alert alert-success">
-        <i class="mdi mdi-check-circle me-1"></i>
-        Active: <strong>{{ config.get_vendor_display }}</strong> — {{ config.model_name }}
-    </div>
-    {% endif %}
+{% include 'backend/partials/_breadcrumb.html' with crumbs=' ' %}
+{% include 'backend/partials/_page_header.html' with title='AI Assistant' subtitle='Speed up content work and quote generation with AI helpers.' %}
 
-    <div class="row g-4">
-        <!-- Brochure Parser -->
-        <div class="col-md-6">
-            <div class="card h-100">
-                <div class="card-header bg-primary text-white">
-                    <i class="mdi mdi-file-pdf-box me-1"></i>PDF Brochure Parser
-                </div>
-                <div class="card-body">
-                    <p class="text-muted small">Upload a lodge PDF brochure — AI extracts structured fields to auto-populate accommodation details.</p>
-                    <p class="mb-1"><small class="text-muted">Total jobs: {{ brochure_count }}</small></p>
-                    {% if recent_brochure %}
-                    <p class="mb-3"><small>Last: <strong>{{ recent_brochure }}</strong></small></p>
-                    {% endif %}
-                </div>
-                <div class="card-footer">
-                    <a href="{% url 'ai_assistant:brochure_upload' %}" class="btn btn-primary btn-sm">
-                        <i class="mdi mdi-upload me-1"></i>Upload PDF
-                    </a>
-                </div>
+<section class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    {% include 'backend/partials/_stat_card.html' with label='Brochure parses' value=brochure_count icon='file-pdf' %}
+    {% include 'backend/partials/_stat_card.html' with label='Itineraries' value=itinerary_count icon='route' %}
+    {% include 'backend/partials/_stat_card.html' with label='Quote suggestions' value=quote_count icon='file-invoice' %}
+    {% include 'backend/partials/_stat_card.html' with label='Routes optimised' value=route_count icon='map' %}
+</section>
+
+<section class="grid md:grid-cols-2 gap-4">
+
+    <a href="{% url 'ai_assistant:brochure_upload' %}" class="dash-card hover:border-bush-400 transition-colors block">
+        <div class="flex items-start gap-4">
+            <span class="w-12 h-12 rounded-lg bg-bush-50 text-bush-700 flex items-center justify-center flex-shrink-0">
+                <i class="fal fa-file-pdf text-lg"></i>
+            </span>
+            <div class="flex-1">
+                <h3 class="font-medium text-slate-900">Parse a lodge brochure</h3>
+                <p class="text-sm text-slate-500 mt-1">Upload a PDF brochure and auto-populate accommodation fields.</p>
             </div>
+            <i class="fal fa-arrow-right text-slate-400"></i>
         </div>
+    </a>
 
-        <!-- Itinerary Generator -->
-        <div class="col-md-6">
-            <div class="card h-100">
-                <div class="card-header bg-success text-white">
-                    <i class="mdi mdi-map-marker-path me-1"></i>Itinerary Generator
-                </div>
-                <div class="card-body">
-                    <p class="text-muted small">Pick a destination, duration, and budget — AI drafts a day-by-day itinerary ready to use or adapt.</p>
-                    <p class="mb-1"><small class="text-muted">Total generated: {{ itinerary_count }}</small></p>
-                    {% if recent_itinerary %}
-                    <p class="mb-3"><small>Last: <strong>{{ recent_itinerary }}</strong></small></p>
-                    {% endif %}
-                </div>
-                <div class="card-footer">
-                    <a href="{% url 'ai_assistant:itinerary_generate' %}" class="btn btn-success btn-sm">
-                        <i class="mdi mdi-plus me-1"></i>Generate Itinerary
-                    </a>
-                </div>
+    <a href="{% url 'ai_assistant:itinerary_generate' %}" class="dash-card hover:border-bush-400 transition-colors block">
+        <div class="flex items-start gap-4">
+            <span class="w-12 h-12 rounded-lg bg-bush-50 text-bush-700 flex items-center justify-center flex-shrink-0">
+                <i class="fal fa-route text-lg"></i>
+            </span>
+            <div class="flex-1">
+                <h3 class="font-medium text-slate-900">Draft an itinerary</h3>
+                <p class="text-sm text-slate-500 mt-1">Give a destination, duration, budget, and let AI write a day-by-day plan.</p>
             </div>
+            <i class="fal fa-arrow-right text-slate-400"></i>
         </div>
+    </a>
 
-        <!-- Quote Builder -->
-        <div class="col-md-6">
-            <div class="card h-100">
-                <div class="card-header bg-warning text-dark">
-                    <i class="mdi mdi-tag-text me-1"></i>Custom Quote Builder
-                </div>
-                <div class="card-body">
-                    <p class="text-muted small">Open an inquiry, then trigger AI to suggest the best matching packages with reasoning.</p>
-                    <p class="mb-1"><small class="text-muted">Total quotes: {{ quote_count }}</small></p>
-                    {% if recent_quote %}
-                    <p class="mb-3"><small>Last: <strong>{{ recent_quote }}</strong></small></p>
-                    {% endif %}
-                </div>
-                <div class="card-footer">
-                    <a href="{% url 'packages:dashboard_inquiry_list' %}" class="btn btn-warning btn-sm">
-                        <i class="mdi mdi-clipboard-list me-1"></i>View Inquiries
-                    </a>
-                </div>
+    <a href="{% url 'ai_assistant:route_optimize' %}" class="dash-card hover:border-bush-400 transition-colors block">
+        <div class="flex items-start gap-4">
+            <span class="w-12 h-12 rounded-lg bg-bush-50 text-bush-700 flex items-center justify-center flex-shrink-0">
+                <i class="fal fa-map text-lg"></i>
+            </span>
+            <div class="flex-1">
+                <h3 class="font-medium text-slate-900">Optimise a route</h3>
+                <p class="text-sm text-slate-500 mt-1">Order destinations for efficient driving sequence.</p>
             </div>
+            <i class="fal fa-arrow-right text-slate-400"></i>
         </div>
+    </a>
 
-        <!-- Route Optimizer -->
-        <div class="col-md-6">
-            <div class="card h-100">
-                <div class="card-header bg-info text-white">
-                    <i class="mdi mdi-routes me-1"></i>Route Optimizer
-                </div>
-                <div class="card-body">
-                    <p class="text-muted small">Enter a list of destinations — AI returns the optimal visiting order with estimated driving times.</p>
-                    <p class="mb-1"><small class="text-muted">Total optimized: {{ route_count }}</small></p>
-                    {% if recent_route %}
-                    <p class="mb-3"><small>Last: <strong>{{ recent_route }}</strong></small></p>
-                    {% endif %}
-                </div>
-                <div class="card-footer">
-                    <a href="{% url 'ai_assistant:route_optimize' %}" class="btn btn-info btn-sm">
-                        <i class="mdi mdi-map me-1"></i>Optimize Route
-                    </a>
-                </div>
+    <div class="dash-card opacity-75">
+        <div class="flex items-start gap-4">
+            <span class="w-12 h-12 rounded-lg bg-slate-100 text-slate-400 flex items-center justify-center flex-shrink-0">
+                <i class="fal fa-file-invoice text-lg"></i>
+            </span>
+            <div class="flex-1">
+                <h3 class="font-medium text-slate-900">Suggest a custom quote</h3>
+                <p class="text-sm text-slate-500 mt-1">From the Inquiry detail page → "Suggest quote" action.</p>
             </div>
         </div>
     </div>
-</div>
+</section>
+
+{% if not config.is_configured %}
+<section class="mt-6 dash-card bg-amber-50/40 border-amber-200">
+    <p class="dash-stat-label text-amber-700 mb-2">Setup required</p>
+    <p class="text-sm text-amber-900">AI features require an OpenAI or Anthropic key.</p>
+    <p class="text-xs text-amber-700 mt-2">Configure under Django admin → AI Assistant → AI Configuration.</p>
+</section>
+{% endif %}
+
 {% endblock %}

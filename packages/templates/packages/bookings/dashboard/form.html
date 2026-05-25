@@ -1,71 +1,51 @@
-{% extends "backend/base.html" %}
+{% extends 'backend/base_dashboard.html' %}
 {% load static %}
 
-{% block title %}{{ title }}{% endblock %}
+{% block title %}{{ title|default:'Booking form' }} — Dashboard{% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <div class="mb-3">
-        <a href="{% url 'packages:dashboard_booking_list' %}" class="text-muted small">
-            <i class="mdi mdi-arrow-left"></i> Bookings
-        </a>
-        {% if booking %}
-            /
-            <a href="{% url 'packages:dashboard_booking_detail' booking.pk %}" class="text-muted small">
-                {{ booking.booking_reference }}
-            </a>
+
+{% include 'backend/partials/_breadcrumb.html' with crumbs=' ' %}
+{% include 'backend/partials/_page_header.html' with title=title subtitle='Create or edit a booking — package, dates, passengers, payment.' %}
+
+<form method="post" data-autosave-form class="grid lg:grid-cols-[1fr_280px] gap-6">
+    {% csrf_token %}
+    {% include "backend/partials/_form_autosave.html" %}
+
+    <div class="space-y-6 min-w-0">
+        <div class="dash-card">
+            <header class="dash-card-header"><div><p class="dash-card-title">Booking details</p></div></header>
+            <div class="grid sm:grid-cols-2 gap-5">
+                {% for field in form %}
+                    <div class="{% if field.name == 'special_requirements' or field.name == 'staff_notes' or field.name == 'cancellation_reason' %}sm:col-span-2{% endif %}">
+                        {% include 'backend/partials/_dash_form_field.html' with field=field %}
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        {% if form.non_field_errors %}
+            <div class="dash-card border-rose-200 bg-rose-50 text-rose-700 text-sm">
+                {% for err in form.non_field_errors %}<p>{{ err }}</p>{% endfor %}
+            </div>
         {% endif %}
-        <h4 class="mb-0 mt-1">{{ title }}</h4>
     </div>
 
-    {% if inquiry %}
-        <div class="alert alert-info">
-            <strong>Linked Inquiry:</strong> {{ inquiry.inquiry_reference }} —
-            {{ inquiry.customer_name }} ({{ inquiry.customer_email }})
+    <aside class="lg:sticky lg:top-20 lg:self-start space-y-4">
+        <div class="dash-card">
+            <p class="dash-card-title mb-4">Actions</p>
+            <button type="submit" class="dash-btn dash-btn-primary w-full"><i class="fal fa-check"></i> Save booking</button>
+            <a href="{% url 'packages:dashboard_booking_list' %}" class="dash-btn dash-btn-ghost w-full mt-2 text-center justify-center">Cancel</a>
         </div>
-    {% endif %}
 
-    <div class="card">
-        <div class="card-body">
-            <form method="post">
-                {% csrf_token %}
-
-                {% if form.non_field_errors %}
-                    <div class="alert alert-danger">{{ form.non_field_errors }}</div>
-                {% endif %}
-
-                <div class="row g-3">
-                    {% for field in form %}
-                        <div class="col-md-6">
-                            <label class="form-label" for="{{ field.id_for_label }}">
-                                {{ field.label }}
-                                {% if field.field.required %}<span class="text-danger">*</span>{% endif %}
-                            </label>
-                            {{ field }}
-                            {% if field.help_text %}
-                                <div class="form-text">{{ field.help_text }}</div>
-                            {% endif %}
-                            {% if field.errors %}
-                                <div class="text-danger small">{{ field.errors }}</div>
-                            {% endif %}
-                        </div>
-                    {% endfor %}
-                </div>
-
-                <div class="mt-4 d-flex gap-2">
-                    <button type="submit" class="btn btn-primary">
-                        {% if booking %}Save Changes{% else %}Create Booking{% endif %}
-                    </button>
-                    {% if booking %}
-                        <a href="{% url 'packages:dashboard_booking_detail' booking.pk %}"
-                           class="btn btn-outline-secondary">Cancel</a>
-                    {% else %}
-                        <a href="{% url 'packages:dashboard_booking_list' %}"
-                           class="btn btn-outline-secondary">Cancel</a>
-                    {% endif %}
-                </div>
-            </form>
+        {% if inquiry %}
+        <div class="dash-card">
+            <p class="dash-stat-label mb-3">From inquiry</p>
+            <p class="text-xs font-mono text-slate-500">{{ inquiry.inquiry_reference }}</p>
+            <p class="mt-2 text-sm text-slate-900">{{ inquiry.customer_name|default:inquiry.customer_email }}</p>
         </div>
-    </div>
-</div>
+        {% endif %}
+    </aside>
+</form>
+
 {% endblock %}

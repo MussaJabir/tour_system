@@ -1,0 +1,85 @@
+{% load static %}
+{# Safari Editorial — footer #}
+<footer class="bg-charcoal text-ivory mt-32">
+    <div class="container-editorial py-20 lg:py-28">
+
+        {# Top: newsletter band #}
+        <div class="grid lg:grid-cols-2 gap-12 lg:gap-20 items-end pb-16 border-b border-graphite">
+            <div>
+                <p class="eyebrow text-sand-300">Stay In Touch</p>
+                <h2 class="font-display text-display-md leading-[1.05] mt-4 text-balance">
+                    Field notes from the bush, delivered monthly.
+                </h2>
+                <p class="mt-4 text-ivory/70 text-base max-w-prose">
+                    Trail diaries, seasonal wildlife sightings, and quiet-season pricing — sent once a month. No spam.
+                </p>
+            </div>
+            <form method="post" action="{% url 'newsletter_subscribe' %}" class="flex flex-col sm:flex-row gap-3 w-full">
+                {% csrf_token %}
+                <input
+                    type="email"
+                    name="email"
+                    required
+                    placeholder="your@email.com"
+                    class="flex-1 bg-transparent border border-graphite focus:border-sand-300 rounded-full px-6 py-4 text-ivory placeholder:text-ivory/40 outline-none transition"
+                >
+                <button type="submit" class="btn btn-primary bg-sand-400 text-charcoal hover:bg-sand-300">
+                    Subscribe
+                    <i class="fal fa-arrow-right"></i>
+                </button>
+            </form>
+        </div>
+
+        {# Middle: columns #}
+        <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-10 pt-16">
+
+            <div class="lg:col-span-1">
+                <span class="font-display text-2xl">Tour<span class="text-sand-400">.</span></span>
+                <p class="text-ivory/60 text-sm mt-4 leading-relaxed">
+                    Tanzania-based safari and tour operator. Crafting bespoke East African journeys since 2014.
+                </p>
+                <div class="flex gap-4 mt-6 text-ivory/70">
+                    <a href="#" aria-label="Instagram" class="hover:text-sand-400 transition"><i class="fab fa-instagram text-lg"></i></a>
+                    <a href="#" aria-label="Facebook" class="hover:text-sand-400 transition"><i class="fab fa-facebook text-lg"></i></a>
+                    <a href="#" aria-label="WhatsApp" class="hover:text-sand-400 transition"><i class="fab fa-whatsapp text-lg"></i></a>
+                    <a href="#" aria-label="TripAdvisor" class="hover:text-sand-400 transition"><i class="fab fa-tripadvisor text-lg"></i></a>
+                </div>
+            </div>
+
+            <div>
+                <p class="eyebrow text-sand-300 mb-5">Explore</p>
+                <ul class="space-y-3 text-sm text-ivory/80">
+                    <li><a href="{% url 'public_destination_list' %}" class="hover:text-sand-300 transition">Destinations</a></li>
+                    <li><a href="{% url 'packages:public_package_list' %}" class="hover:text-sand-300 transition">Tour Packages</a></li>
+                    <li><a href="{% url 'public_activity_list' %}" class="hover:text-sand-300 transition">Activities</a></li>
+                    <li><a href="{% url 'public_accommodation_list' %}" class="hover:text-sand-300 transition">Lodges &amp; Camps</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <p class="eyebrow text-sand-300 mb-5">Company</p>
+                <ul class="space-y-3 text-sm text-ivory/80">
+                    <li><a href="{% url 'faq_page' %}" class="hover:text-sand-300 transition">FAQ</a></li>
+                    <li><a href="{% url 'contact_page' %}" class="hover:text-sand-300 transition">Contact</a></li>
+                    <li><a href="#" class="hover:text-sand-300 transition">Travel Insurance</a></li>
+                    <li><a href="#" class="hover:text-sand-300 transition">Terms &amp; Conditions</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <p class="eyebrow text-sand-300 mb-5">Get In Touch</p>
+                <ul class="space-y-3 text-sm text-ivory/80">
+                    <li class="flex gap-3"><i class="fal fa-map-marker-alt text-sand-400 mt-1"></i> Arusha, Tanzania</li>
+                    <li class="flex gap-3"><i class="fal fa-phone text-sand-400 mt-1"></i> +255 000 000 000</li>
+                    <li class="flex gap-3"><i class="fal fa-envelope text-sand-400 mt-1"></i> hello@toursystem.com</li>
+                </ul>
+            </div>
+        </div>
+
+        {# Bottom: bar #}
+        <div class="pt-12 mt-12 border-t border-graphite flex flex-col sm:flex-row justify-between gap-4 text-xs text-ivory/50">
+            <p>&copy; {% now "Y" %} Tour System. All rights reserved.</p>
+            <p>Crafted in Tanzania <i class="fal fa-heart text-clay-400 mx-1"></i></p>
+        </div>
+    </div>
+</footer>

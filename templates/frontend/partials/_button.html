@@ -1,0 +1,22 @@
+{% comment %}
+Reusable button include.
+Usage:
+    {% include 'frontend/partials/_button.html' with label='Book Now' href='/book/' variant='primary' icon='arrow-right' %}
+
+Vars:
+    label    — text content (required)
+    href     — link target; if omitted renders <button type="submit">
+    variant  — primary | secondary | ghost (default: primary)
+    icon     — Font Awesome icon name without `fa-` prefix (optional, e.g. 'arrow-right')
+    extra    — extra classes appended (optional)
+    type     — when no href: button | submit | reset (default: submit)
+{% endcomment %}
+{% if href %}
+    <a href="{{ href }}" class="btn btn-{{ variant|default:'primary' }} {{ extra }}">
+        {{ label }}{% if icon %} <i class="fal fa-{{ icon }}"></i>{% endif %}
+    </a>
+{% else %}
+    <button type="{{ type|default:'submit' }}" class="btn btn-{{ variant|default:'primary' }} {{ extra }}">
+        {{ label }}{% if icon %} <i class="fal fa-{{ icon }}"></i>{% endif %}
+    </button>
+{% endif %}

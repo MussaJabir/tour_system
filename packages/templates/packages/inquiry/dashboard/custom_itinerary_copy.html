@@ -1,116 +1,36 @@
-{% extends "backend/base.html" %}
+{% extends 'backend/base_dashboard.html' %}
 {% load static %}
 
-{% block title %}Copy Itinerary - {{ custom_package.custom_reference }}{% endblock %}
+{% block title %}Copy itinerary — {{ custom_package.name }}{% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <!-- Page Header -->
-    <div class="row mb-3">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <h4 class="mb-0">Copy Itinerary from Base Package</h4>
-                    <small class="text-muted">Custom Package: {{ custom_package.custom_reference }}</small>
-                </div>
-                <div>
-                    <a href="{% url 'packages:dashboard_custom_package_detail' custom_package.pk %}" class="btn btn-outline-secondary btn-sm">
-                        <i class="bi bi-arrow-left"></i> Back
-                    </a>
-                </div>
-            </div>
+
+{% include 'backend/partials/_breadcrumb.html' with crumbs=' ' %}
+
+<div class="max-w-xl mx-auto">
+    <div class="dash-card text-center py-12">
+        <span class="w-14 h-14 rounded-full bg-bush-50 text-bush-700 flex items-center justify-center mx-auto">
+            <i class="fal fa-copy text-xl"></i>
+        </span>
+        <h1 class="font-medium text-slate-900 text-lg mt-5">Copy itinerary from base package?</h1>
+        <p class="text-sm text-slate-500 mt-2 max-w-sm mx-auto">
+            All days from the base package will be copied into this custom quote. You can then edit each day independently.
+        </p>
+
+        <div class="mt-6 px-6 py-4 bg-slate-50 rounded-lg text-left text-sm">
+            <p><strong class="text-slate-900">{{ custom_package.name }}</strong></p>
+            <p class="text-slate-500 mt-1 font-mono">{{ custom_package.custom_reference }}</p>
+            {% if custom_package.base_package %}
+            <p class="text-slate-500 mt-2">Base: <span class="text-slate-700">{{ custom_package.base_package.name }}</span> · {{ custom_package.base_package.duration_days }} days</p>
+            {% endif %}
         </div>
-    </div>
 
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-body">
-                    {% if custom_package.base_package %}
-                        {% if custom_package.base_package.itineraries.exists %}
-                            <div class="alert alert-info">
-                                <i class="bi bi-info-circle"></i>
-                                <strong>Important:</strong> This will copy all itinerary days from the base package "{{ custom_package.base_package.name }}".
-                            </div>
-
-                            <h5 class="mb-3">Base Package Itinerary Preview</h5>
-                            <p class="text-muted mb-3">The following {{ custom_package.base_package.total_itinerary_days }} day(s) covering {{ custom_package.base_package.itineraries.count }} itinerary entr{% if custom_package.base_package.itineraries.count == 1 %}y{% else %}ies{% endif %} will be copied:</p>
-
-                            <div class="list-group mb-4">
-                                {% for day in custom_package.base_package.itineraries.all %}
-                                    <div class="list-group-item">
-                                        <div class="d-flex justify-content-between align-items-start">
-                                            <div>
-                                                <h6 class="mb-1">{{ day.day_display }}: {{ day.title }}</h6>
-                                                <p class="mb-1 text-muted">{{ day.description|truncatewords:20 }}</p>
-                                                <small class="text-muted">
-                                                    {% if day.location %}
-                                                        <i class="bi bi-geo-alt"></i> {{ day.location }}
-                                                    {% endif %}
-                                                    {% if day.accommodation_name %}
-                                                        | <i class="bi bi-house"></i> {{ day.accommodation_name }}
-                                                    {% endif %}
-                                                </small>
-                                            </div>
-                                            <span class="badge bg-primary">{{ day.meals_display }}</span>
-                                        </div>
-                                    </div>
-                                {% endfor %}
-                            </div>
-
-                            {% if custom_package.itinerary_days.exists %}
-                                <div class="alert alert-warning">
-                                    <i class="bi bi-exclamation-triangle"></i>
-                                    <strong>Warning:</strong> This custom package already has {{ custom_package.itinerary_days.count }} itinerary day(s). 
-                                    Copying from the base package will <strong>replace all existing days</strong>.
-                                </div>
-                            {% endif %}
-
-                            <form method="post">
-                                {% csrf_token %}
-                                <div class="d-flex justify-content-between">
-                                    <a href="{% url 'packages:dashboard_custom_package_detail' custom_package.pk %}" class="btn btn-secondary">
-                                        <i class="bi bi-x"></i> Cancel
-                                    </a>
-                                    <button type="submit" class="btn btn-primary">
-                                        <i class="bi bi-clipboard"></i> Copy Itinerary ({{ custom_package.base_package.total_itinerary_days }} days)
-                                    </button>
-                                </div>
-                            </form>
-                        {% else %}
-                            <div class="alert alert-warning">
-                                <i class="bi bi-exclamation-triangle"></i>
-                                <strong>No Itinerary Available:</strong> The base package "{{ custom_package.base_package.name }}" does not have any itinerary days to copy.
-                            </div>
-                            <a href="{% url 'packages:dashboard_custom_package_detail' custom_package.pk %}" class="btn btn-secondary">
-                                <i class="bi bi-arrow-left"></i> Go Back
-                            </a>
-                        {% endif %}
-                    {% else %}
-                        <div class="alert alert-danger">
-                            <i class="bi bi-x-circle"></i>
-                            <strong>Error:</strong> This custom package is not linked to a base package. Cannot copy itinerary.
-                        </div>
-                        <a href="{% url 'packages:dashboard_custom_package_detail' custom_package.pk %}" class="btn btn-secondary">
-                            <i class="bi bi-arrow-left"></i> Go Back
-                        </a>
-                    {% endif %}
-                </div>
-            </div>
-
-            <!-- Help Card -->
-            <div class="card mt-3">
-                <div class="card-body">
-                    <h6 class="mb-2"><i class="bi bi-lightbulb"></i> Tips</h6>
-                    <ul class="mb-0">
-                        <li>After copying, you can customize each day individually</li>
-                        <li>You can add new days or remove unwanted ones</li>
-                        <li>Changes to the custom itinerary won't affect the base package</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
+        <form method="post" class="mt-6 flex flex-wrap gap-2 justify-center">
+            {% csrf_token %}
+            <a href="{% url 'packages:dashboard_custom_package_detail' custom_package.pk %}" class="dash-btn dash-btn-ghost">Cancel</a>
+            <button type="submit" class="dash-btn dash-btn-primary"><i class="fal fa-copy"></i> Copy itinerary</button>
+        </form>
     </div>
 </div>
-{% endblock %}
 
+{% endblock %}

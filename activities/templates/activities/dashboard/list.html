@@ -1,164 +1,106 @@
-{% extends 'backend/base.html' %}
+{% extends 'backend/base_dashboard.html' %}
 {% load static %}
 
-{% block content %}
-<div class="container-fluid">
-    <!-- Page Heading -->
-    <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h3 mb-0 text-gray-800">{{ page_title }}</h1>
-        <a href="{% url 'dashboard_activity_create' %}" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
-            <i class="fas fa-plus fa-sm text-white-50"></i> Add New Activity
-        </a>
-    </div>
+{% block title %}Activities — Dashboard{% endblock %}
 
-    <!-- Filters -->
-    <div class="row mb-3">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-body">
-                    <form method="get" class="row g-3">
-                        <div class="col-md-3">
-                            <input type="text" name="search" class="form-control" placeholder="Search activities..." value="{{ search_query }}">
-                        </div>
-                        <div class="col-md-3">
-                            <select name="destination" class="form-select">
-                                <option value="">All Destinations</option>
-                                {% for destination in destinations %}
-                                    <option value="{{ destination.slug }}" {% if filter_destination == destination.slug %}selected{% endif %}>
-                                        {{ destination.name }}
-                                    </option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="col-md-2">
-                            <select name="category" class="form-select">
-                                <option value="">All Categories</option>
-                                {% for value, label in categories %}
-                                    <option value="{{ value }}" {% if filter_category == value %}selected{% endif %}>{{ label }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="col-md-2">
-                            <select name="difficulty" class="form-select">
-                                <option value="">All Difficulties</option>
-                                {% for value, label in difficulties %}
-                                    <option value="{{ value }}" {% if filter_difficulty == value %}selected{% endif %}>{{ label }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="col-md-2">
-                            <button type="submit" class="btn btn-primary w-100">
-                                <i class="mdi mdi-magnify"></i> Filter
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Activities Table -->
-    <div class="card shadow mb-4">
-        <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">Activities List</h6>
-        </div>
-        <div class="card-body">
-            {% if activities %}
-            <div class="table-responsive">
-                <table class="table table-bordered" width="100%" cellspacing="0">
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Destination</th>
-                            <th>Category</th>
-                            <th>Difficulty</th>
-                            <th>Duration</th>
-                            <th>Price</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for activity in activities %}
-                        <tr>
-                            <td>
-                                <strong>{{ activity.name }}</strong>
-                                {% if activity.is_featured %}
-                                <span class="badge badge-warning ml-2">Featured</span>
-                                {% endif %}
-                            </td>
-                            <td>{{ activity.destination.name }}</td>
-                            <td>{{ activity.get_category_display }}</td>
-                            <td>
-                                <span class="badge 
-                                    {% if activity.difficulty == 'easy' %}badge-success
-                                    {% elif activity.difficulty == 'moderate' %}badge-info
-                                    {% elif activity.difficulty == 'challenging' %}badge-warning
-                                    {% else %}badge-danger{% endif %}">
-                                    {{ activity.get_difficulty_display }}
-                                </span>
-                            </td>
-                            <td>{{ activity.duration_display }}</td>
-                            <td>{{ activity.price_display }}</td>
-                            <td>
-                                {% if activity.is_active %}
-                                <span class="badge badge-success">Active</span>
-                                {% else %}
-                                <span class="badge badge-secondary">Inactive</span>
-                                {% endif %}
-                            </td>
-                            <td>
-                                <a href="{% url 'dashboard_activity_detail' activity.pk %}" class="btn btn-info btn-sm" title="View">
-                                    <i class="fas fa-eye"></i>
-                                </a>
-                                <a href="{% url 'dashboard_activity_edit' activity.pk %}" class="btn btn-warning btn-sm" title="Edit">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                                <a href="{% url 'dashboard_activity_delete' activity.pk %}" class="btn btn-danger btn-sm" title="Delete">
-                                    <i class="fas fa-trash"></i>
-                                </a>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Pagination -->
-            {% if activities.has_other_pages %}
-            <nav aria-label="Page navigation">
-                <ul class="pagination justify-content-center">
-                    {% if activities.has_previous %}
-                    <li class="page-item">
-                        <a class="page-link" href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}{% if filter_destination %}&destination={{ filter_destination }}{% endif %}{% if filter_category %}&category={{ filter_category }}{% endif %}{% if filter_difficulty %}&difficulty={{ filter_difficulty }}{% endif %}">First</a>
-                    </li>
-                    <li class="page-item">
-                        <a class="page-link" href="?page={{ activities.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if filter_destination %}&destination={{ filter_destination }}{% endif %}{% if filter_category %}&category={{ filter_category }}{% endif %}{% if filter_difficulty %}&difficulty={{ filter_difficulty }}{% endif %}">Previous</a>
-                    </li>
-                    {% endif %}
-
-                    <li class="page-item active">
-                        <span class="page-link">Page {{ activities.number }} of {{ activities.paginator.num_pages }}</span>
-                    </li>
-
-                    {% if activities.has_next %}
-                    <li class="page-item">
-                        <a class="page-link" href="?page={{ activities.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if filter_destination %}&destination={{ filter_destination }}{% endif %}{% if filter_category %}&category={{ filter_category }}{% endif %}{% if filter_difficulty %}&difficulty={{ filter_difficulty }}{% endif %}">Next</a>
-                    </li>
-                    <li class="page-item">
-                        <a class="page-link" href="?page={{ activities.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}{% if filter_destination %}&destination={{ filter_destination }}{% endif %}{% if filter_category %}&category={{ filter_category }}{% endif %}{% if filter_difficulty %}&difficulty={{ filter_difficulty }}{% endif %}">Last</a>
-                    </li>
-                    {% endif %}
-                </ul>
-            </nav>
-            {% endif %}
-            {% else %}
-            <div class="alert alert-info">
-                No activities found. <a href="{% url 'dashboard_activity_create' %}">Create your first activity</a>
-            </div>
-            {% endif %}
-        </div>
-    </div>
-</div>
+{% block topbar_extras %}
+<a href="{% url 'dashboard_activity_create' %}" class="dash-btn dash-btn-primary">
+    <i class="fal fa-plus"></i><span class="hidden sm:inline">New activity</span>
+</a>
 {% endblock %}
 
+{% block content %}
+
+{% include 'backend/partials/_breadcrumb.html' with crumbs=' ' %}
+{% include 'backend/partials/_page_header.html' with title='Activities' subtitle='Game drives, climbs, cultural visits, and other experiences' %}
+
+<section class="bg-white border border-slate-200 rounded-xl overflow-hidden">
+
+    <form method="get" class="px-4 py-3 border-b border-slate-200 flex flex-wrap items-center gap-3">
+        <div class="relative flex-1 min-w-[200px] max-w-md">
+            <i class="fal fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm pointer-events-none"></i>
+            <input type="search" name="search" value="{{ search_query }}" placeholder="Search activities…" class="dash-input pl-9">
+        </div>
+        <select name="destination" class="dash-select w-auto" onchange="this.form.submit()">
+            <option value="">All destinations</option>
+            {% for d in destinations %}
+                <option value="{{ d.slug }}" {% if d.slug == filter_destination %}selected{% endif %}>{{ d.name }}</option>
+            {% endfor %}
+        </select>
+        <select name="category" class="dash-select w-auto" onchange="this.form.submit()">
+            <option value="">All categories</option>
+            {% for val, label in categories %}
+                <option value="{{ val }}" {% if val == filter_category %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+        <select name="difficulty" class="dash-select w-auto" onchange="this.form.submit()">
+            <option value="">All difficulties</option>
+            {% for val, label in difficulties %}
+                <option value="{{ val }}" {% if val == filter_difficulty %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+        <span class="ml-auto text-xs text-slate-500">{{ activities.paginator.count }} activit{{ activities.paginator.count|pluralize:'y,ies' }}</span>
+    </form>
+
+    <div class="overflow-x-auto">
+        <table class="dash-table">
+            <thead>
+                <tr>
+                    <th>Activity</th>
+                    <th>Destination</th>
+                    <th>Category</th>
+                    <th>Difficulty</th>
+                    <th class="text-right">Price</th>
+                    <th>Status</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for a in activities %}
+                <tr>
+                    <td>
+                        <div class="flex items-center gap-3 min-w-[12rem]">
+                            {% if a.featured_image %}
+                                <img src="{{ a.featured_image.url }}" alt="" class="w-8 h-8 rounded object-cover">
+                            {% else %}
+                                <span class="w-8 h-8 rounded bg-slate-100 flex items-center justify-center text-slate-400"><i class="fal fa-binoculars text-xs"></i></span>
+                            {% endif %}
+                            <a href="{% url 'public_activity_detail' a.slug %}" target="_blank" class="text-slate-900 hover:text-bush-700 font-medium">{{ a.name }}</a>
+                        </div>
+                    </td>
+                    <td class="text-slate-500">{{ a.destination.name }}</td>
+                    <td class="text-slate-500">{{ a.get_category_display }}</td>
+                    <td class="text-slate-500">{{ a.get_difficulty_display }}</td>
+                    <td class="text-right font-medium">{{ a.currency }} {{ a.price_per_person|floatformat:0 }}</td>
+                    <td>
+                        {% if a.is_active %}
+                            {% if a.is_featured %}{% include 'backend/partials/_status_badge.html' with label='Featured' variant='success' %}
+                            {% else %}{% include 'backend/partials/_status_badge.html' with label='Active' variant='info' %}{% endif %}
+                        {% else %}{% include 'backend/partials/_status_badge.html' with label='Inactive' variant='neutral' %}{% endif %}
+                    </td>
+                    <td class="text-right whitespace-nowrap">
+                        <a href="{% url 'dashboard_activity_edit' a.pk %}" class="dash-btn dash-btn-sm dash-btn-ghost" title="Edit"><i class="fal fa-edit"></i></a>
+                        <a href="{% url 'dashboard_activity_delete' a.pk %}" class="dash-btn dash-btn-sm dash-btn-ghost text-rose-600" title="Delete"><i class="fal fa-trash"></i></a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="7" class="p-0">
+                    {% include 'backend/partials/_empty_state.html' with icon='binoculars' title='No activities match these filters.' subtitle='Add activities to make packages richer.' action_label='Create activity' action_url='/dashboard/activities/create/' %}
+                </td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if activities.paginator.num_pages > 1 %}
+    <nav class="px-4 py-3 border-t border-slate-200 flex items-center justify-between text-xs">
+        <p class="text-slate-500">Page {{ activities.number }} of {{ activities.paginator.num_pages }}</p>
+        <div class="flex gap-1">
+            {% if activities.has_previous %}<a href="?page={{ activities.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}" class="dash-btn dash-btn-sm dash-btn-ghost"><i class="fal fa-arrow-left"></i> Prev</a>{% endif %}
+            {% if activities.has_next %}<a href="?page={{ activities.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}" class="dash-btn dash-btn-sm dash-btn-ghost">Next <i class="fal fa-arrow-right"></i></a>{% endif %}
+        </div>
+    </nav>
+    {% endif %}
+</section>
+
+{% endblock %}
