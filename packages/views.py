@@ -1305,10 +1305,10 @@ def dashboard_custom_itinerary_copy(request, custom_package_pk):
                 accommodation_name = base_day.accommodation.name if base_day.accommodation else ''
                 accommodation_type = 'hotel'  # Default type
                 
-                # Get location from destinations or accommodation
+                # Get location from the accommodation's destination
                 location = ''
-                if base_day.accommodation and base_day.accommodation.destinations.exists():
-                    location = base_day.accommodation.destinations.first().name
+                if base_day.accommodation and base_day.accommodation.destination:
+                    location = base_day.accommodation.destination.name
                 
                 # Get activities as text
                 activities_text = ', '.join([act.name for act in base_day.activities.all()])
