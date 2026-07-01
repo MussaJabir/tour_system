@@ -6,15 +6,17 @@
 
 {% block content %}
 
-{# ====================== HERO ====================== #}
-<section class="relative min-h-[70vh] flex items-end overflow-hidden bg-charcoal">
+{# ============================================================ #}
+{# HERO #}
+{# ============================================================ #}
+<section class="relative min-h-[80vh] flex items-end overflow-hidden bg-charcoal">
     <div class="absolute inset-0">
         {% if custom_package.featured_image %}
             <img src="{{ custom_package.featured_image.url }}" alt="{{ custom_package.name }}" class="w-full h-full object-cover">
         {% else %}
             <img src="https://images.unsplash.com/photo-1516426122078-c23e76319801?w=2400&q=80" alt="{{ custom_package.name }}" class="w-full h-full object-cover">
         {% endif %}
-        <div class="absolute inset-0 bg-gradient-to-t from-charcoal/95 via-charcoal/40 to-charcoal/20"></div>
+        <div class="absolute inset-0 bg-gradient-to-t from-charcoal/95 via-charcoal/40 to-charcoal/30"></div>
     </div>
 
     <div class="container-editorial relative pt-40 pb-16 lg:pb-24 text-ivory w-full">
@@ -53,96 +55,227 @@
 </div>
 {% endif %}
 
-{# ====================== MAIN ====================== #}
-<section class="py-16 lg:py-24">
+{# ============================================================ #}
+{# PRICE BLOCK — centered, under hero #}
+{# ============================================================ #}
+<section class="relative -mt-12 lg:-mt-16 z-10">
     <div class="container-editorial">
-        <div class="listing-grid">
-
-            {# Sidebar — price + accept #}
-            <aside class="lg:order-2 lg:sticky lg:top-28 lg:self-start">
-                <div class="bg-bone rounded-2xl p-7 lg:p-8" style="box-shadow: var(--shadow-frame);">
+        <div class="bg-ivory rounded-2xl px-6 py-8 lg:px-12 lg:py-10 max-w-5xl mx-auto" style="box-shadow: var(--shadow-frame);">
+            <div class="grid lg:grid-cols-[1fr_auto] gap-8 lg:gap-12 items-center">
+                {# Price + CTA #}
+                <div class="text-center lg:text-left">
                     <p class="eyebrow text-mist">Total trip price</p>
-                    <div class="mt-3 flex items-baseline gap-3">
-                        <span class="font-display text-display-sm text-charcoal">{{ custom_package.currency }} {{ total_price|floatformat:0 }}</span>
+                    <div class="mt-2 flex flex-wrap items-baseline gap-3 justify-center lg:justify-start">
+                        <span class="font-display text-display-md text-charcoal">{{ custom_package.currency }} {{ total_price|floatformat:0 }}</span>
+                        {% if custom_package.price_difference %}
+                            <span class="text-sm {% if custom_package.price_difference > 0 %}text-clay-600{% else %}text-bush-700{% endif %}">
+                                {% if custom_package.price_difference > 0 %}+{% endif %}{{ custom_package.currency }} {{ custom_package.price_difference|floatformat:0 }} vs original
+                            </span>
+                        {% endif %}
                     </div>
                     {% if custom_package.adjusted_price %}
-                        <p class="text-xs text-mist mt-1">{{ custom_package.currency }} {{ custom_package.adjusted_price|floatformat:0 }} per person</p>
+                        <p class="text-xs text-mist mt-2">{{ custom_package.currency }} {{ custom_package.adjusted_price|floatformat:0 }} per person · {{ inquiry.total_travelers }} travellers</p>
                     {% endif %}
-                    {% if custom_package.price_difference %}
-                        <p class="text-xs mt-2 {% if custom_package.price_difference > 0 %}text-clay-600{% else %}text-bush-700{% endif %}">
-                            {% if custom_package.price_difference > 0 %}+{% endif %}{{ custom_package.currency }} {{ custom_package.price_difference|floatformat:0 }} vs original
-                        </p>
-                    {% endif %}
+                    <p class="text-xs text-mist mt-2">No deposit until you accept your tailored itinerary.</p>
+                </div>
 
-                    {% if not is_expired %}
-                    <form method="post" action="{% url 'packages:custom_package_action' custom_package.access_token 'accept' %}" class="mt-6">
+                {% if not is_expired %}
+                <div class="flex flex-col gap-3 lg:min-w-[280px]" x-data="{ changes: false }">
+                    <form method="post" action="{% url 'packages:custom_package_action' custom_package.access_token 'approve' %}">
                         {% csrf_token %}
-                        <button type="submit" class="btn btn-primary w-full">
+                        <button type="submit" class="btn btn-primary w-full justify-center">
                             Accept &amp; Book
                             <i class="fal fa-arrow-right"></i>
                         </button>
                     </form>
-                    <form method="post" action="{% url 'packages:custom_package_action' custom_package.access_token 'request_changes' %}" class="mt-3">
+                    <button type="button" @click="changes = !changes" class="btn btn-ghost w-full justify-center">
+                        Request changes
+                    </button>
+                    <form x-show="changes" x-cloak method="post"
+                          action="{% url 'packages:custom_package_action' custom_package.access_token 'request_changes' %}"
+                          class="mt-1 space-y-3">
                         {% csrf_token %}
-                        <button type="submit" class="btn btn-secondary w-full">Request changes</button>
+                        <textarea name="feedback" rows="3" required
+                                  class="w-full rounded-xl border border-sand-300 bg-bone px-4 py-3 text-sm text-charcoal placeholder:text-mist focus:outline-none focus:border-bush-600"
+                                  placeholder="Tell us what you'd like to change…"></textarea>
+                        <button type="submit" class="btn btn-secondary w-full justify-center">Send change request</button>
                     </form>
-                    {% endif %}
-
-                    <dl class="mt-7 pt-6 border-t border-sand-300 space-y-3 text-sm">
-                        <div class="flex justify-between"><dt class="text-mist">Reference</dt><dd>{{ custom_package.custom_reference }}</dd></div>
-                        <div class="flex justify-between"><dt class="text-mist">Inquiry</dt><dd>{{ inquiry.inquiry_reference }}</dd></div>
-                        <div class="flex justify-between"><dt class="text-mist">Duration</dt><dd>{{ custom_package.duration_days }}D · {{ custom_package.duration_nights }}N</dd></div>
-                        <div class="flex justify-between"><dt class="text-mist">Travellers</dt><dd>{{ inquiry.total_travelers }}</dd></div>
-                        {% if inquiry.preferred_travel_date %}<div class="flex justify-between"><dt class="text-mist">Dates</dt><dd class="text-right">{{ inquiry.preferred_travel_date|date:"d M" }}{% if inquiry.preferred_end_date %} – {{ inquiry.preferred_end_date|date:"d M Y" }}{% endif %}</dd></div>{% endif %}
-                    </dl>
-                </div>
-            </aside>
-
-            <article class="lg:order-1 max-w-3xl space-y-16 lg:space-y-20">
-
-                <div>
-                    <p class="eyebrow">Overview</p>
-                    <h2 class="font-display text-display-md mt-3 text-balance">About this trip</h2>
-                    <div class="mt-6 text-charcoal/90 leading-relaxed text-lg">{{ custom_package.description|linebreaks }}</div>
-                </div>
-
-                {% if custom_package.modifications_made %}
-                <div>
-                    <p class="eyebrow text-clay-500">What's different</p>
-                    <h2 class="font-display text-display-md mt-3 text-balance">Modifications</h2>
-                    <div class="mt-6 text-charcoal/90 leading-relaxed">{{ custom_package.modifications_made|linebreaks }}</div>
                 </div>
                 {% endif %}
+            </div>
 
-                {% if custom_package.itinerary_days.all %}
+            {# Fact tiles #}
+            <dl class="mt-8 pt-8 border-t border-sand-200 grid grid-cols-2 lg:grid-cols-4 gap-6 text-center">
                 <div>
-                    <p class="eyebrow">Day by day</p>
-                    <h2 class="font-display text-display-md mt-3 text-balance">Itinerary</h2>
-                    <ol class="mt-8 relative border-l border-sand-300 space-y-10 pl-8">
-                        {% for day in custom_package.itinerary_days.all %}
-                        <li class="relative">
-                            <span class="absolute -left-[2.6rem] top-0 w-10 h-10 rounded-full bg-bush-700 text-ivory flex items-center justify-center font-display text-sm">{{ day.day_number }}</span>
-                            <h3 class="font-display text-xl lg:text-2xl text-balance">{{ day.title }}</h3>
-                            <div class="mt-3 text-charcoal/80 leading-relaxed">{{ day.description|linebreaks }}</div>
-                            {% if day.location %}
-                                <p class="mt-2 text-sm text-mist"><i class="fal fa-map-marker-alt mr-1"></i> {{ day.location }}</p>
-                            {% endif %}
-                        </li>
-                        {% endfor %}
-                    </ol>
+                    <dt class="eyebrow text-mist">Duration</dt>
+                    <dd class="font-display text-xl text-charcoal mt-2">{{ custom_package.duration_days }}D · {{ custom_package.duration_nights }}N</dd>
                 </div>
-                {% endif %}
-
-                {% if custom_package.staff_notes_to_client %}
-                <div class="bg-bone rounded-2xl p-7 lg:p-10">
-                    <p class="eyebrow">A note from your designer</p>
-                    <div class="mt-4 text-charcoal/90 leading-relaxed">{{ custom_package.staff_notes_to_client|linebreaks }}</div>
+                <div>
+                    <dt class="eyebrow text-mist">Travellers</dt>
+                    <dd class="font-display text-xl text-charcoal mt-2">{{ inquiry.total_travelers }}</dd>
                 </div>
-                {% endif %}
-
-            </article>
+                <div>
+                    <dt class="eyebrow text-mist">Reference</dt>
+                    <dd class="font-display text-xl text-charcoal mt-2">{{ custom_package.custom_reference }}</dd>
+                </div>
+                <div>
+                    <dt class="eyebrow text-mist">Valid until</dt>
+                    <dd class="font-display text-xl text-charcoal mt-2">{{ custom_package.expires_at|date:"d M Y"|default:"—" }}</dd>
+                </div>
+            </dl>
         </div>
     </div>
 </section>
+
+{# ============================================================ #}
+{# MAIN CONTENT — wide editorial article #}
+{# ============================================================ #}
+<section class="py-16 lg:py-24">
+    <div class="container-editorial">
+        <article class="max-w-4xl mx-auto space-y-20 lg:space-y-24">
+
+            {# Overview #}
+            <div>
+                <p class="eyebrow">Overview</p>
+                <h2 class="font-display text-display-md mt-3 text-balance">About this trip</h2>
+                <div class="mt-6 prose-editorial text-charcoal/90 leading-relaxed text-lg">
+                    {{ custom_package.description|linebreaks }}
+                </div>
+            </div>
+
+            {# What's different #}
+            {% if custom_package.modifications_made %}
+            <div>
+                <p class="eyebrow text-clay-500">What's different</p>
+                <h2 class="font-display text-display-md mt-3 text-balance">Tailored for you</h2>
+                <div class="mt-6 text-charcoal/90 leading-relaxed text-lg">{{ custom_package.modifications_made|linebreaks }}</div>
+            </div>
+            {% endif %}
+
+            {# Your local team — static trust card #}
+            <div class="bg-bone rounded-2xl p-8 lg:p-12">
+                <p class="eyebrow text-bush-600">Your local team</p>
+                <h2 class="font-display text-display-sm mt-3 text-balance">Built and guided from Arusha.</h2>
+                <p class="mt-5 text-charcoal/80 leading-relaxed text-lg max-w-2xl">
+                    Every itinerary is written and run by a team that grew up walking these parks. Your driver-guide is a
+                    full-time staff guide — not a freelancer pulled in for the week — and your itinerary is yours alone.
+                    No fixed groups, no conveyor belt.
+                </p>
+                <dl class="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-6">
+                    <div><dt class="eyebrow text-mist">Years guiding</dt><dd class="font-display text-2xl mt-2 text-charcoal">10+</dd></div>
+                    <div><dt class="eyebrow text-mist">Languages</dt><dd class="font-display text-2xl mt-2 text-charcoal">EN · SW · FR</dd></div>
+                    <div><dt class="eyebrow text-mist">Guide ratio</dt><dd class="font-display text-2xl mt-2 text-charcoal">1 : 1 trip</dd></div>
+                    <div><dt class="eyebrow text-mist">Reply time</dt><dd class="font-display text-2xl mt-2 text-charcoal">&lt; 24h</dd></div>
+                </dl>
+            </div>
+
+        </article>
+    </div>
+</section>
+
+{# ============================================================ #}
+{# ITINERARY — editorial day cards #}
+{# ============================================================ #}
+{% if custom_package.itinerary_days.all %}
+<section class="py-16 lg:py-20 bg-bone" id="itinerary">
+    <div class="container-editorial">
+        <div class="max-w-5xl mx-auto">
+            <p class="eyebrow">Day by day</p>
+            <h2 class="font-display text-display-md mt-3 text-balance">Your itinerary</h2>
+            <p class="mt-4 text-charcoal/70 max-w-2xl">A day-by-day plan tailored to your trip.</p>
+        </div>
+
+        <div class="mt-12 lg:mt-16 max-w-5xl mx-auto space-y-6">
+            {% for day in custom_package.itinerary_days.all %}
+            <article class="bg-ivory rounded-2xl p-6 lg:p-10 grid sm:grid-cols-[80px_1fr] gap-5">
+                <div class="flex flex-col items-start">
+                    <span class="w-12 h-12 rounded-full bg-bush-700 text-ivory flex items-center justify-center font-display text-lg">{{ day.day_number }}</span>
+                    <span class="mt-2 eyebrow text-mist">{{ day.day_display }}</span>
+                </div>
+                <div>
+                    <h3 class="font-display text-xl lg:text-2xl text-balance">{{ day.title }}</h3>
+                    {% if day.location %}
+                        <p class="mt-2 text-sm text-mist"><i class="fal fa-map-marker-alt mr-1 text-bush-600"></i> {{ day.location }}</p>
+                    {% endif %}
+                    <div class="mt-3 text-charcoal/80 leading-relaxed">{{ day.description|linebreaks }}</div>
+
+                    {% if day.activities %}
+                        <p class="mt-4 text-sm text-charcoal/80"><i class="fal fa-hiking text-bush-600 mr-1.5"></i> {{ day.activities }}</p>
+                    {% endif %}
+
+                    {# Meal + accommodation + transport badges #}
+                    <div class="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs">
+                        {% if day.breakfast_included or day.lunch_included or day.dinner_included %}
+                            <span class="flex items-center gap-1.5 text-charcoal">
+                                <i class="fal fa-utensils text-bush-600"></i>
+                                {% if day.breakfast_included %}<span class="inline-block w-5 h-5 rounded-full bg-bush-700 text-ivory text-[10px] flex items-center justify-center" title="Breakfast">B</span>{% endif %}
+                                {% if day.lunch_included %}<span class="inline-block w-5 h-5 rounded-full bg-bush-700 text-ivory text-[10px] flex items-center justify-center" title="Lunch">L</span>{% endif %}
+                                {% if day.dinner_included %}<span class="inline-block w-5 h-5 rounded-full bg-bush-700 text-ivory text-[10px] flex items-center justify-center" title="Dinner">D</span>{% endif %}
+                            </span>
+                        {% endif %}
+                        {% if day.accommodation_name %}
+                            <span class="flex items-center gap-1.5 text-mist">
+                                <i class="fal fa-bed"></i>
+                                <span class="text-charcoal">{{ day.accommodation_name }}</span>
+                            </span>
+                        {% endif %}
+                        {% if day.distance %}
+                            <span class="flex items-center gap-1.5 text-mist"><i class="fal fa-route"></i> {{ day.distance }}</span>
+                        {% endif %}
+                        {% if day.drive_time %}
+                            <span class="flex items-center gap-1.5 text-mist"><i class="fal fa-car"></i> {{ day.drive_time }}</span>
+                        {% endif %}
+                    </div>
+
+                    {% if day.featured_image %}
+                    <div class="mt-5 rounded-xl overflow-hidden bg-sand-100">
+                        <img src="{{ day.featured_image.url }}" alt="{{ day.title }}" class="w-full h-40 object-cover" loading="lazy">
+                    </div>
+                    {% endif %}
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+{# ============================================================ #}
+{# A NOTE FROM YOUR DESIGNER #}
+{# ============================================================ #}
+{% if custom_package.staff_notes_to_client %}
+<section class="py-16 lg:py-24">
+    <div class="container-editorial">
+        <div class="bg-bone rounded-2xl p-8 lg:p-12 max-w-4xl mx-auto">
+            <p class="eyebrow">A note from your designer</p>
+            <div class="mt-4 text-charcoal/90 leading-relaxed text-lg">{{ custom_package.staff_notes_to_client|linebreaks }}</div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+{# ============================================================ #}
+{# FINAL CTA #}
+{# ============================================================ #}
+{% if not is_expired %}
+<section class="py-16 lg:py-24">
+    <div class="container-editorial">
+        <div class="bg-charcoal text-ivory rounded-2xl p-10 lg:p-16 text-center max-w-5xl mx-auto">
+            <p class="eyebrow text-sand-300">Ready when you are</p>
+            <h3 class="font-display text-display-sm lg:text-display-md mt-4 text-balance">Make it yours.</h3>
+            <p class="mt-4 text-ivory/80 max-w-md mx-auto">
+                Accept this itinerary as-is, or ask us to tweak it — we'll write back within a day.
+            </p>
+            <form method="post" action="{% url 'packages:custom_package_action' custom_package.access_token 'approve' %}" class="mt-8 inline-block">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-primary bg-ivory text-charcoal hover:bg-sand-300">
+                    Accept &amp; Book
+                    <i class="fal fa-arrow-right"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+</section>
+{% endif %}
 
 {% endblock %}
