@@ -10,9 +10,21 @@
 
 <form method="post" data-autosave-form enctype="multipart/form-data" class="grid lg:grid-cols-[1fr_320px] gap-6">
     {% csrf_token %}
+    {# inquiry and status are required form fields with no visible widget — submit them as hidden #}
+    <input type="hidden" name="inquiry" value="{{ inquiry.pk }}">
+    <input type="hidden" name="status" value="draft">
     {% include "backend/partials/_form_autosave.html" %}
 
     <div class="space-y-6 min-w-0">
+
+        {% if form.errors %}
+            <div class="dash-card border-rose-200 bg-rose-50 text-rose-700 text-sm">
+                {% for err in form.non_field_errors %}<p>{{ err }}</p>{% endfor %}
+                {% for field in form %}
+                    {% for err in field.errors %}<p>{{ field.label }}: {{ err }}</p>{% endfor %}
+                {% endfor %}
+            </div>
+        {% endif %}
 
         <div class="dash-card">
             <header class="dash-card-header"><div><p class="dash-card-title">Basics</p></div></header>
@@ -64,11 +76,6 @@
             </div>
         </div>
 
-        {% if form.non_field_errors %}
-            <div class="dash-card border-rose-200 bg-rose-50 text-rose-700 text-sm">
-                {% for err in form.non_field_errors %}<p>{{ err }}</p>{% endfor %}
-            </div>
-        {% endif %}
     </div>
 
     <aside class="lg:sticky lg:top-20 lg:self-start space-y-4">
