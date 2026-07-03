@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model
 from .models import (
     Package, PackageImage, PackageItinerary, PackageInclusion,
     BookingInquiry, CustomPackage, InquiryMessage, CustomPackageItinerary,
-    Booking, Passenger, Payment, Departure,
+    Booking, Passenger, Payment, Departure, Invoice,
 )
 
 User = get_user_model()
@@ -1084,3 +1084,23 @@ class DepartureForm(forms.ModelForm):
             raise ValidationError("Departure date cannot be in the past.")
         return date
 
+
+
+class InvoiceForm(forms.ModelForm):
+    """Staff form for issuing an invoice against a booking."""
+
+    class Meta:
+        model = Invoice
+        fields = ['invoice_type', 'amount', 'currency', 'notes']
+        widgets = {
+            'invoice_type': forms.Select(attrs={'class': 'form-select'}),
+            'amount': forms.NumberInput(attrs={'class': 'form-control', 'min': 0, 'step': '0.01'}),
+            'currency': forms.TextInput(attrs={'class': 'form-control'}),
+            'notes': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+        }
+
+    def clean_amount(self):
+        amount = self.cleaned_data.get('amount')
+        if amount is not None and amount <= 0:
+            raise ValidationError("Invoice amount must be greater than zero.")
+        return amount

@@ -357,15 +357,33 @@ class SiteSettingsForm(forms.ModelForm):
 
     class Meta:
         model = SiteSettings
-        fields = ['whatsapp_number']
+        fields = [
+            'whatsapp_number',
+            'bank_name', 'bank_account_name', 'bank_account_number', 'bank_swift',
+            'mpesa_name', 'mpesa_number', 'invoice_footer_note',
+        ]
         widgets = {
             'whatsapp_number': forms.TextInput(attrs={
                 'class': 'form-control',
                 'placeholder': '+255 744 000 000',
             }),
+            'bank_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. CRDB Bank'}),
+            'bank_account_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Account holder name'}),
+            'bank_account_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Account number'}),
+            'bank_swift': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. CORUTZTZ'}),
+            'mpesa_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Registered name'}),
+            'mpesa_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. 0744 000 000 or Lipa number'}),
+            'invoice_footer_note': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Terms, thank-you note, etc.'}),
         }
         labels = {
             'whatsapp_number': 'WhatsApp Number',
+            'bank_name': 'Bank Name',
+            'bank_account_name': 'Account Name',
+            'bank_account_number': 'Account Number',
+            'bank_swift': 'SWIFT / BIC',
+            'mpesa_name': 'M-Pesa Name',
+            'mpesa_number': 'M-Pesa Number',
+            'invoice_footer_note': 'Invoice Footer Note',
         }
         help_texts = {
             'whatsapp_number': (
@@ -373,6 +391,7 @@ class SiteSettingsForm(forms.ModelForm):
                 'Powers all "Chat on WhatsApp" buttons on the public site and dashboard. '
                 'Leave empty to hide them.'
             ),
+            'invoice_footer_note': 'Printed at the bottom of every invoice PDF.',
         }
 
     def clean_whatsapp_number(self):

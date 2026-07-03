@@ -38,6 +38,26 @@
             </div>
         </div>
 
+        <div class="dash-card">
+            <header class="dash-card-header">
+                <div>
+                    <p class="dash-card-title">Payment details</p>
+                    <p class="text-sm text-slate-500 mt-1">Printed on invoice PDFs so customers know where to pay.</p>
+                </div>
+            </header>
+            <div class="space-y-5">
+                <div class="grid sm:grid-cols-2 gap-5">
+                    {% include 'backend/partials/_dash_form_field.html' with field=form.bank_name %}
+                    {% include 'backend/partials/_dash_form_field.html' with field=form.bank_account_name %}
+                    {% include 'backend/partials/_dash_form_field.html' with field=form.bank_account_number %}
+                    {% include 'backend/partials/_dash_form_field.html' with field=form.bank_swift %}
+                    {% include 'backend/partials/_dash_form_field.html' with field=form.mpesa_name %}
+                    {% include 'backend/partials/_dash_form_field.html' with field=form.mpesa_number %}
+                </div>
+                {% include 'backend/partials/_dash_form_field.html' with field=form.invoice_footer_note %}
+            </div>
+        </div>
+
         {% if form.non_field_errors %}
             <div class="dash-card border-rose-200 bg-rose-50 text-rose-700 text-sm">
                 {% for err in form.non_field_errors %}<p>{{ err }}</p>{% endfor %}
