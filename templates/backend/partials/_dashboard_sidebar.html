@@ -64,6 +64,13 @@ when {% url %} matches request.path.
                 <li><a href="{% url 'ai_assistant:home' %}" class="dash-nav-link {% if '/dashboard/ai' in request.path %}is-active{% endif %}"><i class="fal fa-sparkles"></i> AI Assistant</a></li>
             </ul>
         </div>
+
+        <div>
+            <p class="dash-nav-section-label">System</p>
+            <ul class="space-y-0.5">
+                <li><a href="{% url 'dashboard_settings' %}" class="dash-nav-link {% if '/dashboard/settings' in request.path %}is-active{% endif %}"><i class="fal fa-cog"></i> Settings</a></li>
+            </ul>
+        </div>
     </nav>
 
     {# Footer: user + logout #}

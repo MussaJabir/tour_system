@@ -9,15 +9,34 @@ Covers:
   customer's normalized number
 """
 from django.contrib.auth import get_user_model
+from django.core.cache import cache
 from django.test import TestCase, override_settings
 from django.urls import reverse
 
+from core.models import SiteSettings
 from core.templatetags.whatsapp_tags import whatsapp_url
 from core.utils import normalize_whatsapp_number
 from destinations.tests_homepage import make_package
 from packages.models import BookingInquiry
 
 User = get_user_model()
+
+
+class SiteSettingsCacheCleanupMixin:
+    """
+    The SiteSettings singleton is cached in Redis, which the test runner
+    shares with the dev server. Drop the key around every test so tests
+    never read each other's (or the dev server's) cached row — and never
+    leave a test-database object behind for the dev server to pick up.
+    """
+
+    def setUp(self):
+        super().setUp()
+        cache.delete(SiteSettings.CACHE_KEY)
+
+    def tearDown(self):
+        cache.delete(SiteSettings.CACHE_KEY)
+        super().tearDown()
 
 
 class NormalizeWhatsappNumberTests(TestCase):
@@ -75,7 +94,7 @@ class WhatsappUrlTagTests(TestCase):
 
 
 @override_settings(WHATSAPP_BUSINESS_NUMBER='+255700000001')
-class FloatingButtonRenderTests(TestCase):
+class FloatingButtonRenderTests(SiteSettingsCacheCleanupMixin, TestCase):
 
     def test_home_page_shows_floating_button(self):
         response = self.client.get(reverse('public_home'))
@@ -101,7 +120,7 @@ class FloatingButtonRenderTests(TestCase):
 
 
 @override_settings(WHATSAPP_BUSINESS_NUMBER='+255700000001')
-class DashboardWhatsappActionTests(TestCase):
+class DashboardWhatsappActionTests(SiteSettingsCacheCleanupMixin, TestCase):
 
     @classmethod
     def setUpTestData(cls):
@@ -149,3 +168,103 @@ class DashboardWhatsappActionTests(TestCase):
         response = self.client.get(reverse('packages:dashboard_inquiry_list'))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Prefers WhatsApp')
+
+
+class SiteSettingsModelTests(SiteSettingsCacheCleanupMixin, TestCase):
+
+    def test_load_creates_singleton(self):
+        self.assertEqual(SiteSettings.objects.count(), 0)
+        obj = SiteSettings.load()
+        self.assertEqual(obj.pk, 1)
+        self.assertEqual(SiteSettings.objects.count(), 1)
+
+    def test_save_enforces_single_row(self):
+        SiteSettings.load()
+        another = SiteSettings(whatsapp_number='+255744123456')
+        another.save()
+        self.assertEqual(SiteSettings.objects.count(), 1)
+        self.assertEqual(SiteSettings.load().whatsapp_number, '+255744123456')
+
+    def test_save_invalidates_cache(self):
+        SiteSettings.load()  # primes the cache
+        obj = SiteSettings.objects.get(pk=1)
+        obj.whatsapp_number = '+255744999888'
+        obj.save()
+        self.assertEqual(SiteSettings.load().whatsapp_number, '+255744999888')
+
+
+@override_settings(WHATSAPP_BUSINESS_NUMBER='+255700000001')
+class WhatsappFallbackChainTests(SiteSettingsCacheCleanupMixin, TestCase):
+    """Resolution order: dashboard Site Settings → env var → hidden."""
+
+    def test_dashboard_value_overrides_env(self):
+        SiteSettings(whatsapp_number='0744 555 666').save()
+        response = self.client.get(reverse('public_home'))
+        self.assertContains(response, 'wa.me/255744555666')
+        self.assertNotContains(response, 'wa.me/255700000001')
+
+    def test_env_used_when_dashboard_blank(self):
+        SiteSettings.load()  # row exists, whatsapp_number blank
+        response = self.client.get(reverse('public_home'))
+        self.assertContains(response, 'wa.me/255700000001')
+
+    @override_settings(WHATSAPP_BUSINESS_NUMBER='')
+    def test_hidden_when_both_blank(self):
+        response = self.client.get(reverse('public_home'))
+        self.assertNotContains(response, 'wa.me/')
+
+
+@override_settings(WHATSAPP_BUSINESS_NUMBER='')
+class DashboardSettingsViewTests(SiteSettingsCacheCleanupMixin, TestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.staff = User.objects.create_user(
+            username='setstaff', email='setstaff@example.com',
+            password='pw1234', is_staff=True,
+        )
+        cls.nonstaff = User.objects.create_user(
+            username='plainuser', email='plain@example.com', password='pw1234',
+        )
+
+    def test_requires_staff(self):
+        response = self.client.get(reverse('dashboard_settings'))
+        self.assertEqual(response.status_code, 302)  # anonymous → login
+
+        self.client.login(username='plainuser', password='pw1234')
+        response = self.client.get(reverse('dashboard_settings'))
+        self.assertEqual(response.status_code, 302)  # non-staff → blocked
+
+    def test_staff_can_view_and_save(self):
+        self.client.login(username='setstaff', password='pw1234')
+        response = self.client.get(reverse('dashboard_settings'))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'WhatsApp Number')
+
+        response = self.client.post(
+            reverse('dashboard_settings'),
+            {'whatsapp_number': '0744 123 456'},
+            follow=True,
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(SiteSettings.load().whatsapp_number, '0744 123 456')
+
+        # The public site now uses the dashboard value
+        response = self.client.get(reverse('public_home'))
+        self.assertContains(response, 'wa.me/255744123456')
+
+    def test_invalid_number_rejected(self):
+        self.client.login(username='setstaff', password='pw1234')
+        response = self.client.post(
+            reverse('dashboard_settings'), {'whatsapp_number': 'not-a-phone'}
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'valid phone number')
+        self.assertEqual(SiteSettings.load().whatsapp_number, '')
+
+    def test_page_shows_live_status_with_effective_number(self):
+        SiteSettings(whatsapp_number='+255744123456').save()
+        self.client.login(username='setstaff', password='pw1234')
+        response = self.client.get(reverse('dashboard_settings'))
+        self.assertContains(response, 'Live')
+        self.assertContains(response, 'wa.me/255744123456')

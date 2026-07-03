@@ -1063,6 +1063,27 @@ Phase 7 shipped the full Operations Slate dashboard. A senior-dev audit turned u
 10. **Live-verified** on localhost:8000 — button renders with normalized
     number and urlencoded prefill.
 
+### Follow-up in same PR — dashboard-managed Site Settings
+
+User call (right one): operators buying deployments will never edit `.env`,
+so the WhatsApp number must be editable from the dashboard.
+
+1. **`core.SiteSettings` singleton model** (`TimeStampedModel`, pk forced to 1,
+   Redis-cached via `SiteSettings.load()` with invalidation on save). Migration
+   `core/0002_sitesettings`. Fixed a real bug found by tests: saving a fresh
+   instance over the existing row takes Django's UPDATE path where
+   `auto_now_add` doesn't fire — `save()` now preserves `created_at`.
+2. **Fallback chain** in the context processor: dashboard Site Settings →
+   `WHATSAPP_BUSINESS_NUMBER` env var → hidden.
+3. **Dashboard → System → Settings page** (`/dashboard/settings/`,
+   `@login_required` + `@staff_member_required`) — WhatsApp card with
+   Live/Hidden status badge, shows the effective wa.me link and whether it
+   comes from the env fallback. `SiteSettingsForm` rejects undialable numbers.
+4. **Tests** — 12 more in `core/tests_whatsapp.py` (singleton behaviour,
+   fallback chain, view auth + save + validation). A
+   `SiteSettingsCacheCleanupMixin` drops the Redis key around every test since
+   the test runner shares Redis with the dev server. **All 319 tests pass.**
+
 ### Decisions / non-goals
 
 - **No Meta WhatsApp Cloud API yet** — wa.me links need no approval; the Cloud
@@ -1070,6 +1091,8 @@ Phase 7 shipped the full Operations Slate dashboard. A senior-dev audit turned u
   first. Parked as Phase 10.3.
 - **WhatsApp green (`#25D366`) via inline style** — one-off brand colour, not
   worth a design-system token.
+- **No Django admin registration for SiteSettings** — the dashboard page is
+  the interface; admin would only add a delete footgun on a singleton.
 
 ### PR
 - https://github.com/MussaJabir/tour_system/pull/43

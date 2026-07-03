@@ -456,7 +456,7 @@ Branch: `feature/dashboard-polish` → PR → `develop`
 > (setup fee + monthly hosting) + Enteipa site as lead-gen/broker channel.
 > These two features are what operators actually ask for in pitches.
 
-- [x] **10.1 WhatsApp click-to-chat** (Session 028) — `WHATSAPP_BUSINESS_NUMBER` env var, `normalize_whatsapp_number()` helper, `{% whatsapp_url %}` tag, site-wide floating button with context-aware prefill (package name / inquiry reference), "Reply on WhatsApp" on dashboard inquiry + booking detail, prefer-WhatsApp badge on inquiry list. 17 tests.
+- [x] **10.1 WhatsApp click-to-chat** (Session 028) — `WHATSAPP_BUSINESS_NUMBER` env var, `normalize_whatsapp_number()` helper, `{% whatsapp_url %}` tag, site-wide floating button with context-aware prefill (package name / inquiry reference), "Reply on WhatsApp" on dashboard inquiry + booking detail, prefer-WhatsApp badge on inquiry list. Plus `core.SiteSettings` singleton + Dashboard → System → Settings page so operators edit the number without shell access (dashboard → env → hidden fallback chain). 29 tests.
 - [ ] **10.2 Invoice PDFs** — WeasyPrint + Docker deps; lean `Invoice` model (`INV-YYYYMMDD-NNNNN`, FK Booking, type, amount, snapshot fields — TRA wants numbered immutable invoices); `invoice_pdf.html` template with Enteipa letterhead + bank/M-Pesa payment instructions from `.env`; staff-only download + email-with-attachment actions on booking detail; `send_invoice_email()` in `packages/emails.py`.
 - [ ] **10.3 WhatsApp Cloud API** — PARKED until BRELA certificate in hand (Meta business verification needs it). Automated inquiry confirmations + quote notifications via Celery. Free tier ~1,000 conversations/month is plenty.
 

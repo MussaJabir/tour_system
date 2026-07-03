@@ -4,6 +4,7 @@ These models provide common functionality that other apps inherit from.
 Following DRY (Don't Repeat Yourself) principle for maintainability.
 """
 from django.db import models
+from django.core.cache import cache
 from django.utils.text import slugify
 from django.contrib.auth import get_user_model
 
@@ -460,3 +461,54 @@ class Testimonial(TimeStampedModel, PublishableMixin):
     
     def __str__(self):
         return f"{self.customer_name} - {self.rating}⭐"
+
+
+class SiteSettings(TimeStampedModel):
+    """
+    Singleton for operator-editable site configuration (Dashboard → Settings).
+
+    Values set here take priority over the corresponding environment
+    variables, so each deployment can be reconfigured from the dashboard
+    without shell access. Always read through SiteSettings.load(), which
+    caches the row and enforces the single pk=1 instance.
+    """
+    CACHE_KEY = 'core:site_settings'
+
+    whatsapp_number = models.CharField(
+        max_length=50,
+        blank=True,
+        help_text=(
+            "Business WhatsApp number in international format, e.g. +255744000000. "
+            "Leave empty to fall back to the WHATSAPP_BUSINESS_NUMBER environment variable."
+        ),
+    )
+
+    class Meta:
+        verbose_name = "Site Settings"
+        verbose_name_plural = "Site Settings"
+
+    def __str__(self):
+        return "Site settings"
+
+    def save(self, *args, **kwargs):
+        self.pk = 1  # enforce singleton
+        if self.created_at is None:
+            # A fresh instance saved over the existing row takes Django's
+            # UPDATE path, where auto_now_add doesn't fire — preserve the
+            # original creation timestamp instead of writing NULL.
+            self.created_at = (
+                SiteSettings.objects
+                .filter(pk=1)
+                .values_list('created_at', flat=True)
+                .first()
+            )
+        super().save(*args, **kwargs)
+        cache.delete(self.CACHE_KEY)
+
+    @classmethod
+    def load(cls):
+        obj = cache.get(cls.CACHE_KEY)
+        if obj is None:
+            obj, _ = cls.objects.get_or_create(pk=1)
+            cache.set(cls.CACHE_KEY, obj)
+        return obj
