@@ -1152,7 +1152,7 @@ so the WhatsApp number must be editable from the dashboard.
   set; no hardcoding.
 
 ### PR
-- https://github.com/MussaJabir/tour_system/pull/[PENDING]
+- https://github.com/MussaJabir/tour_system/pull/44
 
 ---
 
