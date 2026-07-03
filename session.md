@@ -1072,7 +1072,7 @@ Phase 7 shipped the full Operations Slate dashboard. A senior-dev audit turned u
   worth a design-system token.
 
 ### PR
-- https://github.com/MussaJabir/tour_system/pull/[PENDING]
+- https://github.com/MussaJabir/tour_system/pull/43
 
 ---
 
