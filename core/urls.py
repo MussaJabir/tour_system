@@ -51,5 +51,8 @@ urlpatterns = [
     path('dashboard/testimonials/create/', views.dashboard_testimonial_create, name='dashboard_testimonial_create'),
     path('dashboard/testimonials/<int:pk>/edit/', views.dashboard_testimonial_edit, name='dashboard_testimonial_edit'),
     path('dashboard/testimonials/<int:pk>/delete/', views.dashboard_testimonial_delete, name='dashboard_testimonial_delete'),
+
+    # Site Settings (singleton)
+    path('dashboard/settings/', views.dashboard_settings, name='dashboard_settings'),
 ]
 

@@ -1,5 +1,5 @@
 {% extends 'frontend/base_modern.html' %}
-{% load static %}
+{% load static whatsapp_tags %}
 
 {% block title %}Inquiry received — Tour System{% endblock %}
 {% block meta_description %}We've received your trip inquiry. Our team will write back within 24 hours.{% endblock %}
@@ -50,6 +50,13 @@
         </div>
 
         <div class="mt-12 flex flex-wrap justify-center gap-3">
+            {% if whatsapp_number %}
+            {% whatsapp_url whatsapp_number 'Hi! I just sent inquiry '|add:inquiry.inquiry_reference|add:' and would like to continue on WhatsApp.' as wa_href %}
+            <a href="{{ wa_href }}" target="_blank" rel="noopener" class="btn btn-primary">
+                <i class="fab fa-whatsapp"></i>
+                Chat with us on WhatsApp
+            </a>
+            {% endif %}
             <a href="{% url 'packages:public_package_list' %}" class="btn btn-secondary">
                 Keep exploring tours
             </a>

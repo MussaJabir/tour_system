@@ -7,7 +7,8 @@ Customer-facing forms for:
 """
 from django import forms
 from django.core.validators import validate_email
-from .models import ContactMessage, NewsletterSubscriber, FAQ, Testimonial
+from .models import ContactMessage, NewsletterSubscriber, FAQ, SiteSettings, Testimonial
+from .utils import normalize_whatsapp_number
 
 
 class ContactForm(forms.ModelForm):
@@ -347,3 +348,38 @@ class TestimonialForm(forms.ModelForm):
             raise forms.ValidationError('Testimonial is too long (maximum 500 characters).')
         return quote
 
+
+
+class SiteSettingsForm(forms.ModelForm):
+    """
+    Form for the dashboard Site Settings page (singleton).
+    """
+
+    class Meta:
+        model = SiteSettings
+        fields = ['whatsapp_number']
+        widgets = {
+            'whatsapp_number': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': '+255 744 000 000',
+            }),
+        }
+        labels = {
+            'whatsapp_number': 'WhatsApp Number',
+        }
+        help_texts = {
+            'whatsapp_number': (
+                'International format preferred (e.g. +255744000000). '
+                'Powers all "Chat on WhatsApp" buttons on the public site and dashboard. '
+                'Leave empty to hide them.'
+            ),
+        }
+
+    def clean_whatsapp_number(self):
+        """Accept any format a human types, but reject undialable numbers."""
+        raw = self.cleaned_data.get('whatsapp_number', '').strip()
+        if raw and not normalize_whatsapp_number(raw):
+            raise forms.ValidationError(
+                'Enter a valid phone number, e.g. +255744123456 or 0744123456.'
+            )
+        return raw
