@@ -46,7 +46,10 @@
                 <tr>
                     <td class="font-mono text-xs text-slate-500">{{ inq.inquiry_reference }}</td>
                     <td>
-                        <p class="text-slate-900">{{ inq.customer_name|default:inq.customer_email }}</p>
+                        <p class="text-slate-900">
+                            {{ inq.customer_name|default:inq.customer_email }}
+                            {% if inq.prefer_whatsapp %}<i class="fab fa-whatsapp text-emerald-500 ml-1" title="Prefers WhatsApp" aria-label="Prefers WhatsApp"></i>{% endif %}
+                        </p>
                         <p class="text-xs text-slate-500">{{ inq.customer_email }}</p>
                     </td>
                     <td class="text-slate-500 truncate max-w-[14rem]">{{ inq.base_package.name|default:'—' }}</td>

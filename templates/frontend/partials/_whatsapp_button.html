@@ -1,0 +1,23 @@
+{% load whatsapp_tags %}
+{# Floating WhatsApp click-to-chat button — included site-wide from base_modern.html.
+   Renders nothing when WHATSAPP_BUSINESS_NUMBER is unset (see core.context_processors).
+   Prefill adapts to page context: package detail names the tour, inquiry success
+   quotes the reference, everything else gets a generic opener. On package pages the
+   button sits above the sticky mobile CTA bar. #}
+{% if whatsapp_number %}
+
+{% if package.name %}
+    {% whatsapp_url whatsapp_number 'Hi! I saw the "'|add:package.name|add:'" tour on your website and would like to know more.' as wa_href %}
+{% elif inquiry.inquiry_reference %}
+    {% whatsapp_url whatsapp_number 'Hi! I just sent inquiry '|add:inquiry.inquiry_reference|add:' and would like to continue on WhatsApp.' as wa_href %}
+{% else %}
+    {% whatsapp_url whatsapp_number 'Hi! I found your website and would like to plan a trip.' as wa_href %}
+{% endif %}
+
+<a href="{{ wa_href }}" target="_blank" rel="noopener"
+   aria-label="Chat with us on WhatsApp"
+   class="fixed right-5 z-50 flex items-center justify-center w-14 h-14 rounded-full text-ivory shadow-lifted transition-transform duration-200 hover:scale-105 {% if package.name %}bottom-24 lg:bottom-8{% else %}bottom-6 lg:bottom-8{% endif %}"
+   style="background-color: #25D366;">
+    <i class="fab fa-whatsapp text-2xl" aria-hidden="true"></i>
+</a>
+{% endif %}

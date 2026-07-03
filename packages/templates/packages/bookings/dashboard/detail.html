@@ -1,5 +1,5 @@
 {% extends 'backend/base_dashboard.html' %}
-{% load static %}
+{% load static whatsapp_tags %}
 
 {% block title %}Booking {{ booking.booking_reference }} — Dashboard{% endblock %}
 
@@ -43,7 +43,15 @@
         <div class="dash-card">
             <header class="dash-card-header">
                 <div><p class="dash-card-title">Customer</p></div>
-                <a href="{% url 'packages:dashboard_inquiry_detail' booking.inquiry.pk %}" class="text-xs text-bush-700 hover:underline">View inquiry →</a>
+                <div class="flex items-center gap-3">
+                    {% whatsapp_url booking.inquiry.customer_phone 'Hello '|add:booking.inquiry.customer_name|add:', greetings from '|add:site_name|add:'! Regarding your booking '|add:booking.booking_reference|add:': ' as wa_href %}
+                    {% if wa_href %}
+                    <a href="{{ wa_href }}" target="_blank" rel="noopener" class="dash-btn dash-btn-sm dash-btn-secondary">
+                        <i class="fab fa-whatsapp text-emerald-600"></i> WhatsApp
+                    </a>
+                    {% endif %}
+                    <a href="{% url 'packages:dashboard_inquiry_detail' booking.inquiry.pk %}" class="text-xs text-bush-700 hover:underline">View inquiry →</a>
+                </div>
             </header>
             <dl class="grid sm:grid-cols-2 gap-x-6 gap-y-3 text-sm">
                 <div><dt class="text-slate-500 text-xs">Name</dt><dd class="text-slate-900">{{ booking.inquiry.customer_name }}</dd></div>

@@ -29,7 +29,7 @@
 
     {# Tailwind compiled CSS — Safari Editorial design system.
        Version stamp busts the browser cache whenever the file is rebuilt. #}
-    <link rel="stylesheet" href="{% static 'frontend/css/tailwind.css' %}?v=20260521b">
+    <link rel="stylesheet" href="{% static 'frontend/css/tailwind.css' %}?v=20260703a">
 
     {# Font Awesome (kept — icons used throughout) #}
     <link rel="stylesheet" href="{% static 'frontend/assets/css/fontawesome-5.14.0.min.css' %}">
@@ -55,6 +55,8 @@
     </main>
 
     {% include 'frontend/partials/_footer.html' %}
+
+    {% include 'frontend/partials/_whatsapp_button.html' %}
 
     {# Vendor scripts — defer so they don't block render #}
     <script src="{% static 'frontend/vendor/alpine.min.js' %}" defer></script>

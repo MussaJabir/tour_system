@@ -1007,4 +1007,73 @@ Phase 7 shipped the full Operations Slate dashboard. A senior-dev audit turned u
 
 ---
 
+## Session 028 — 2026-07-03
+
+**Type:** Business planning + Feature (Phase 10 kickoff)
+**Branch:** `feature/whatsapp-click-to-chat`
+
+> Numbering note: work between Session 027 and here (custom quote page fixes,
+> docker entrypoint fix, catalog seeding PR #29) landed on `develop` without
+> individual session logs.
+
+### Business decisions (mentor discussion)
+
+- **Brand name: Enteipa.** System launches under this name.
+- **Dual revenue model locked in**: (1) productized per-operator deployments
+  (setup fee + monthly hosting), (2) Enteipa site as a lead-gen/broker channel
+  passing inquiries to a licensed operator for commission. User handles BRELA
+  registration to operate as an agent; a partner handles social media.
+- **User's action items**: buy domain (Porkbun/Cloudflare recommended), rent
+  VPS (Hetzner CX32 recommended), BRELA registration, written commission
+  agreement with a licensed operator.
+- **New Phase 10 added to todo.md**: WhatsApp integration + invoice PDFs —
+  the two things operators actually ask for. Deliberate launch-line extension.
+
+### What we did (Phase 10.1 — WhatsApp click-to-chat)
+
+1. **`WHATSAPP_BUSINESS_NUMBER` setting** — via `.env` (python-decouple), empty
+   default hides all WhatsApp UI. Added to `.env.example`.
+2. **`core.utils.normalize_whatsapp_number()`** — converts every phone format
+   customers type (`+255…`, `00255…`, `0744…`, `744…`) to wa.me digits format;
+   returns `''` for undialable input so callers hide dead links. Default
+   country code `255`, overridable.
+3. **`core.context_processors.site_settings`** — new context processor (registered
+   in `TEMPLATES`) exposing `site_name` + pre-normalized `whatsapp_number` to
+   every template.
+4. **`{% whatsapp_url number message %}` simple tag** (`core/templatetags/whatsapp_tags.py`)
+   — builds wa.me links with urlencoded prefill text.
+5. **Floating WhatsApp button site-wide** — new partial
+   `templates/frontend/partials/_whatsapp_button.html` included from
+   `base_modern.html`. Prefill adapts to context: package detail names the tour,
+   inquiry success page quotes the reference, generic opener elsewhere. Sits
+   above the sticky mobile CTA bar on package pages (`bottom-24` vs `bottom-6`).
+6. **Inquiry success page** — explicit "Chat with us on WhatsApp" primary button
+   prefilled with the inquiry reference.
+7. **Dashboard actions** — "Reply on WhatsApp" on inquiry detail (Contact
+   preference card) and "WhatsApp" on booking detail (Customer card header),
+   both prefilled with customer name + reference; hidden when the customer's
+   phone can't be normalized. WhatsApp badge on inquiry list rows where
+   `prefer_whatsapp=True`.
+8. **Tailwind rebuilt + `?v=20260703a`** bumped in both base templates;
+   `collectstatic` run.
+9. **Tests** — new `core/tests_whatsapp.py`: 17 tests across 4 classes
+   (normalization matrix, tag behaviour, floating-button rendering incl.
+   hidden-when-unconfigured, dashboard actions incl. staff auth). **All 309
+   tests pass** (292 prior + 17 new).
+10. **Live-verified** on localhost:8000 — button renders with normalized
+    number and urlencoded prefill.
+
+### Decisions / non-goals
+
+- **No Meta WhatsApp Cloud API yet** — wa.me links need no approval; the Cloud
+  API requires Meta business verification, which needs the BRELA certificate
+  first. Parked as Phase 10.3.
+- **WhatsApp green (`#25D366`) via inline style** — one-off brand colour, not
+  worth a design-system token.
+
+### PR
+- https://github.com/MussaJabir/tour_system/pull/[PENDING]
+
+---
+
 _Add new sessions above this line._

@@ -450,6 +450,25 @@ Branch: `feature/dashboard-polish` → PR → `develop`
 
 ---
 
+## Phase 10 — Enteipa launch: sales infrastructure (Session 028)
+> Deliberate launch-line extension (per Phase 9 rule). Business decision:
+> system launches as **Enteipa** — dual revenue: per-operator deployments
+> (setup fee + monthly hosting) + Enteipa site as lead-gen/broker channel.
+> These two features are what operators actually ask for in pitches.
+
+- [x] **10.1 WhatsApp click-to-chat** (Session 028) — `WHATSAPP_BUSINESS_NUMBER` env var, `normalize_whatsapp_number()` helper, `{% whatsapp_url %}` tag, site-wide floating button with context-aware prefill (package name / inquiry reference), "Reply on WhatsApp" on dashboard inquiry + booking detail, prefer-WhatsApp badge on inquiry list. 17 tests.
+- [ ] **10.2 Invoice PDFs** — WeasyPrint + Docker deps; lean `Invoice` model (`INV-YYYYMMDD-NNNNN`, FK Booking, type, amount, snapshot fields — TRA wants numbered immutable invoices); `invoice_pdf.html` template with Enteipa letterhead + bank/M-Pesa payment instructions from `.env`; staff-only download + email-with-attachment actions on booking detail; `send_invoice_email()` in `packages/emails.py`.
+- [ ] **10.3 WhatsApp Cloud API** — PARKED until BRELA certificate in hand (Meta business verification needs it). Automated inquiry confirmations + quote notifications via Celery. Free tier ~1,000 conversations/month is plenty.
+
+### User-side action items (not code)
+- [ ] Buy `enteipa.com` (Porkbun / Cloudflare Registrar) + Cloudflare free DNS
+- [ ] Rent VPS (Hetzner CX32 recommended) + deploy
+- [ ] BRELA registration (agent) — unlocks 10.3 + Meta verification
+- [ ] Written commission agreement with a licensed operator
+- [ ] Set real `WHATSAPP_BUSINESS_NUMBER` in production `.env`
+
+---
+
 ## Priority Order (Impact vs Effort)
 
 | # | Item | Impact | Effort |

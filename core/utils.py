@@ -59,3 +59,38 @@ def parse_best_months(text):
 # All 12 month abbreviations, for rendering the calendar shell.
 MONTH_ABBR = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
               'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+
+
+def normalize_whatsapp_number(raw, default_country_code='255'):
+    """
+    Normalize a phone number into the digits-only international format that
+    wa.me links require (e.g. '0744 123 456' → '255744123456').
+
+    Handles the forms customers actually type:
+        '+255 744 123 456'  → '255744123456'   (already international)
+        '00255744123456'    → '255744123456'   (00 international prefix)
+        '0744123456'        → '255744123456'   (local with leading zero)
+        '744123456'         → '255744123456'   (local without leading zero)
+
+    Returns '' when the input can't be a dialable number, so callers can
+    hide WhatsApp actions instead of rendering a dead link.
+    """
+    if not raw:
+        return ''
+    raw = str(raw).strip()
+    digits = re.sub(r'\D', '', raw)
+
+    if raw.startswith('+'):
+        pass  # already international — digits are usable as-is
+    elif digits.startswith('00'):
+        digits = digits[2:]
+    elif digits.startswith('0'):
+        digits = default_country_code + digits[1:]
+    elif len(digits) <= 9:
+        # Local number typed without the leading zero
+        digits = default_country_code + digits
+
+    # Full international numbers are 10-15 digits (E.164 upper bound)
+    if not 10 <= len(digits) <= 15:
+        return ''
+    return digits
