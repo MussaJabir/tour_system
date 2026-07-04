@@ -21,14 +21,16 @@ from django.db.models import Q, Count, Sum, DecimalField
 from django.db.models.functions import Coalesce, TruncMonth, TruncDate
 from django.utils import timezone
 
-from .models import ContactMessage, NewsletterSubscriber, FAQ, Testimonial
+from .models import ContactMessage, NewsletterSubscriber, FAQ, SiteSettings, Testimonial
+from .utils import normalize_whatsapp_number
 from .forms import (
     ContactForm, 
     NewsletterSubscriptionForm, 
     ContactMessageReplyForm,
     ContactMessageNotesForm,
     FAQForm,
-    TestimonialForm
+    TestimonialForm,
+    SiteSettingsForm,
 )
 
 # Import models from other apps for dashboard stats
@@ -982,6 +984,43 @@ def dashboard_testimonial_delete(request, pk):
     testimonial.delete()
     messages.success(request, '✅ Testimonial deleted successfully.')
     return redirect('dashboard_testimonial_list')
+
+
+# ==================== SITE SETTINGS DASHBOARD ====================
+
+@login_required
+@staff_member_required
+def dashboard_settings(request):
+    """
+    Dashboard: Site Settings (singleton) — operator-editable configuration.
+    Values here override the corresponding environment variables.
+    """
+    site = SiteSettings.load()
+
+    if request.method == 'POST':
+        form = SiteSettingsForm(request.POST, instance=site)
+        if form.is_valid():
+            form.save()
+            messages.success(request, '✅ Settings saved.')
+            return redirect('dashboard_settings')
+        else:
+            messages.error(request, '❌ Please correct the errors below.')
+    else:
+        form = SiteSettingsForm(instance=site)
+
+    # Effective WhatsApp number after the dashboard → env fallback chain,
+    # so the page can show whether the buttons are actually live.
+    effective_whatsapp = normalize_whatsapp_number(
+        site.whatsapp_number or getattr(settings, 'WHATSAPP_BUSINESS_NUMBER', '')
+    )
+
+    context = {
+        'form': form,
+        'page_title': 'Site Settings',
+        'effective_whatsapp': effective_whatsapp,
+        'env_whatsapp_set': bool(getattr(settings, 'WHATSAPP_BUSINESS_NUMBER', '')),
+    }
+    return render(request, 'core/dashboard/settings.html', context)
 
 
 # ============================================================================

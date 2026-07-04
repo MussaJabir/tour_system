@@ -1,5 +1,5 @@
 {% extends 'backend/base_dashboard.html' %}
-{% load static %}
+{% load static whatsapp_tags %}
 
 {% block title %}Booking {{ booking.booking_reference }} — Dashboard{% endblock %}
 
@@ -43,7 +43,15 @@
         <div class="dash-card">
             <header class="dash-card-header">
                 <div><p class="dash-card-title">Customer</p></div>
-                <a href="{% url 'packages:dashboard_inquiry_detail' booking.inquiry.pk %}" class="text-xs text-bush-700 hover:underline">View inquiry →</a>
+                <div class="flex items-center gap-3">
+                    {% whatsapp_url booking.inquiry.customer_phone 'Hello '|add:booking.inquiry.customer_name|add:', greetings from '|add:site_name|add:'! Regarding your booking '|add:booking.booking_reference|add:': ' as wa_href %}
+                    {% if wa_href %}
+                    <a href="{{ wa_href }}" target="_blank" rel="noopener" class="dash-btn dash-btn-sm dash-btn-secondary">
+                        <i class="fab fa-whatsapp text-emerald-600"></i> WhatsApp
+                    </a>
+                    {% endif %}
+                    <a href="{% url 'packages:dashboard_inquiry_detail' booking.inquiry.pk %}" class="text-xs text-bush-700 hover:underline">View inquiry →</a>
+                </div>
             </header>
             <dl class="grid sm:grid-cols-2 gap-x-6 gap-y-3 text-sm">
                 <div><dt class="text-slate-500 text-xs">Name</dt><dd class="text-slate-900">{{ booking.inquiry.customer_name }}</dd></div>
@@ -131,6 +139,70 @@
             {% else %}
             <p class="text-sm text-slate-500 text-center py-6">No payments recorded yet.</p>
             {% endif %}
+        </div>
+
+        {# Invoices #}
+        <div class="dash-card" x-data="{ showForm: false }">
+            <header class="dash-card-header">
+                <div><p class="dash-card-title">Invoices · {{ booking.invoices.count }}</p></div>
+                <button type="button" @click="showForm = !showForm" class="dash-btn dash-btn-sm dash-btn-secondary">
+                    <i class="fal fa-plus"></i> Issue invoice
+                </button>
+            </header>
+
+            {% if booking.invoices.all %}
+            <div class="overflow-x-auto">
+                <table class="dash-table">
+                    <thead><tr><th>Number</th><th>Type</th><th>Issued</th><th class="text-right">Amount</th><th></th></tr></thead>
+                    <tbody>
+                        {% for inv in booking.invoices.all %}
+                        <tr>
+                            <td class="font-mono text-xs text-slate-500">{{ inv.invoice_number }}</td>
+                            <td class="text-slate-500">{{ inv.get_invoice_type_display }}</td>
+                            <td class="text-slate-500">{{ inv.issued_at|date:'d M Y' }}</td>
+                            <td class="text-right font-medium">{{ inv.currency }} {{ inv.amount|floatformat:0 }}</td>
+                            <td class="text-right whitespace-nowrap">
+                                <a href="{% url 'packages:dashboard_invoice_pdf' inv.pk %}" target="_blank" class="dash-btn dash-btn-sm dash-btn-ghost" title="Download PDF"><i class="fal fa-file-pdf"></i></a>
+                                <form method="post" action="{% url 'packages:dashboard_invoice_email' inv.pk %}" class="inline">
+                                    {% csrf_token %}
+                                    <button type="submit" class="dash-btn dash-btn-sm dash-btn-ghost" title="Email to customer"><i class="fal fa-paper-plane"></i></button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-sm text-slate-500 text-center py-6">No invoices issued yet.</p>
+            {% endif %}
+
+            {# Issue invoice form #}
+            <form method="post" action="{% url 'packages:dashboard_invoice_create' booking.pk %}"
+                  x-show="showForm" x-cloak class="mt-5 pt-5 border-t border-slate-200 space-y-4">
+                {% csrf_token %}
+                <div class="grid sm:grid-cols-3 gap-4">
+                    <div>
+                        <label class="dash-stat-label mb-1 block">Type</label>
+                        {{ invoice_form.invoice_type }}
+                    </div>
+                    <div>
+                        <label class="dash-stat-label mb-1 block">Amount</label>
+                        {{ invoice_form.amount }}
+                    </div>
+                    <div>
+                        <label class="dash-stat-label mb-1 block">Currency</label>
+                        {{ invoice_form.currency }}
+                    </div>
+                </div>
+                <div>
+                    <label class="dash-stat-label mb-1 block">Note (optional)</label>
+                    {{ invoice_form.notes }}
+                </div>
+                <div class="flex justify-end">
+                    <button type="submit" class="dash-btn dash-btn-primary"><i class="fal fa-file-invoice"></i> Issue invoice</button>
+                </div>
+            </form>
         </div>
 
         {# Special requirements #}

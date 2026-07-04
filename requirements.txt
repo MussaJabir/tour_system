@@ -29,6 +29,9 @@ gunicorn==23.0.0
 Pillow==11.0.0
 django-imagekit==5.0.0
 
+# PDF Generation (Phase 10.2 — booking invoices)
+weasyprint==63.1
+
 # Frontend Build (Phase 6 — Safari Editorial overhaul)
 # pytailwindcss bundles the standalone Tailwind CLI binary; no Node required.
 pytailwindcss==0.2.0

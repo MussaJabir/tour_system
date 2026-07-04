@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+{% load humanize %}
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>{{ invoice.invoice_number }}</title>
+<style>
+    @page {
+        size: A4;
+        margin: 1.6cm 1.8cm;
+        @bottom-center {
+            content: "{{ site_name }} · Invoice {{ invoice.invoice_number }}";
+            font-size: 8pt;
+            color: #94a3b8;
+        }
+    }
+    * { box-sizing: border-box; }
+    body {
+        font-family: "DejaVu Sans", sans-serif;
+        font-size: 10pt;
+        color: #1e293b;
+        margin: 0;
+        line-height: 1.5;
+    }
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        border-bottom: 2px solid #4d7c0f;
+        padding-bottom: 16px;
+        margin-bottom: 24px;
+    }
+    .brand {
+        font-size: 20pt;
+        font-weight: bold;
+        color: #4d7c0f;
+        letter-spacing: 0.5px;
+    }
+    .brand-sub { font-size: 9pt; color: #64748b; margin-top: 2px; }
+    .doc-title { text-align: right; }
+    .doc-title h1 {
+        margin: 0;
+        font-size: 18pt;
+        color: #334155;
+        letter-spacing: 1px;
+    }
+    .doc-title .num { font-size: 10pt; color: #64748b; margin-top: 4px; }
+    .meta {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 24px;
+    }
+    .meta .block { width: 48%; }
+    .meta h3 {
+        font-size: 8pt;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: #94a3b8;
+        margin: 0 0 6px 0;
+    }
+    .meta p { margin: 0; font-size: 10pt; }
+    .meta .name { font-weight: bold; font-size: 11pt; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+    thead th {
+        background: #f1f5f9;
+        text-align: left;
+        padding: 8px 10px;
+        font-size: 8pt;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #475569;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    tbody td { padding: 10px; border-bottom: 1px solid #f1f5f9; }
+    .text-right { text-align: right; }
+    .totals { width: 45%; margin-left: 55%; margin-bottom: 24px; }
+    .totals td { padding: 5px 10px; font-size: 10pt; }
+    .totals .grand td {
+        border-top: 2px solid #334155;
+        font-weight: bold;
+        font-size: 12pt;
+        padding-top: 8px;
+    }
+    .totals .due td { color: #b91c1c; font-weight: bold; }
+    .payinfo {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        padding: 14px 16px;
+        margin-bottom: 20px;
+    }
+    .payinfo h3 {
+        font-size: 8pt;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: #94a3b8;
+        margin: 0 0 8px 0;
+    }
+    .payinfo .row { font-size: 9pt; margin-bottom: 2px; }
+    .payinfo .label { color: #64748b; display: inline-block; min-width: 130px; }
+    .footer-note {
+        font-size: 8.5pt;
+        color: #64748b;
+        border-top: 1px solid #e2e8f0;
+        padding-top: 12px;
+        white-space: pre-line;
+    }
+    .badge {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 10px;
+        font-size: 8pt;
+        background: #ecfccb;
+        color: #3f6212;
+    }
+</style>
+</head>
+<body>
+
+<div class="header">
+    <div>
+        <div class="brand">{{ site_name }}</div>
+        <div class="brand-sub">Tour &amp; Safari Operator</div>
+    </div>
+    <div class="doc-title">
+        <h1>INVOICE</h1>
+        <div class="num">{{ invoice.invoice_number }}</div>
+        <div class="num">{{ invoice.issued_at|date:"d M Y" }}</div>
+        <div style="margin-top:4px;"><span class="badge">{{ invoice.get_invoice_type_display }}</span></div>
+    </div>
+</div>
+
+<div class="meta">
+    <div class="block">
+        <h3>Billed to</h3>
+        <p class="name">{{ invoice.customer_name|default:"—" }}</p>
+        {% if invoice.customer_email %}<p>{{ invoice.customer_email }}</p>{% endif %}
+    </div>
+    <div class="block" style="text-align:right;">
+        <h3>Booking</h3>
+        <p class="name">{{ booking.booking_reference }}</p>
+        <p>Departure: {{ booking.departure_date|date:"d M Y" }}</p>
+        <p>{{ booking.num_adults }} adult{{ booking.num_adults|pluralize }}{% if booking.num_children %}, {{ booking.num_children }} child{{ booking.num_children|pluralize:"ren" }}{% endif %}</p>
+    </div>
+</div>
+
+<table>
+    <thead>
+        <tr>
+            <th>Description</th>
+            <th class="text-right">Amount</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+                <strong>{{ invoice.package_name|default:booking.package.name }}</strong><br>
+                <span style="color:#64748b;font-size:9pt;">{{ invoice.get_invoice_type_display }}{% if invoice.notes %} — {{ invoice.notes }}{% endif %}</span>
+            </td>
+            <td class="text-right">{{ invoice.currency }} {{ invoice.amount|floatformat:2|intcomma }}</td>
+        </tr>
+    </tbody>
+</table>
+
+<table class="totals">
+    <tr>
+        <td>This invoice</td>
+        <td class="text-right">{{ invoice.currency }} {{ invoice.amount|floatformat:2|intcomma }}</td>
+    </tr>
+    <tr>
+        <td>Booking total</td>
+        <td class="text-right">{{ booking.currency }} {{ booking.quoted_price|floatformat:2|intcomma }}</td>
+    </tr>
+    <tr>
+        <td>Paid to date</td>
+        <td class="text-right">{{ booking.currency }} {{ booking.total_paid|floatformat:2|intcomma }}</td>
+    </tr>
+    <tr class="due">
+        <td>Balance due</td>
+        <td class="text-right">{{ booking.currency }} {{ booking.balance_due|floatformat:2|intcomma }}</td>
+    </tr>
+</table>
+
+{% if site.has_payment_details %}
+<div class="payinfo">
+    <h3>Payment details</h3>
+    {% if site.bank_account_number %}
+        {% if site.bank_name %}<div class="row"><span class="label">Bank</span>{{ site.bank_name }}</div>{% endif %}
+        {% if site.bank_account_name %}<div class="row"><span class="label">Account name</span>{{ site.bank_account_name }}</div>{% endif %}
+        <div class="row"><span class="label">Account number</span>{{ site.bank_account_number }}</div>
+        {% if site.bank_swift %}<div class="row"><span class="label">SWIFT / BIC</span>{{ site.bank_swift }}</div>{% endif %}
+    {% endif %}
+    {% if site.mpesa_number %}
+        <div class="row"><span class="label">M-Pesa</span>{{ site.mpesa_number }}{% if site.mpesa_name %} ({{ site.mpesa_name }}){% endif %}</div>
+    {% endif %}
+</div>
+{% endif %}
+
+{% if site.invoice_footer_note %}
+<div class="footer-note">{{ site.invoice_footer_note }}</div>
+{% endif %}
+
+</body>
+</html>

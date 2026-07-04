@@ -1007,4 +1007,153 @@ Phase 7 shipped the full Operations Slate dashboard. A senior-dev audit turned u
 
 ---
 
+## Session 028 — 2026-07-03
+
+**Type:** Business planning + Feature (Phase 10 kickoff)
+**Branch:** `feature/whatsapp-click-to-chat`
+
+> Numbering note: work between Session 027 and here (custom quote page fixes,
+> docker entrypoint fix, catalog seeding PR #29) landed on `develop` without
+> individual session logs.
+
+### Business decisions (mentor discussion)
+
+- **Brand name: Enteipa.** System launches under this name.
+- **Dual revenue model locked in**: (1) productized per-operator deployments
+  (setup fee + monthly hosting), (2) Enteipa site as a lead-gen/broker channel
+  passing inquiries to a licensed operator for commission. User handles BRELA
+  registration to operate as an agent; a partner handles social media.
+- **User's action items**: buy domain (Porkbun/Cloudflare recommended), rent
+  VPS (Hetzner CX32 recommended), BRELA registration, written commission
+  agreement with a licensed operator.
+- **New Phase 10 added to todo.md**: WhatsApp integration + invoice PDFs —
+  the two things operators actually ask for. Deliberate launch-line extension.
+
+### What we did (Phase 10.1 — WhatsApp click-to-chat)
+
+1. **`WHATSAPP_BUSINESS_NUMBER` setting** — via `.env` (python-decouple), empty
+   default hides all WhatsApp UI. Added to `.env.example`.
+2. **`core.utils.normalize_whatsapp_number()`** — converts every phone format
+   customers type (`+255…`, `00255…`, `0744…`, `744…`) to wa.me digits format;
+   returns `''` for undialable input so callers hide dead links. Default
+   country code `255`, overridable.
+3. **`core.context_processors.site_settings`** — new context processor (registered
+   in `TEMPLATES`) exposing `site_name` + pre-normalized `whatsapp_number` to
+   every template.
+4. **`{% whatsapp_url number message %}` simple tag** (`core/templatetags/whatsapp_tags.py`)
+   — builds wa.me links with urlencoded prefill text.
+5. **Floating WhatsApp button site-wide** — new partial
+   `templates/frontend/partials/_whatsapp_button.html` included from
+   `base_modern.html`. Prefill adapts to context: package detail names the tour,
+   inquiry success page quotes the reference, generic opener elsewhere. Sits
+   above the sticky mobile CTA bar on package pages (`bottom-24` vs `bottom-6`).
+6. **Inquiry success page** — explicit "Chat with us on WhatsApp" primary button
+   prefilled with the inquiry reference.
+7. **Dashboard actions** — "Reply on WhatsApp" on inquiry detail (Contact
+   preference card) and "WhatsApp" on booking detail (Customer card header),
+   both prefilled with customer name + reference; hidden when the customer's
+   phone can't be normalized. WhatsApp badge on inquiry list rows where
+   `prefer_whatsapp=True`.
+8. **Tailwind rebuilt + `?v=20260703a`** bumped in both base templates;
+   `collectstatic` run.
+9. **Tests** — new `core/tests_whatsapp.py`: 17 tests across 4 classes
+   (normalization matrix, tag behaviour, floating-button rendering incl.
+   hidden-when-unconfigured, dashboard actions incl. staff auth). **All 309
+   tests pass** (292 prior + 17 new).
+10. **Live-verified** on localhost:8000 — button renders with normalized
+    number and urlencoded prefill.
+
+### Follow-up in same PR — dashboard-managed Site Settings
+
+User call (right one): operators buying deployments will never edit `.env`,
+so the WhatsApp number must be editable from the dashboard.
+
+1. **`core.SiteSettings` singleton model** (`TimeStampedModel`, pk forced to 1,
+   Redis-cached via `SiteSettings.load()` with invalidation on save). Migration
+   `core/0002_sitesettings`. Fixed a real bug found by tests: saving a fresh
+   instance over the existing row takes Django's UPDATE path where
+   `auto_now_add` doesn't fire — `save()` now preserves `created_at`.
+2. **Fallback chain** in the context processor: dashboard Site Settings →
+   `WHATSAPP_BUSINESS_NUMBER` env var → hidden.
+3. **Dashboard → System → Settings page** (`/dashboard/settings/`,
+   `@login_required` + `@staff_member_required`) — WhatsApp card with
+   Live/Hidden status badge, shows the effective wa.me link and whether it
+   comes from the env fallback. `SiteSettingsForm` rejects undialable numbers.
+4. **Tests** — 12 more in `core/tests_whatsapp.py` (singleton behaviour,
+   fallback chain, view auth + save + validation). A
+   `SiteSettingsCacheCleanupMixin` drops the Redis key around every test since
+   the test runner shares Redis with the dev server. **All 319 tests pass.**
+
+### Decisions / non-goals
+
+- **No Meta WhatsApp Cloud API yet** — wa.me links need no approval; the Cloud
+  API requires Meta business verification, which needs the BRELA certificate
+  first. Parked as Phase 10.3.
+- **WhatsApp green (`#25D366`) via inline style** — one-off brand colour, not
+  worth a design-system token.
+- **No Django admin registration for SiteSettings** — the dashboard page is
+  the interface; admin would only add a delete footgun on a singleton.
+
+### PR
+- https://github.com/MussaJabir/tour_system/pull/43
+
+---
+
+## Session 029 — 2026-07-03
+
+**Type:** Feature (Phase 10.2)
+**Branch:** `feature/booking-invoice-pdf`
+
+### What we did — booking invoice PDFs
+
+1. **WeasyPrint 63.1** added to `requirements.txt`; Dockerfile gained the
+   native deps (pango, gdk-pixbuf, libffi, shared-mime-info, DejaVu fonts,
+   fontconfig). Images rebuilt (`docker compose build django celery
+   celery-beat`) — user ran the build locally and confirmed the import.
+2. **`packages.Invoice` model** — `INV-YYYYMMDD-NNNNN` sequential numbering
+   (same pattern as booking refs), FK to Booking (`PROTECT`), invoice_type
+   (deposit/balance/full), amount, currency, and **snapshot fields**
+   (customer_name/email, package_name) frozen at issue time so the document
+   stays accurate if the booking/inquiry is later edited. `save()` also sets
+   `issued_at`. Migration `packages/0004_invoice`.
+3. **Payment details on `SiteSettings`** — bank_name, bank_account_name,
+   bank_account_number, bank_swift, mpesa_name, mpesa_number,
+   invoice_footer_note + `has_payment_details` property. New "Payment details"
+   card on the existing `/dashboard/settings/` page. Migration `core/0003`.
+4. **PDF renderer** — `packages/pdf.py::render_invoice_pdf()` renders a
+   self-contained template (`invoices/invoice_pdf.html`, inline CSS, DejaVu,
+   no external assets) to bytes. WeasyPrint imported lazily inside the fn.
+5. **Views** (all staff-gated): `dashboard_invoice_create` (POST from booking
+   detail), `dashboard_invoice_pdf` (inline PDF response),
+   `dashboard_invoice_email` (attaches PDF, sends via new
+   `packages/emails.py::send_invoice_email`). Booking detail gained an
+   Invoices card: list + download/email actions + Alpine-toggle issue form.
+6. **`django.contrib.humanize`** added to INSTALLED_APPS for `intcomma` money
+   formatting on invoices.
+7. **Log noise fix** — WeasyPrint + fontTools emit per-glyph INFO/DEBUG on
+   every render; quieted both loggers to WARNING in `LOGGING`.
+8. **Tests** — new `packages/tests_invoices.py`, 15 tests: numbering,
+   snapshotting (incl. survives inquiry edit), PROTECT on delete, PDF byte
+   output, view auth + create + validation, PDF endpoint content-type, email
+   attachment, settings payment fields. **All 334 tests pass.**
+9. **Live-verified end-to-end over HTTP**: logged in as staff, issued an
+   invoice through the real form, downloaded the PDF (200, application/pdf,
+   ~15KB, valid PDF 1.7) — text extraction confirmed correct customer
+   snapshot, booking ref, totals, and comma-formatted amounts. Sample PDF
+   sent to the user. Test data cleaned from the dev DB afterwards.
+
+### Decisions / non-goals
+
+- **Manual invoice creation** (not auto-on-payment) — invoicing precedes
+  payment in the real flow; staff issue the invoice, customer pays against it.
+- **No logo image on the invoice** — text letterhead keeps the PDF fully
+  self-contained (no base_url/static resolution). Add later if wanted.
+- **SITE_NAME drives the letterhead** — becomes "Enteipa" once the env var is
+  set; no hardcoding.
+
+### PR
+- https://github.com/MussaJabir/tour_system/pull/44
+
+---
+
 _Add new sessions above this line._

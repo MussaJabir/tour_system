@@ -6,7 +6,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib import messages
 from django.core.paginator import Paginator
 from django.db.models import Q, Count, Avg
-from django.http import JsonResponse, Http404
+from django.http import JsonResponse, Http404, HttpResponse
 from django.utils import timezone
 from decimal import Decimal
 
@@ -15,13 +15,13 @@ logger = logging.getLogger(__name__)
 from .models import (
     Package, PackageImage, PackageItinerary, PackageInclusion,
     BookingInquiry, CustomPackage, InquiryMessage,
-    Booking, Passenger, Payment, Departure,
+    Booking, Passenger, Payment, Departure, Invoice,
 )
 from .forms import (
     PackageForm, PackageImageForm, PackageItineraryForm, PackageInclusionForm,
     BookingInquiryForm, InquiryManagementForm, CustomPackageForm,
     InquiryMessageForm, InquiryFilterForm,
-    BookingForm, PassengerForm, PaymentForm, DepartureForm,
+    BookingForm, PassengerForm, PaymentForm, DepartureForm, InvoiceForm,
 )
 from destinations.models import Destination
 
@@ -1427,15 +1427,20 @@ def dashboard_booking_create(request, inquiry_pk=None):
 def dashboard_booking_detail(request, pk):
     booking = get_object_or_404(
         Booking.objects.select_related('package', 'inquiry', 'custom_package', 'staff_assigned')
-                       .prefetch_related('passengers', 'payments'),
+                       .prefetch_related('passengers', 'payments', 'invoices'),
         pk=pk,
     )
     passenger_form = PassengerForm()
     payment_form = PaymentForm()
+    invoice_form = InvoiceForm(initial={
+        'currency': booking.currency,
+        'amount': booking.balance_due,
+    })
     return render(request, 'packages/bookings/dashboard/detail.html', {
         'booking': booking,
         'passenger_form': passenger_form,
         'payment_form': payment_form,
+        'invoice_form': invoice_form,
     })
 
 
@@ -1565,6 +1570,67 @@ def dashboard_payment_delete(request, pk):
         payment.delete()
         messages.success(request, "Payment record deleted.")
     return redirect('packages:dashboard_booking_detail', pk=booking_pk)
+
+
+# ============================================================================
+# INVOICE VIEWS
+# ============================================================================
+
+@login_required
+@staff_member_required
+def dashboard_invoice_create(request, booking_pk):
+    booking = get_object_or_404(Booking, pk=booking_pk)
+    if request.method == 'POST':
+        form = InvoiceForm(request.POST)
+        if form.is_valid():
+            invoice = form.save(commit=False)
+            invoice.booking = booking
+            invoice.issued_by = request.user
+            invoice.save()  # snapshots customer/package details
+            messages.success(
+                request,
+                f"Invoice {invoice.invoice_number} issued "
+                f"({invoice.currency} {invoice.amount})."
+            )
+        else:
+            messages.error(request, "Please fix the errors below.")
+    return redirect('packages:dashboard_booking_detail', pk=booking_pk)
+
+
+@login_required
+@staff_member_required
+def dashboard_invoice_pdf(request, pk):
+    invoice = get_object_or_404(
+        Invoice.objects.select_related('booking', 'booking__inquiry', 'booking__package'),
+        pk=pk,
+    )
+    from .pdf import render_invoice_pdf
+    pdf_bytes = render_invoice_pdf(invoice)
+    response = HttpResponse(pdf_bytes, content_type='application/pdf')
+    response['Content-Disposition'] = f'inline; filename="{invoice.invoice_number}.pdf"'
+    return response
+
+
+@login_required
+@staff_member_required
+def dashboard_invoice_email(request, pk):
+    invoice = get_object_or_404(
+        Invoice.objects.select_related('booking', 'booking__inquiry', 'booking__package'),
+        pk=pk,
+    )
+    if request.method == 'POST':
+        from .emails import send_invoice_email
+        if send_invoice_email(invoice):
+            messages.success(
+                request,
+                f"Invoice {invoice.invoice_number} emailed to {invoice.customer_email}."
+            )
+        else:
+            messages.error(
+                request,
+                "Could not send the invoice — check the customer email and mail settings."
+            )
+    return redirect('packages:dashboard_booking_detail', pk=invoice.booking.pk)
 
 
 # ============================================================================

@@ -1,0 +1,77 @@
+{% extends 'backend/base_dashboard.html' %}
+{% load static %}
+
+{% block title %}Site Settings — Dashboard{% endblock %}
+
+{% block content %}
+
+{% include 'backend/partials/_breadcrumb.html' with crumbs=' ' %}
+{% include 'backend/partials/_page_header.html' with title='Site Settings' subtitle='Contact channels and site configuration. Values here override the server environment.' %}
+
+<form method="post" class="grid lg:grid-cols-[1fr_280px] gap-6">
+    {% csrf_token %}
+
+    <div class="space-y-6 min-w-0">
+        <div class="dash-card">
+            <header class="dash-card-header">
+                <div>
+                    <p class="dash-card-title">WhatsApp</p>
+                    <p class="text-sm text-slate-500 mt-1">Click-to-chat buttons on the public site and dashboard.</p>
+                </div>
+                {% if effective_whatsapp %}
+                    {% include 'backend/partials/_status_badge.html' with label='Live' variant='success' %}
+                {% else %}
+                    {% include 'backend/partials/_status_badge.html' with label='Hidden' variant='warning' %}
+                {% endif %}
+            </header>
+            <div class="space-y-5">
+                {% include 'backend/partials/_dash_form_field.html' with field=form.whatsapp_number %}
+                {% if effective_whatsapp %}
+                <p class="text-xs text-slate-500">
+                    Buttons currently link to <a href="https://wa.me/{{ effective_whatsapp }}" target="_blank" rel="noopener" class="font-mono text-bush-700 hover:underline">wa.me/{{ effective_whatsapp }}</a>{% if not form.whatsapp_number.value and env_whatsapp_set %} (from the server environment — set a number here to override it){% endif %}.
+                </p>
+                {% else %}
+                <p class="text-xs text-amber-700">
+                    No number configured — all WhatsApp buttons are hidden. Enter a number above to enable them.
+                </p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="dash-card">
+            <header class="dash-card-header">
+                <div>
+                    <p class="dash-card-title">Payment details</p>
+                    <p class="text-sm text-slate-500 mt-1">Printed on invoice PDFs so customers know where to pay.</p>
+                </div>
+            </header>
+            <div class="space-y-5">
+                <div class="grid sm:grid-cols-2 gap-5">
+                    {% include 'backend/partials/_dash_form_field.html' with field=form.bank_name %}
+                    {% include 'backend/partials/_dash_form_field.html' with field=form.bank_account_name %}
+                    {% include 'backend/partials/_dash_form_field.html' with field=form.bank_account_number %}
+                    {% include 'backend/partials/_dash_form_field.html' with field=form.bank_swift %}
+                    {% include 'backend/partials/_dash_form_field.html' with field=form.mpesa_name %}
+                    {% include 'backend/partials/_dash_form_field.html' with field=form.mpesa_number %}
+                </div>
+                {% include 'backend/partials/_dash_form_field.html' with field=form.invoice_footer_note %}
+            </div>
+        </div>
+
+        {% if form.non_field_errors %}
+            <div class="dash-card border-rose-200 bg-rose-50 text-rose-700 text-sm">
+                {% for err in form.non_field_errors %}<p>{{ err }}</p>{% endfor %}
+            </div>
+        {% endif %}
+    </div>
+
+    <aside class="lg:sticky lg:top-20 lg:self-start space-y-4">
+        <div class="dash-card">
+            <p class="dash-card-title mb-4">Save</p>
+            <button type="submit" class="dash-btn dash-btn-primary w-full"><i class="fal fa-check"></i> Save settings</button>
+            <p class="text-xs text-slate-500 mt-3">Changes apply immediately across the public site and dashboard.</p>
+        </div>
+    </aside>
+</form>
+
+{% endblock %}

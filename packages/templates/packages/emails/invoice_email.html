@@ -1,0 +1,39 @@
+{% extends "packages/emails/base.html" %}
+
+{% block title %}Invoice {{ invoice.invoice_number }}{% endblock %}
+
+{% block header_title %}Your Invoice{% endblock %}
+
+{% block content %}
+<p>Dear {{ invoice.customer_name|default:"Valued Customer" }},</p>
+
+<p>
+    Please find attached invoice <strong>{{ invoice.invoice_number }}</strong> for your
+    booking <strong>{{ booking.booking_reference }}</strong>.
+</p>
+
+<div class="info-box">
+    <div class="info-row">
+        <span class="info-label">Invoice Number:</span>
+        <span class="info-value"><strong>{{ invoice.invoice_number }}</strong></span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">Type:</span>
+        <span class="info-value">{{ invoice.get_invoice_type_display }}</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">Amount:</span>
+        <span class="info-value"><strong>{{ invoice.currency }} {{ invoice.amount|floatformat:2 }}</strong></span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">Balance Due:</span>
+        <span class="info-value">{{ booking.currency }} {{ booking.balance_due|floatformat:2 }}</span>
+    </div>
+</div>
+
+<p>The full invoice, including our payment details, is attached as a PDF.</p>
+
+<p>If you have any questions, simply reply to this email and our team will be happy to help.</p>
+
+<p>Warm regards,<br><strong>{{ site_name }} Team</strong></p>
+{% endblock %}

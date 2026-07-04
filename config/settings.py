@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.sitemaps',
+    'django.contrib.humanize',
     'rest_framework',
     'rest_framework.authtoken',
     'corsheaders',
@@ -95,6 +96,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'django.template.context_processors.media',
                 'django.template.context_processors.static',
+                'core.context_processors.site_settings',
             ],
         },
     },
@@ -289,6 +291,18 @@ LOGGING = {
             'level': 'INFO',
             'propagate': False,
         },
+        # WeasyPrint + fontTools emit verbose per-glyph INFO/DEBUG on every
+        # PDF render — quiet them so invoice generation doesn't flood logs.
+        'weasyprint': {
+            'handlers': ['console'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
+        'fontTools': {
+            'handlers': ['console'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
     },
 }
 
@@ -311,3 +325,7 @@ STAFF_NOTIFICATION_EMAILS = config('STAFF_NOTIFICATION_EMAILS', default='', cast
 # Site configuration for email templates
 SITE_NAME = config('SITE_NAME', default='Tour Management System')
 SITE_URL = config('SITE_URL', default='http://localhost:8000')
+
+# WhatsApp click-to-chat — business number in international format
+# (e.g. +255744000000). Leave empty to hide all WhatsApp buttons.
+WHATSAPP_BUSINESS_NUMBER = config('WHATSAPP_BUSINESS_NUMBER', default='')

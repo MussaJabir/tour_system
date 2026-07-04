@@ -1,5 +1,5 @@
 {% extends 'backend/base_dashboard.html' %}
-{% load static %}
+{% load static whatsapp_tags %}
 
 {% block title %}Inquiry {{ inquiry.inquiry_reference }} — Dashboard{% endblock %}
 
@@ -160,6 +160,12 @@
                 {% if inquiry.prefer_phone %}<li><i class="fal fa-phone text-slate-400 mr-2"></i>Phone</li>{% endif %}
                 {% if inquiry.prefer_whatsapp %}<li><i class="fab fa-whatsapp text-slate-400 mr-2"></i>WhatsApp</li>{% endif %}
             </ul>
+            {% whatsapp_url inquiry.customer_phone 'Hello '|add:inquiry.customer_name|add:', greetings from '|add:site_name|add:'! Regarding your inquiry '|add:inquiry.inquiry_reference|add:': ' as wa_reply %}
+            {% if wa_reply %}
+            <a href="{{ wa_reply }}" target="_blank" rel="noopener" class="dash-btn dash-btn-secondary w-full justify-center mt-4">
+                <i class="fab fa-whatsapp text-emerald-600"></i> Reply on WhatsApp
+            </a>
+            {% endif %}
         </div>
     </aside>
 </div>
