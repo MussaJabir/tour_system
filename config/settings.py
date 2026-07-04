@@ -250,7 +250,14 @@ CORS_ALLOW_CREDENTIALS = True
 
 # Security Settings (for production)
 if not DEBUG:
-    SECURE_SSL_REDIRECT = True
+    # Behind a TLS-terminating proxy (Cloudflare / nginx), trust the
+    # X-Forwarded-Proto header so Django can tell an HTTPS request from an
+    # HTTP one. Without this, request.is_secure() is always False behind a
+    # proxy and SECURE_SSL_REDIRECT loops forever.
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    # Env-controlled so we can bring a new deployment up over plain HTTP for
+    # verification before the TLS/CDN layer is in front of it. Default True.
+    SECURE_SSL_REDIRECT = config('SECURE_SSL_REDIRECT', default=True, cast=bool)
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
     SECURE_BROWSER_XSS_FILTER = True
