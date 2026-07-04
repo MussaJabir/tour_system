@@ -1254,3 +1254,79 @@ class Payment(TimeStampedModel):
             f"{self.booking.booking_reference} - "
             f"{self.get_payment_type_display()} {self.currency} {self.amount}"
         )
+
+
+class Invoice(TimeStampedModel):
+    """
+    A numbered, immutable invoice issued against a Booking.
+
+    Customer / package details are snapshotted at issue time so the document
+    stays historically accurate even if the booking or its inquiry is later
+    edited or unlinked. Numbers are sequential per day (INV-YYYYMMDD-NNNNN)
+    — do not reuse or delete numbers once issued (TRA bookkeeping).
+    """
+    INVOICE_TYPE_CHOICES = [
+        ('deposit', 'Deposit Invoice'),
+        ('balance', 'Balance Invoice'),
+        ('full', 'Full Invoice'),
+    ]
+
+    invoice_number = models.CharField(max_length=50, unique=True, editable=False, db_index=True)
+    booking = models.ForeignKey(
+        Booking, on_delete=models.PROTECT, related_name='invoices',
+    )
+    invoice_type = models.CharField(
+        max_length=20, choices=INVOICE_TYPE_CHOICES, default='deposit'
+    )
+    amount = models.DecimalField(max_digits=12, decimal_places=2, validators=[MinValueValidator(Decimal('0.01'))])
+    currency = models.CharField(max_length=3, default='USD')
+
+    # Snapshot of who/what this invoice is for, frozen at issue time.
+    customer_name = models.CharField(max_length=200, blank=True)
+    customer_email = models.EmailField(blank=True)
+    package_name = models.CharField(max_length=255, blank=True)
+
+    notes = models.TextField(blank=True, help_text="Optional note shown on the invoice")
+    issued_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True, related_name='issued_invoices',
+    )
+    issued_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Invoice'
+        verbose_name_plural = 'Invoices'
+        indexes = [
+            models.Index(fields=['booking', '-created_at']),
+        ]
+
+    def __str__(self):
+        return f"{self.invoice_number} - {self.get_invoice_type_display()}"
+
+    def save(self, *args, **kwargs):
+        from django.utils import timezone
+
+        if not self.invoice_number:
+            date_str = timezone.now().strftime('%Y%m%d')
+            last = Invoice.objects.filter(
+                invoice_number__startswith=f'INV-{date_str}'
+            ).order_by('-invoice_number').first()
+            seq = int(last.invoice_number.split('-')[-1]) + 1 if last else 1
+            self.invoice_number = f'INV-{date_str}-{seq:05d}'
+
+        if self.issued_at is None:
+            self.issued_at = timezone.now()
+
+        # Snapshot customer / package details from the booking on first save.
+        if not self.customer_name or not self.package_name:
+            booking = self.booking
+            if not self.customer_name and booking.inquiry_id:
+                self.customer_name = booking.inquiry.customer_name
+            if not self.customer_email and booking.inquiry_id:
+                self.customer_email = booking.inquiry.customer_email
+            if not self.package_name and booking.package_id:
+                self.package_name = booking.package.name
+            if not self.currency:
+                self.currency = booking.currency
+
+        super().save(*args, **kwargs)

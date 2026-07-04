@@ -1099,4 +1099,61 @@ so the WhatsApp number must be editable from the dashboard.
 
 ---
 
+## Session 029 — 2026-07-03
+
+**Type:** Feature (Phase 10.2)
+**Branch:** `feature/booking-invoice-pdf`
+
+### What we did — booking invoice PDFs
+
+1. **WeasyPrint 63.1** added to `requirements.txt`; Dockerfile gained the
+   native deps (pango, gdk-pixbuf, libffi, shared-mime-info, DejaVu fonts,
+   fontconfig). Images rebuilt (`docker compose build django celery
+   celery-beat`) — user ran the build locally and confirmed the import.
+2. **`packages.Invoice` model** — `INV-YYYYMMDD-NNNNN` sequential numbering
+   (same pattern as booking refs), FK to Booking (`PROTECT`), invoice_type
+   (deposit/balance/full), amount, currency, and **snapshot fields**
+   (customer_name/email, package_name) frozen at issue time so the document
+   stays accurate if the booking/inquiry is later edited. `save()` also sets
+   `issued_at`. Migration `packages/0004_invoice`.
+3. **Payment details on `SiteSettings`** — bank_name, bank_account_name,
+   bank_account_number, bank_swift, mpesa_name, mpesa_number,
+   invoice_footer_note + `has_payment_details` property. New "Payment details"
+   card on the existing `/dashboard/settings/` page. Migration `core/0003`.
+4. **PDF renderer** — `packages/pdf.py::render_invoice_pdf()` renders a
+   self-contained template (`invoices/invoice_pdf.html`, inline CSS, DejaVu,
+   no external assets) to bytes. WeasyPrint imported lazily inside the fn.
+5. **Views** (all staff-gated): `dashboard_invoice_create` (POST from booking
+   detail), `dashboard_invoice_pdf` (inline PDF response),
+   `dashboard_invoice_email` (attaches PDF, sends via new
+   `packages/emails.py::send_invoice_email`). Booking detail gained an
+   Invoices card: list + download/email actions + Alpine-toggle issue form.
+6. **`django.contrib.humanize`** added to INSTALLED_APPS for `intcomma` money
+   formatting on invoices.
+7. **Log noise fix** — WeasyPrint + fontTools emit per-glyph INFO/DEBUG on
+   every render; quieted both loggers to WARNING in `LOGGING`.
+8. **Tests** — new `packages/tests_invoices.py`, 15 tests: numbering,
+   snapshotting (incl. survives inquiry edit), PROTECT on delete, PDF byte
+   output, view auth + create + validation, PDF endpoint content-type, email
+   attachment, settings payment fields. **All 334 tests pass.**
+9. **Live-verified end-to-end over HTTP**: logged in as staff, issued an
+   invoice through the real form, downloaded the PDF (200, application/pdf,
+   ~15KB, valid PDF 1.7) — text extraction confirmed correct customer
+   snapshot, booking ref, totals, and comma-formatted amounts. Sample PDF
+   sent to the user. Test data cleaned from the dev DB afterwards.
+
+### Decisions / non-goals
+
+- **Manual invoice creation** (not auto-on-payment) — invoicing precedes
+  payment in the real flow; staff issue the invoice, customer pays against it.
+- **No logo image on the invoice** — text letterhead keeps the PDF fully
+  self-contained (no base_url/static resolution). Add later if wanted.
+- **SITE_NAME drives the letterhead** — becomes "Enteipa" once the env var is
+  set; no hardcoding.
+
+### PR
+- https://github.com/MussaJabir/tour_system/pull/44
+
+---
+
 _Add new sessions above this line._

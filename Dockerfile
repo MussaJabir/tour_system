@@ -9,12 +9,20 @@ ENV PYTHONUNBUFFERED=1
 WORKDIR /app
 
 # Install system dependencies
+# (pango/gdk-pixbuf/fontconfig + DejaVu fonts are WeasyPrint runtime deps for invoice PDFs)
 RUN apt-get update && apt-get install -y \
     postgresql-client \
     build-essential \
     libpq-dev \
     gettext \
     netcat-openbsd \
+    libpango-1.0-0 \
+    libpangoft2-1.0-0 \
+    libgdk-pixbuf-2.0-0 \
+    libffi-dev \
+    shared-mime-info \
+    fonts-dejavu-core \
+    fontconfig \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python dependencies

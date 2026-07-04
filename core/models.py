@@ -483,9 +483,34 @@ class SiteSettings(TimeStampedModel):
         ),
     )
 
+    # Payment details — printed on invoice PDFs (Phase 10.2)
+    bank_name = models.CharField(max_length=150, blank=True)
+    bank_account_name = models.CharField(
+        max_length=200, blank=True, help_text="Account holder name as it appears at the bank"
+    )
+    bank_account_number = models.CharField(max_length=100, blank=True)
+    bank_swift = models.CharField(
+        max_length=50, blank=True, verbose_name="Bank SWIFT / BIC"
+    )
+    mpesa_name = models.CharField(
+        max_length=150, blank=True, verbose_name="M-Pesa account name"
+    )
+    mpesa_number = models.CharField(
+        max_length=50, blank=True, verbose_name="M-Pesa number / Lipa number"
+    )
+    invoice_footer_note = models.TextField(
+        blank=True,
+        help_text="Optional note printed at the bottom of every invoice (terms, thank-you, etc.)",
+    )
+
     class Meta:
         verbose_name = "Site Settings"
         verbose_name_plural = "Site Settings"
+
+    @property
+    def has_payment_details(self):
+        """True when at least one payout channel is configured."""
+        return bool(self.bank_account_number or self.mpesa_number)
 
     def __str__(self):
         return "Site settings"

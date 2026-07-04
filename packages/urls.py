@@ -89,6 +89,11 @@ urlpatterns = [
     path('dashboard/bookings/<int:booking_pk>/payments/record/', views.dashboard_payment_record, name='dashboard_payment_record'),
     path('dashboard/payments/<int:pk>/delete/', views.dashboard_payment_delete, name='dashboard_payment_delete'),
 
+    # Invoices
+    path('dashboard/bookings/<int:booking_pk>/invoices/create/', views.dashboard_invoice_create, name='dashboard_invoice_create'),
+    path('dashboard/invoices/<int:pk>/pdf/', views.dashboard_invoice_pdf, name='dashboard_invoice_pdf'),
+    path('dashboard/invoices/<int:pk>/email/', views.dashboard_invoice_email, name='dashboard_invoice_email'),
+
     # ============================================================================
     # DEPARTURE / AVAILABILITY CALENDAR
     # ============================================================================

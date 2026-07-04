@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.sitemaps',
+    'django.contrib.humanize',
     'rest_framework',
     'rest_framework.authtoken',
     'corsheaders',
@@ -288,6 +289,18 @@ LOGGING = {
         'celery': {
             'handlers': ['console'],
             'level': 'INFO',
+            'propagate': False,
+        },
+        # WeasyPrint + fontTools emit verbose per-glyph INFO/DEBUG on every
+        # PDF render — quiet them so invoice generation doesn't flood logs.
+        'weasyprint': {
+            'handlers': ['console'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
+        'fontTools': {
+            'handlers': ['console'],
+            'level': 'WARNING',
             'propagate': False,
         },
     },

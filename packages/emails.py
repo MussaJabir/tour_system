@@ -3,10 +3,14 @@ Email notification utilities for the packages app.
 Handles sending emails for inquiries, custom packages, and client actions.
 """
 
+import logging
+
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.conf import settings
 from django.utils.html import strip_tags
+
+logger = logging.getLogger(__name__)
 
 
 def send_inquiry_confirmation_email(inquiry):
@@ -245,3 +249,46 @@ def send_custom_package_expiry_reminder(custom_package):
         print(f"Error sending expiry reminder email: {e}")
         return False
 
+
+
+def send_invoice_email(invoice):
+    """
+    Email an invoice PDF to the customer.
+
+    Returns True on success, False if there is no recipient or sending fails.
+    """
+    to_email = invoice.customer_email or (
+        invoice.booking.inquiry.customer_email if invoice.booking.inquiry_id else ''
+    )
+    if not to_email:
+        logger.warning("No recipient email for invoice %s", invoice.invoice_number)
+        return False
+
+    from .pdf import render_invoice_pdf
+
+    site_name = getattr(settings, 'SITE_NAME', 'Tour System')
+    subject = f'Invoice {invoice.invoice_number} — {site_name}'
+
+    html_content = render_to_string('packages/emails/invoice_email.html', {
+        'invoice': invoice,
+        'booking': invoice.booking,
+        'site_name': site_name,
+    })
+    text_content = strip_tags(html_content)
+
+    email = EmailMultiAlternatives(
+        subject=subject,
+        body=text_content,
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        to=[to_email],
+    )
+    email.attach_alternative(html_content, "text/html")
+
+    try:
+        pdf_bytes = render_invoice_pdf(invoice)
+        email.attach(f'{invoice.invoice_number}.pdf', pdf_bytes, 'application/pdf')
+        email.send(fail_silently=False)
+        return True
+    except Exception:
+        logger.exception("Error sending invoice email for %s", invoice.invoice_number)
+        return False
