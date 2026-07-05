@@ -87,10 +87,12 @@ Vars:
         </div>
     </div>
 
-    {# Django's ClearableFileInput emits a separate "clear" checkbox when
+    {% comment %}
+       Django's ClearableFileInput emits a separate "clear" checkbox when
        there's an existing value. We hide-and-track it ourselves so the
        Remove button above can flip it without operators ever seeing the
-       raw checkbox. #}
+       raw checkbox.
+    {% endcomment %}
     {% if field.value and field.field.required is False %}
     <label class="hidden">
         <input type="checkbox" name="{{ field.html_name }}-clear" id="{{ field.id_for_label }}-clear" x-ref="clearCheckbox">

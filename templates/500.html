@@ -1,6 +1,5 @@
 {% load static %}<!DOCTYPE html>
-{# 500 errors render without RequestContext, so we can't rely on context processors
-   or {% url %} tags. Keep this template self-contained. #}
+{# 500 errors render without RequestContext — keep this template self-contained (no context processors or url tags). #}
 <html lang="en">
 <head>
     <meta charset="utf-8">
