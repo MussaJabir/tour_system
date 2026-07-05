@@ -1,9 +1,11 @@
 {% load whatsapp_tags %}
-{# Floating WhatsApp click-to-chat button — included site-wide from base_modern.html.
+{% comment %}
+   Floating WhatsApp click-to-chat button — included site-wide from base_modern.html.
    Renders nothing when WHATSAPP_BUSINESS_NUMBER is unset (see core.context_processors).
    Prefill adapts to page context: package detail names the tour, inquiry success
    quotes the reference, everything else gets a generic opener. On package pages the
-   button sits above the sticky mobile CTA bar. #}
+   button sits above the sticky mobile CTA bar.
+{% endcomment %}
 {% if whatsapp_number %}
 
 {% if package.name %}
