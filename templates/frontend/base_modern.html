@@ -7,13 +7,13 @@
     <meta name="description" content="{% block meta_description %}Bespoke East African safaris, cultural journeys, and tailor-made tours. Crafted by Tanzania experts.{% endblock %}">
     <meta name="keywords" content="{% block meta_keywords %}Tanzania safari, Serengeti tours, Ngorongoro, Kilimanjaro climbs, East Africa travel{% endblock %}">
 
-    <title>{% block title %}Tour System — East African Journeys{% endblock %}</title>
+    <title>{% block title %}{{ site_name }} — East African Journeys{% endblock %}</title>
 
     {% block canonical %}{% endblock %}
 
     {# Open Graph #}
     <meta property="og:type" content="{% block og_type %}website{% endblock %}">
-    <meta property="og:title" content="{% block og_title %}{% block title2 %}Tour System — East African Journeys{% endblock %}{% endblock %}">
+    <meta property="og:title" content="{% block og_title %}{% block title2 %}{{ site_name }} — East African Journeys{% endblock %}{% endblock %}">
     <meta property="og:description" content="{% block og_description %}Bespoke East African safaris and curated tours.{% endblock %}">
     <meta property="og:image" content="{% block og_image %}{% endblock %}">
     <meta property="og:url" content="{% block og_url %}{{ request.build_absolute_uri }}{% endblock %}">
