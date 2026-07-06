@@ -8,7 +8,7 @@ when {% url %} matches request.path.
     {# Brand + close (mobile) #}
     <div class="flex items-center justify-between px-5 py-5 border-b border-slate-200">
         <a href="{% url 'dashboard_home' %}" class="flex items-center gap-2 group">
-            <span class="font-display text-2xl tracking-tight text-slate-900">Tour<span class="text-bush-600">.</span></span>
+            <span class="font-display text-2xl tracking-tight text-slate-900">{{ site_name }}<span class="text-bush-600">.</span></span>
             <span class="text-xs uppercase tracking-wider text-slate-400">Staff</span>
         </a>
         <button @click="sidebarOpen = false"
