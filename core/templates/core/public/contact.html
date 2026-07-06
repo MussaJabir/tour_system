@@ -1,7 +1,7 @@
 {% extends 'frontend/base_modern.html' %}
 {% load static %}
 
-{% block title %}Contact — Tour System{% endblock %}
+{% block title %}Contact — {{ site_name }}{% endblock %}
 {% block meta_description %}Get in touch with our Tanzania safari team. We reply to every inquiry within 24 hours.{% endblock %}
 
 {% block content %}
@@ -80,7 +80,7 @@
                             <span class="w-9 h-9 rounded-full bg-bush-700 text-ivory flex items-center justify-center flex-shrink-0"><i class="fal fa-envelope"></i></span>
                             <div>
                                 <p class="font-medium text-charcoal">Email us</p>
-                                <a href="mailto:hello@toursystem.com" class="text-mist hover:text-bush-700 transition mt-0.5 block">hello@toursystem.com</a>
+                                <a href="mailto:hello@enteipa.com" class="text-mist hover:text-bush-700 transition mt-0.5 block">hello@enteipa.com</a>
                             </div>
                         </li>
                         <li class="flex gap-4">
@@ -139,7 +139,7 @@
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; OpenStreetMap'
         }).addTo(map);
-        L.marker([-3.3869, 36.6830]).addTo(map).bindPopup('<b>Tour System</b><br>Arusha, Tanzania');
+        L.marker([-3.3869, 36.6830]).addTo(map).bindPopup('<b>{{ site_name }}</b><br>Arusha, Tanzania');
     });
 </script>
 {% endblock %}

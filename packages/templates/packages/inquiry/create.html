@@ -1,7 +1,7 @@
 {% extends 'frontend/base_modern.html' %}
 {% load static %}
 
-{% block title %}{% if package %}Plan {{ package.name }}{% else %}Plan Your Trip{% endif %} — Tour System{% endblock %}
+{% block title %}{% if package %}Plan {{ package.name }}{% else %}Plan Your Trip{% endif %} — {{ site_name }}{% endblock %}
 {% block meta_description %}Tell us what you have in mind and our team will write back within 24 hours with a draft itinerary built around it.{% endblock %}
 
 {% block content %}

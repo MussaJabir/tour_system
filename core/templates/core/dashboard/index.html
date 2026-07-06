@@ -1,7 +1,7 @@
 {% extends 'backend/base_dashboard.html' %}
 {% load static %}
 
-{% block title %}Dashboard — Tour System{% endblock %}
+{% block title %}Dashboard — {{ site_name }}{% endblock %}
 
 {% block topbar_extras %}
 <a href="{% url 'packages:dashboard_booking_create' %}" class="dash-btn dash-btn-primary">
