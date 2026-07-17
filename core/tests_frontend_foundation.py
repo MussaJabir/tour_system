@@ -55,7 +55,8 @@ class BaseModernTemplateTests(TestCase):
         request = RequestFactory().get('/')
         html = template.render(Context({'request': request}))
         self.assertIn('<p>hello</p>', html)
-        self.assertIn('Tour System', html)
+        # Brand name is now driven by SITE_NAME; assert the stable tagline instead.
+        self.assertIn('East African Journeys', html)
         self.assertIn('tailwind.css', html)
 
     def test_base_modern_defines_required_blocks(self):
