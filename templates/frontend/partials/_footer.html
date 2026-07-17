@@ -30,8 +30,17 @@
             </form>
         </div>
 
+        {# Brand band — logo dissolves into the dark footer via screen blend #}
+        <div class="pt-16 flex justify-center">
+            <img src="{% static 'frontend/assets/images/logos/footer-logo.png' %}"
+                 alt="Enteipa Adventures"
+                 class="w-full max-w-xl h-auto select-none pointer-events-none"
+                 style="mix-blend-mode: screen;"
+                 loading="lazy">
+        </div>
+
         {# Middle: columns #}
-        <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-10 pt-16">
+        <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-10 pt-12">
 
             <div class="lg:col-span-1">
                 <span class="font-display text-2xl">{{ site_short_name }}<span class="text-sand-400">.</span></span>
