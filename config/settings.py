@@ -331,6 +331,10 @@ STAFF_NOTIFICATION_EMAILS = config('STAFF_NOTIFICATION_EMAILS', default='', cast
 
 # Site configuration for email templates
 SITE_NAME = config('SITE_NAME', default='Tour Management System')
+# Short brand for the header/sidebar wordmark. Defaults to the first word of
+# SITE_NAME (e.g. "Enteipa Adventures" -> "Enteipa"); override explicitly if
+# that isn't the right mark.
+SITE_SHORT_NAME = config('SITE_SHORT_NAME', default='')
 SITE_URL = config('SITE_URL', default='http://localhost:8000')
 
 # WhatsApp click-to-chat — business number in international format
