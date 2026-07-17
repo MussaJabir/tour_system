@@ -8,7 +8,9 @@
 
     <title>{% block title %}Dashboard — {{ site_name }}{% endblock %}</title>
 
-    <link rel="shortcut icon" href="{% static 'frontend/assets/images/logos/favicon.png' %}" type="image/x-icon">
+    <link rel="icon" href="{% static 'frontend/assets/images/logos/favicon.ico' %}" sizes="any">
+    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'frontend/assets/images/logos/favicon-32.png' %}">
+    <link rel="apple-touch-icon" href="{% static 'frontend/assets/images/logos/apple-touch-icon.png' %}">
 
     {# Inter only — no Fraunces in the dashboard. Variable font, narrow weight range to keep load small. #}
     <link rel="preconnect" href="https://fonts.googleapis.com">
