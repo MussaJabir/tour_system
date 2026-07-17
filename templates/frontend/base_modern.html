@@ -15,12 +15,18 @@
     <meta property="og:type" content="{% block og_type %}website{% endblock %}">
     <meta property="og:title" content="{% block og_title %}{% block title2 %}{{ site_name }} — East African Journeys{% endblock %}{% endblock %}">
     <meta property="og:description" content="{% block og_description %}Bespoke East African safaris and curated tours.{% endblock %}">
-    <meta property="og:image" content="{% block og_image %}{% endblock %}">
+    <meta property="og:image" content="{% block og_image %}{{ request.scheme }}://{{ request.get_host }}{% static 'frontend/assets/images/logos/og-default.png' %}{% endblock %}">
+    <meta name="twitter:card" content="summary_large_image">
     <meta property="og:url" content="{% block og_url %}{{ request.build_absolute_uri }}{% endblock %}">
 
     {% block meta_tags %}{% endblock %}
 
-    <link rel="shortcut icon" href="{% static 'frontend/assets/images/logos/favicon.png' %}" type="image/x-icon">
+    {# Favicons + app icons (generated from the Enteipa Adventures logo) #}
+    <link rel="icon" href="{% static 'frontend/assets/images/logos/favicon.ico' %}" sizes="any">
+    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'frontend/assets/images/logos/favicon-32.png' %}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{% static 'frontend/assets/images/logos/favicon-16.png' %}">
+    <link rel="apple-touch-icon" href="{% static 'frontend/assets/images/logos/apple-touch-icon.png' %}">
+    <link rel="manifest" href="{% static 'frontend/site.webmanifest' %}">
 
     {# Google variable fonts — Fraunces (display) + Inter (body) #}
     <link rel="preconnect" href="https://fonts.googleapis.com">
