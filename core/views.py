@@ -8,6 +8,7 @@ Views for:
 - Testimonials (dashboard)
 """
 from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
@@ -285,12 +286,10 @@ def contact_page(request):
                 # Log error but don't fail the submission
                 print(f"Error sending notification email: {e}")
             
-            # Success message
-            messages.success(
-                request,
-                '✅ Thank you for contacting us! We\'ll get back to you within 24 hours.'
-            )
-            return redirect('contact_page')
+            # Stash the first name so the success panel can greet them,
+            # then PRG-redirect to the confirmation state (avoids resubmit on refresh)
+            request.session['contact_sent_name'] = (contact_msg.name or '').strip().split(' ')[0]
+            return redirect(f"{reverse('contact_page')}?sent=1")
         else:
             messages.error(
                 request,
@@ -298,10 +297,13 @@ def contact_page(request):
             )
     else:
         form = ContactForm()
-    
+
+    sent = request.GET.get('sent') == '1'
     context = {
         'form': form,
         'page_title': 'Contact Us',
+        'sent': sent,
+        'sent_name': request.session.pop('contact_sent_name', '') if sent else '',
     }
     return render(request, 'core/public/contact.html', context)
 
