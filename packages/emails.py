@@ -4,6 +4,7 @@ Handles sending emails for inquiries, custom packages, and client actions.
 """
 
 import logging
+from email.utils import parseaddr
 
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
@@ -11,6 +12,12 @@ from django.conf import settings
 from django.utils.html import strip_tags
 
 logger = logging.getLogger(__name__)
+
+
+def _contact_email():
+    """Our public/business email (bare address, no display name)."""
+    from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', '')
+    return parseaddr(from_email)[1] or from_email
 
 
 def send_inquiry_confirmation_email(inquiry):
@@ -26,6 +33,7 @@ def send_inquiry_confirmation_email(inquiry):
     html_content = render_to_string('packages/emails/inquiry_confirmation.html', {
         'inquiry': inquiry,
         'site_name': getattr(settings, 'SITE_NAME', 'Tour System'),
+        'contact_email': _contact_email(),
     })
     
     # Create plain text version
