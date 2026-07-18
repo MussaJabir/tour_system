@@ -666,30 +666,35 @@ Reply ASAP - This is a potential customer! 💰
 
 def send_contact_reply_email(contact_msg, reply_message):
     """
-    Send reply email to customer who submitted contact form.
+    Send a branded reply email to a customer who used the contact form.
+
+    Body is the staff's typed reply; the sign-off comes from the dashboard
+    Site Settings (SiteSettings.effective_email_signature) so it can be edited
+    without touching code.
     """
-    subject = f'Re: {contact_msg.subject}'
-    message = f"""
-Hi {contact_msg.name},
+    from django.core.mail import EmailMultiAlternatives
+    from django.template.loader import render_to_string
+    from django.utils.html import strip_tags
 
-Thank you for contacting us! Here's our response:
+    site = SiteSettings.load()
+    context = {
+        'name': contact_msg.name,
+        'subject': contact_msg.subject,
+        'reply_message': reply_message,
+        'signature': site.effective_email_signature,
+        'site_name': getattr(settings, 'SITE_NAME', 'Our Team'),
+    }
+    html_content = render_to_string('core/emails/contact_reply.html', context)
+    text_content = strip_tags(html_content)
 
-{reply_message}
-
----
-Best regards,
-Tour Management Team
-
-If you have any other questions, feel free to reply to this email.
-    """
-    
-    send_mail(
-        subject=subject,
-        message=message,
+    email = EmailMultiAlternatives(
+        subject=f'Re: {contact_msg.subject}',
+        body=text_content,
         from_email=settings.DEFAULT_FROM_EMAIL,
-        recipient_list=[contact_msg.email],
-        fail_silently=False,
+        to=[contact_msg.email],
     )
+    email.attach_alternative(html_content, 'text/html')
+    email.send(fail_silently=False)
 
 
 def send_newsletter_welcome_email(subscriber):

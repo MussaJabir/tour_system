@@ -1,0 +1,21 @@
+{% extends "packages/emails/base.html" %}
+
+{% block title %}Re: {{ subject }}{% endblock %}
+
+{% block header_title %}{{ site_name }}{% endblock %}
+
+{% block content %}
+<p>Hi {{ name }},</p>
+<p>Thank you for reaching out to us. Here's our response:</p>
+
+<div class="info-box" style="white-space: pre-line;">{{ reply_message }}</div>
+
+<p style="margin-top: 24px; white-space: pre-line;">{{ signature }}</p>
+{% endblock %}
+
+{% block footer %}
+<p><strong>{{ site_name }}</strong><br>Arusha, Tanzania · East Africa</p>
+<p style="margin-top: 10px; color: #999; font-size: 11px;">
+    You can reply directly to this email — it reaches our team.
+</p>
+{% endblock %}
