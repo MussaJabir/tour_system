@@ -389,6 +389,7 @@ class SiteSettingsForm(forms.ModelForm):
             'whatsapp_number',
             'bank_name', 'bank_account_name', 'bank_account_number', 'bank_swift',
             'mpesa_name', 'mpesa_number', 'invoice_footer_note',
+            'email_signature',
         ]
         widgets = {
             'whatsapp_number': forms.TextInput(attrs={
@@ -402,6 +403,7 @@ class SiteSettingsForm(forms.ModelForm):
             'mpesa_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Registered name'}),
             'mpesa_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. 0744 000 000 or Lipa number'}),
             'invoice_footer_note': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Terms, thank-you note, etc.'}),
+            'email_signature': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Warm regards,\nMussa — Enteipa Adventures, Arusha'}),
         }
         labels = {
             'whatsapp_number': 'WhatsApp Number',
@@ -412,6 +414,7 @@ class SiteSettingsForm(forms.ModelForm):
             'mpesa_name': 'M-Pesa Name',
             'mpesa_number': 'M-Pesa Number',
             'invoice_footer_note': 'Invoice Footer Note',
+            'email_signature': 'Email Signature',
         }
         help_texts = {
             'whatsapp_number': (
@@ -420,6 +423,7 @@ class SiteSettingsForm(forms.ModelForm):
                 'Leave empty to hide them.'
             ),
             'invoice_footer_note': 'Printed at the bottom of every invoice PDF.',
+            'email_signature': 'Sign-off at the bottom of reply emails to customers. Leave empty to use the site name.',
         }
 
     def clean_whatsapp_number(self):
