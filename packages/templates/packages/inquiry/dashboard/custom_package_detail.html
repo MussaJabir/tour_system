@@ -4,11 +4,13 @@
 {% block title %}Quote {{ custom_package.custom_reference }} — Dashboard{% endblock %}
 
 {% block topbar_extras %}
-{% if custom_package.status == 'draft' or custom_package.status == 'pending_approval' %}
-<form method="post" action="{% url 'packages:dashboard_custom_package_send' custom_package.pk %}" class="inline">
+{% if custom_package.status == 'draft' or custom_package.status == 'sent' or custom_package.status == 'viewed' %}
+<form method="post" action="{% url 'packages:dashboard_custom_package_send' custom_package.pk %}" class="inline"
+      onsubmit="return confirm('{% if custom_package.status == 'draft' %}Send this quote to the client?{% else %}Re-send this quote email to the client?{% endif %}')">
     {% csrf_token %}
     <button type="submit" class="dash-btn dash-btn-primary">
-        <i class="fal fa-paper-plane"></i><span class="hidden sm:inline">Send to client</span>
+        <i class="fal fa-paper-plane"></i>
+        <span class="hidden sm:inline">{% if custom_package.status == 'draft' %}Send to client{% else %}Resend to client{% endif %}</span>
     </button>
 </form>
 {% endif %}
@@ -24,10 +26,12 @@
         <h1 class="dash-page-title flex items-center gap-3">
             <span class="font-mono">{{ custom_package.custom_reference }}</span>
             {% if custom_package.status == 'draft' %}{% include 'backend/partials/_status_badge.html' with label='Draft' variant='info' %}
-            {% elif custom_package.status == 'pending_approval' %}{% include 'backend/partials/_status_badge.html' with label='Pending' variant='warning' %}
+            {% elif custom_package.status == 'sent' %}{% include 'backend/partials/_status_badge.html' with label='Sent' variant='info' %}
+            {% elif custom_package.status == 'viewed' %}{% include 'backend/partials/_status_badge.html' with label='Viewed' variant='warning' %}
             {% elif custom_package.status == 'approved' %}{% include 'backend/partials/_status_badge.html' with label='Approved' variant='success' %}
             {% elif custom_package.status == 'rejected' %}{% include 'backend/partials/_status_badge.html' with label='Rejected' variant='danger' %}
-            {% elif custom_package.status == 'expired' %}{% include 'backend/partials/_status_badge.html' with label='Expired' variant='neutral' %}{% endif %}
+            {% elif custom_package.status == 'expired' %}{% include 'backend/partials/_status_badge.html' with label='Expired' variant='neutral' %}
+            {% elif custom_package.status == 'cancelled' %}{% include 'backend/partials/_status_badge.html' with label='Cancelled' variant='neutral' %}{% endif %}
         </h1>
         <p class="text-sm text-slate-500 mt-1">{{ custom_package.name }}</p>
     </div>
