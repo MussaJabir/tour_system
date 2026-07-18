@@ -42,7 +42,33 @@
                 </div>
             </header>
             <p class="text-sm text-slate-700 leading-relaxed whitespace-pre-line">{{ contact_msg.message }}</p>
+            <p class="text-xs text-slate-400 mt-3">{{ contact_msg.name }} · {{ contact_msg.created_at|date:'d M Y, H:i' }}</p>
         </div>
+
+        {# Conversation thread — your replies, so you don't have to open Gmail #}
+        {% if contact_msg.replies.all %}
+        <div class="dash-card">
+            <header class="dash-card-header">
+                <div><p class="dash-card-title">Conversation · {{ contact_msg.replies.count }} repl{{ contact_msg.replies.count|pluralize:'y,ies' }}</p></div>
+            </header>
+            <ul class="space-y-4">
+                {% for reply in contact_msg.replies.all %}
+                <li class="flex gap-3">
+                    <span class="w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-medium bg-bush-50 text-bush-700">
+                        {% if reply.sent_by %}{{ reply.sent_by.username|slice:':1'|upper }}{% else %}E{% endif %}
+                    </span>
+                    <div class="flex-1 min-w-0 bg-bush-50/40 rounded-xl px-4 py-3">
+                        <p class="text-xs text-slate-500">
+                            <span class="text-slate-700 font-medium">You{% if reply.sent_by %} ({{ reply.sent_by.username }}){% endif %}</span>
+                            · {{ reply.created_at|date:'d M Y, H:i' }}
+                        </p>
+                        <p class="mt-1 text-sm text-slate-800 whitespace-pre-line">{{ reply.body }}</p>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
 
         {# Reply form #}
         <div class="dash-card">

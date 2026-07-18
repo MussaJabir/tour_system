@@ -21,7 +21,7 @@ from django.db.models import Q, Count, Sum, DecimalField
 from django.db.models.functions import Coalesce, TruncMonth, TruncDate
 from django.utils import timezone
 
-from .models import ContactMessage, NewsletterSubscriber, FAQ, SiteSettings, Testimonial
+from .models import ContactMessage, ContactReply, NewsletterSubscriber, FAQ, SiteSettings, Testimonial
 from .utils import normalize_whatsapp_number
 from .forms import (
     ContactForm, 
@@ -427,9 +427,23 @@ def faq_page(request):
 def dashboard_contact_list(request):
     """
     Dashboard: List all contact messages.
-    
+
     YOUR LEADS INBOX!
     """
+    # Bulk actions (clear out spam without deleting one at a time)
+    if request.method == 'POST':
+        action = request.POST.get('bulk_action')
+        if action == 'delete_selected':
+            ids = request.POST.getlist('selected')
+            n, _ = ContactMessage.objects.filter(pk__in=ids).delete()
+            messages.success(request, f'🗑️ Deleted {len(ids)} message(s).')
+        elif action == 'delete_read':
+            qs = ContactMessage.objects.filter(status='read')
+            n = qs.count()
+            qs.delete()
+            messages.success(request, f'🗑️ Deleted {n} read message(s).')
+        return redirect('dashboard_contact_list')
+
     # Get filter parameters
     status_filter = request.GET.get('status', '')
     search = request.GET.get('search', '')
@@ -504,12 +518,19 @@ def dashboard_contact_detail(request, pk):
                 # Send reply email
                 try:
                     send_contact_reply_email(contact_msg, reply_message)
-                    
+
+                    # Store the reply so the dashboard shows the full thread
+                    ContactReply.objects.create(
+                        contact_message=contact_msg,
+                        body=reply_message,
+                        sent_by=request.user,
+                    )
+
                     # Mark as replied if checkbox is checked
                     if reply_form.cleaned_data['mark_as_replied']:
                         contact_msg.status = 'replied'
                         contact_msg.save(update_fields=['status'])
-                    
+
                     messages.success(request, '✅ Reply sent successfully!')
                     return redirect('dashboard_contact_detail', pk=pk)
                 except Exception as e:
