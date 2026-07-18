@@ -18,7 +18,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400..600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 
     {# Tailwind compiled CSS — shared between public + dashboard #}
-    <link rel="stylesheet" href="{% static 'frontend/css/tailwind.css' %}?v=20260718a">
+    <link rel="stylesheet" href="{% static 'frontend/css/tailwind.css' %}?v=20260718b">
 
     {# Font Awesome #}
     <link rel="stylesheet" href="{% static 'frontend/assets/css/fontawesome-5.14.0.min.css' %}">
@@ -44,9 +44,9 @@
              x-transition.opacity
              class="fixed inset-0 bg-slate-900/50 z-30 lg:hidden"></div>
 
-        {# Sidebar (off-canvas on mobile, fixed column on lg+) #}
+        {# Sidebar (off-canvas on mobile, sticky full-height column on lg+) #}
         <div :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
-             class="dash-sidebar fixed inset-y-0 left-0 w-64 z-40 transform transition-transform duration-200 lg:relative lg:translate-x-0 lg:w-auto lg:z-auto">
+             class="dash-sidebar fixed inset-y-0 left-0 w-64 z-40 transform transition-transform duration-200 lg:sticky lg:top-0 lg:h-screen lg:self-start lg:translate-x-0 lg:w-auto lg:z-auto">
             {% include 'backend/partials/_dashboard_sidebar.html' %}
         </div>
 
