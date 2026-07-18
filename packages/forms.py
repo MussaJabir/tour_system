@@ -1,6 +1,7 @@
 from django import forms
 from django.core.exceptions import ValidationError
 from django.contrib.auth import get_user_model
+from core.forms import HoneypotMixin
 from .models import (
     Package, PackageImage, PackageItinerary, PackageInclusion,
     BookingInquiry, CustomPackage, InquiryMessage, CustomPackageItinerary,
@@ -452,7 +453,7 @@ class PackageInclusionForm(forms.ModelForm):
 # BOOKING INQUIRY & CUSTOM PACKAGE FORMS (Phase 2A)
 # ============================================================================
 
-class BookingInquiryForm(forms.ModelForm):
+class BookingInquiryForm(HoneypotMixin, forms.ModelForm):
     """
     Public form for customers to submit package inquiries.
     This is the initial step before receiving a custom quote.

@@ -11,10 +11,38 @@ from .models import ContactMessage, NewsletterSubscriber, FAQ, SiteSettings, Tes
 from .utils import normalize_whatsapp_number
 
 
-class ContactForm(forms.ModelForm):
+class HoneypotMixin:
+    """
+    Silent anti-spam honeypot for public forms.
+
+    Adds a hidden 'website' field. Real users never see it (it's positioned
+    off-screen in the template); automated spam bots fill every field they
+    find, so a non-empty value means the submission is a bot — we reject it.
+    Mix in BEFORE forms.ModelForm / forms.Form in the class bases.
+    """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['website'] = forms.CharField(
+            required=False,
+            label='',
+            widget=forms.TextInput(attrs={
+                'autocomplete': 'off',
+                'tabindex': '-1',
+                'aria-hidden': 'true',
+            }),
+        )
+
+    def clean_website(self):
+        if (self.cleaned_data.get('website') or '').strip():
+            raise forms.ValidationError('Spam detected.')
+        return ''
+
+
+class ContactForm(HoneypotMixin, forms.ModelForm):
     """
     Contact form for potential customers.
-    
+
     CRITICAL: This is your lead generation tool!
     Every submission is a potential booking.
     """
