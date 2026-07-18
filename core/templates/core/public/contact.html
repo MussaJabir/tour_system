@@ -30,6 +30,11 @@
 
                 <form method="post" class="mt-10 space-y-6" novalidate>
                     {% csrf_token %}
+                    {# Honeypot — hidden from humans; bots that fill it are rejected #}
+                    <div style="position:absolute; left:-9999px; top:-9999px;" aria-hidden="true">
+                        <label for="{{ form.website.id_for_label }}">Leave this field empty</label>
+                        {{ form.website }}
+                    </div>
                     <div class="grid sm:grid-cols-2 gap-5">
                         {% include 'frontend/partials/_form_field.html' with field=form.name %}
                         {% include 'frontend/partials/_form_field.html' with field=form.email %}
@@ -80,7 +85,7 @@
                             <span class="w-9 h-9 rounded-full bg-bush-700 text-ivory flex items-center justify-center flex-shrink-0"><i class="fal fa-envelope"></i></span>
                             <div>
                                 <p class="font-medium text-charcoal">Email us</p>
-                                <a href="mailto:hello@enteipa.com" class="text-mist hover:text-bush-700 transition mt-0.5 block">hello@enteipa.com</a>
+                                <a href="mailto:info@enteipa.com" class="text-mist hover:text-bush-700 transition mt-0.5 block">info@enteipa.com</a>
                             </div>
                         </li>
                         <li class="flex gap-4">
