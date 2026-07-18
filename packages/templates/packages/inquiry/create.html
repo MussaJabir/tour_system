@@ -52,6 +52,12 @@
         <form method="post" class="space-y-8" novalidate>
             {% csrf_token %}
 
+            {# Honeypot — hidden from humans; bots that fill it are rejected #}
+            <div style="position:absolute; left:-9999px; top:-9999px;" aria-hidden="true">
+                <label for="{{ form.website.id_for_label }}">Leave this field empty</label>
+                {{ form.website }}
+            </div>
+
             {# Hidden base_package — preserved in submit even though only shown on step 1 #}
             {% if package %}
                 <input type="hidden" name="base_package" value="{{ package.pk }}">
