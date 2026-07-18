@@ -76,3 +76,31 @@ class BulkActionTests(TestCase):
         self.assertEqual(ContactMessage.objects.filter(status='read').count(), 0)
         # the 'new' one survives
         self.assertTrue(ContactMessage.objects.filter(pk=self.m_new.pk).exists())
+
+
+class InternalNoteTests(TestCase):
+    def setUp(self):
+        self.staff = _staff()
+        self.client.login(username='cmstaff', password='pw1234')
+        self.msg = ContactMessage.objects.create(name='A', email='a@x.com', message='hi')
+
+    def test_add_note_creates_timestamped_note(self):
+        url = reverse('dashboard_contact_detail', args=[self.msg.pk])
+        resp = self.client.post(url, {'add_note': '1', 'note_body': 'Called back, wants August dates.'})
+        self.assertEqual(resp.status_code, 302)
+        self.assertEqual(self.msg.notes.count(), 1)
+        note = self.msg.notes.first()
+        self.assertEqual(note.created_by, self.staff)
+        self.assertIn('August dates', note.body)
+
+    def test_empty_note_rejected(self):
+        url = reverse('dashboard_contact_detail', args=[self.msg.pk])
+        self.client.post(url, {'add_note': '1', 'note_body': '   '})
+        self.assertEqual(self.msg.notes.count(), 0)
+
+    def test_notes_show_on_detail(self):
+        from core.models import ContactNote
+        ContactNote.objects.create(contact_message=self.msg, body='First note here.', created_by=self.staff)
+        resp = self.client.get(reverse('dashboard_contact_detail', args=[self.msg.pk]))
+        self.assertContains(resp, 'First note here.')
+        self.assertContains(resp, 'Internal notes')
