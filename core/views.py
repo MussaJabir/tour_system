@@ -481,7 +481,9 @@ def dashboard_contact_list(request):
     }
     
     context = {
-        'messages': messages_page,
+        # NB: NOT 'messages' — that name collides with Django's flash-message
+        # framework and would render each ContactMessage as a fake notification.
+        'page_obj': messages_page,
         'counts': counts,
         'status_filter': status_filter,
         'search': search,
