@@ -326,6 +326,29 @@ class ContactMessage(TimeStampedModel):
         self.save(update_fields=['status'])
 
 
+class ContactReply(TimeStampedModel):
+    """
+    A staff reply sent to a contact message. Stored so the dashboard can show
+    the full conversation thread instead of a fire-and-forget email.
+    """
+    contact_message = models.ForeignKey(
+        ContactMessage, on_delete=models.CASCADE, related_name='replies',
+    )
+    body = models.TextField()
+    sent_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='contact_replies',
+    )
+
+    class Meta:
+        ordering = ['created_at']
+        verbose_name = "Contact Reply"
+        verbose_name_plural = "Contact Replies"
+
+    def __str__(self):
+        return f"Reply to {self.contact_message.name} ({self.created_at:%Y-%m-%d %H:%M})"
+
+
 class NewsletterSubscriber(TimeStampedModel):
     """
     Model for newsletter subscribers.
