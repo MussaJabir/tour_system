@@ -13,6 +13,24 @@
         <div class="grid lg:grid-cols-[1.4fr_1fr] gap-12 lg:gap-20">
 
             <div>
+                {% if sent %}
+                <div x-data="{}" x-init="setTimeout(() => $el.scrollIntoView({ behavior: 'smooth', block: 'center' }), 150)"
+                     class="rounded-2xl border border-bush-200 bg-bush-50 p-10 sm:p-14 text-center">
+                    <div class="mx-auto w-16 h-16 rounded-full bg-bush-600 text-white flex items-center justify-center">
+                        <i class="fal fa-check text-2xl"></i>
+                    </div>
+                    <h2 class="font-display text-display-md mt-6 text-charcoal text-balance">
+                        {% if sent_name %}Thank you, {{ sent_name }}.{% else %}Message sent.{% endif %}
+                    </h2>
+                    <p class="mt-4 text-mist max-w-sm mx-auto">
+                        Your message just reached our Arusha team. We'll write back within 24 hours — usually the same day.
+                    </p>
+                    <div class="mt-8 flex items-center justify-center gap-5 flex-wrap">
+                        <a href="{% url 'public_home' %}" class="btn btn-primary">Back to home <i class="fal fa-arrow-right"></i></a>
+                        <a href="{% url 'contact_page' %}" class="text-sm text-bush-700 hover:underline">Send another message</a>
+                    </div>
+                </div>
+                {% else %}
                 {% if messages %}
                     {% for m in messages %}
                         <div class="mb-6 p-4 rounded-2xl text-sm
@@ -61,6 +79,7 @@
                         </p>
                     </div>
                 </form>
+                {% endif %}
             </div>
 
             <aside class="space-y-8">
