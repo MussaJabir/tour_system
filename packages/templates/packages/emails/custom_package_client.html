@@ -35,10 +35,10 @@
         <span class="info-value"><strong style="color: #28a745; font-size: 18px;">{{ custom_package.currency }} {{ custom_package.total_price|floatformat:2 }}</strong></span>
     </div>
     
-    {% if custom_package.valid_until %}
+    {% if custom_package.expires_at %}
     <div class="info-row">
         <span class="info-label">Valid Until:</span>
-        <span class="info-value">{{ custom_package.valid_until|date:"M d, Y" }}</span>
+        <span class="info-value">{{ custom_package.expires_at|date:"M d, Y" }}</span>
     </div>
     {% endif %}
 </div>
@@ -75,11 +75,11 @@
 <p style="margin-left: 20px;">You can approve, request changes, or provide feedback directly through the secure link.</p>
 
 <p><strong>✓ Flexible Booking</strong></p>
-<p style="margin-left: 20px;">Take your time to review - this quote is valid until {{ custom_package.valid_until|date:"M d, Y" }}.</p>
+<p style="margin-left: 20px;">Take your time to review - this quote is valid until {{ custom_package.expires_at|date:"M d, Y" }}.</p>
 
-{% if custom_package.valid_until %}
+{% if custom_package.expires_at %}
 <div class="warning-box">
-    <strong>⏰ Important:</strong> This custom package will expire on <strong>{{ custom_package.valid_until|date:"F d, Y" }}</strong>. 
+    <strong>⏰ Important:</strong> This custom package will expire on <strong>{{ custom_package.expires_at|date:"F d, Y" }}</strong>. 
     Please review and take action before this date to secure your booking.
 </div>
 {% endif %}

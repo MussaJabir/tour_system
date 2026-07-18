@@ -54,6 +54,44 @@ class CustomPackageSendEmailTests(TestCase):
         self.assertNotIn('/packages/custom/', html)
 
 
+@override_settings(EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend',
+                   DEFAULT_FROM_EMAIL='Enteipa Adventures <info@enteipa.com>',
+                   SITE_NAME='Enteipa Adventures')
+class InquiryConfirmationEmailTests(TestCase):
+    def test_contact_line_uses_our_email_not_customers(self):
+        pkg = make_package()
+        inquiry = BookingInquiry.objects.create(
+            base_package=pkg, customer_name='Amina',
+            customer_email='amina@example.com', customer_phone='0744123456',
+        )
+        from packages.emails import send_inquiry_confirmation_email
+        send_inquiry_confirmation_email(inquiry)
+        html = mail.outbox[0].alternatives[0][0]
+        self.assertIn('contact us at info@enteipa.com', html)
+        self.assertNotIn('contact us at amina@example.com', html)
+
+
+@override_settings(EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend',
+                   SITE_URL='https://enteipa.com', SITE_NAME='Enteipa Adventures')
+class CustomPackageExpiryInEmailTests(TestCase):
+    def test_expiry_date_renders(self):
+        from datetime import timedelta
+        from django.utils import timezone
+        pkg = make_package()
+        inquiry = BookingInquiry.objects.create(
+            base_package=pkg, customer_name='X', customer_email='x@e.com',
+            customer_phone='0744000000',
+        )
+        cp = _custom_package(pkg, inquiry)
+        cp.expires_at = timezone.now() + timedelta(days=7)
+        cp.save()
+        from packages.emails import send_custom_package_to_client
+        send_custom_package_to_client(cp)
+        html = mail.outbox[0].alternatives[0][0]
+        self.assertNotIn('valid until .', html)           # not the empty bug
+        self.assertIn(str(cp.expires_at.year), html)      # the date rendered
+
+
 class CustomItineraryCopyImageTests(TestCase):
     def setUp(self):
         self.staff = User.objects.create_user('cpstaff', password='pw1234', is_staff=True)
