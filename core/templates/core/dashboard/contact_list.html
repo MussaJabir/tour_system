@@ -24,7 +24,7 @@
             <input type="search" name="search" value="{{ search }}" placeholder="Search messages…" class="dash-input pl-9">
         </div>
         {% if status_filter %}<input type="hidden" name="status" value="{{ status_filter }}">{% endif %}
-        <span class="ml-auto text-xs text-slate-500">{{ messages.paginator.count }} message{{ messages.paginator.count|pluralize }}</span>
+        <span class="ml-auto text-xs text-slate-500">{{ page_obj.paginator.count }} message{{ page_obj.paginator.count|pluralize }}</span>
     </form>
 
     <form method="post" x-data="{ count: 0, recount() { this.count = $root.querySelectorAll('.row-check:checked').length } }" @change="recount()">
@@ -54,7 +54,7 @@
                 </tr>
             </thead>
             <tbody>
-                {% for m in messages %}
+                {% for m in page_obj %}
                 <tr>
                     <td><input type="checkbox" class="row-check" name="selected" value="{{ m.pk }}"></td>
                     <td>
@@ -84,12 +84,12 @@
     </div>
     </form>
 
-    {% if messages.paginator.num_pages > 1 %}
+    {% if page_obj.paginator.num_pages > 1 %}
     <nav class="px-4 py-3 border-t border-slate-200 flex items-center justify-between text-xs">
-        <p class="text-slate-500">Page {{ messages.number }} of {{ messages.paginator.num_pages }}</p>
+        <p class="text-slate-500">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</p>
         <div class="flex gap-1">
-            {% if messages.has_previous %}<a href="?page={{ messages.previous_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if search %}&search={{ search }}{% endif %}" class="dash-btn dash-btn-sm dash-btn-ghost"><i class="fal fa-arrow-left"></i> Prev</a>{% endif %}
-            {% if messages.has_next %}<a href="?page={{ messages.next_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if search %}&search={{ search }}{% endif %}" class="dash-btn dash-btn-sm dash-btn-ghost">Next <i class="fal fa-arrow-right"></i></a>{% endif %}
+            {% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if search %}&search={{ search }}{% endif %}" class="dash-btn dash-btn-sm dash-btn-ghost"><i class="fal fa-arrow-left"></i> Prev</a>{% endif %}
+            {% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if search %}&search={{ search }}{% endif %}" class="dash-btn dash-btn-sm dash-btn-ghost">Next <i class="fal fa-arrow-right"></i></a>{% endif %}
         </div>
     </nav>
     {% endif %}
