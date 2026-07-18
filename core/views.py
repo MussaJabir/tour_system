@@ -21,7 +21,7 @@ from django.db.models import Q, Count, Sum, DecimalField
 from django.db.models.functions import Coalesce, TruncMonth, TruncDate
 from django.utils import timezone
 
-from .models import ContactMessage, ContactReply, NewsletterSubscriber, FAQ, SiteSettings, Testimonial
+from .models import ContactMessage, ContactReply, ContactNote, NewsletterSubscriber, FAQ, SiteSettings, Testimonial
 from .utils import normalize_whatsapp_number
 from .forms import (
     ContactForm, 
@@ -509,8 +509,7 @@ def dashboard_contact_detail(request, pk):
     
     # Handle reply form
     reply_form = ContactMessageReplyForm()
-    notes_form = ContactMessageNotesForm(instance=contact_msg)
-    
+
     if request.method == 'POST':
         if 'send_reply' in request.POST:
             reply_form = ContactMessageReplyForm(request.POST)
@@ -538,17 +537,22 @@ def dashboard_contact_detail(request, pk):
                 except Exception as e:
                     messages.error(request, f'❌ Error sending email: {str(e)}')
         
-        elif 'save_notes' in request.POST:
-            notes_form = ContactMessageNotesForm(request.POST, instance=contact_msg)
-            if notes_form.is_valid():
-                notes_form.save()
-                messages.success(request, '✅ Notes saved successfully!')
-                return redirect('dashboard_contact_detail', pk=pk)
-    
+        elif 'add_note' in request.POST:
+            note_body = (request.POST.get('note_body') or '').strip()
+            if note_body:
+                ContactNote.objects.create(
+                    contact_message=contact_msg,
+                    body=note_body,
+                    created_by=request.user,
+                )
+                messages.success(request, '📝 Internal note added.')
+            else:
+                messages.error(request, 'A note cannot be empty.')
+            return redirect('dashboard_contact_detail', pk=pk)
+
     context = {
         'contact_msg': contact_msg,
         'reply_form': reply_form,
-        'notes_form': notes_form,
         'page_title': f'Contact Message: {contact_msg.name}',
     }
     return render(request, 'core/dashboard/contact_detail.html', context)

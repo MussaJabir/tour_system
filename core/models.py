@@ -349,6 +349,29 @@ class ContactReply(TimeStampedModel):
         return f"Reply to {self.contact_message.name} ({self.created_at:%Y-%m-%d %H:%M})"
 
 
+class ContactNote(TimeStampedModel):
+    """
+    A private internal note on a contact message. Multiple staff can add
+    timestamped notes over time (not shown to the customer).
+    """
+    contact_message = models.ForeignKey(
+        ContactMessage, on_delete=models.CASCADE, related_name='notes',
+    )
+    body = models.TextField()
+    created_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='contact_notes',
+    )
+
+    class Meta:
+        ordering = ['created_at']
+        verbose_name = "Contact Note"
+        verbose_name_plural = "Contact Notes"
+
+    def __str__(self):
+        return f"Note on {self.contact_message.name} ({self.created_at:%Y-%m-%d %H:%M})"
+
+
 class NewsletterSubscriber(TimeStampedModel):
     """
     Model for newsletter subscribers.
