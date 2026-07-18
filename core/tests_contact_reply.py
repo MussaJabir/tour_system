@@ -52,3 +52,10 @@ class ContactReplyEmailTests(TestCase):
         self.assertEqual(sent.to, ['amina@example.com'])
         self.assertEqual(sent.alternatives[0][1], 'text/html')
         self.assertEqual(sent.subject, 'Re: Safari in August')
+
+    def test_email_has_no_leaked_django_comment(self):
+        # Guards against the multi-line {# #} comment bug (renders as text).
+        html = self._send().alternatives[0][0]
+        self.assertNotIn('{#', html)
+        self.assertNotIn('#}', html)
+        self.assertNotIn('wrapper table', html)
