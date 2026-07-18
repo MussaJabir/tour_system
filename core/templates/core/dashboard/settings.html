@@ -58,6 +58,18 @@
             </div>
         </div>
 
+        <div class="dash-card">
+            <header class="dash-card-header">
+                <div>
+                    <p class="dash-card-title">Email signature</p>
+                    <p class="text-sm text-slate-500 mt-1">The sign-off at the bottom of reply emails you send to customers.</p>
+                </div>
+            </header>
+            <div class="space-y-5">
+                {% include 'backend/partials/_dash_form_field.html' with field=form.email_signature %}
+            </div>
+        </div>
+
         {% if form.non_field_errors %}
             <div class="dash-card border-rose-200 bg-rose-50 text-rose-700 text-sm">
                 {% for err in form.non_field_errors %}<p>{{ err }}</p>{% endfor %}

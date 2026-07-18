@@ -502,6 +502,14 @@ class SiteSettings(TimeStampedModel):
         blank=True,
         help_text="Optional note printed at the bottom of every invoice (terms, thank-you, etc.)",
     )
+    email_signature = models.TextField(
+        blank=True,
+        help_text=(
+            "Sign-off at the bottom of reply emails to customers "
+            "(e.g. 'Warm regards,\\nMussa — Enteipa Adventures, Arusha'). "
+            "Leave empty to use the site name (e.g. 'Enteipa Adventures Team')."
+        ),
+    )
 
     class Meta:
         verbose_name = "Site Settings"
@@ -511,6 +519,15 @@ class SiteSettings(TimeStampedModel):
     def has_payment_details(self):
         """True when at least one payout channel is configured."""
         return bool(self.bank_account_number or self.mpesa_number)
+
+    @property
+    def effective_email_signature(self):
+        """Custom signature if set, else a sensible default from the site name."""
+        from django.conf import settings as dj_settings
+        if self.email_signature.strip():
+            return self.email_signature.strip()
+        site_name = getattr(dj_settings, 'SITE_NAME', '') or 'Our'
+        return f"Best regards,\n{site_name} Team"
 
     def __str__(self):
         return "Site settings"

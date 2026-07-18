@@ -24,7 +24,7 @@
         }
         
         .email-header {
-            background: linear-gradient(135deg, #4a81d4 0%, #3d5afe 100%);
+            background: linear-gradient(135deg, #2C5F2D 0%, #1B3B1C 100%);
             color: #ffffff;
             padding: 30px 20px;
             text-align: center;
@@ -51,7 +51,7 @@
         .button {
             display: inline-block;
             padding: 12px 30px;
-            background-color: #4a81d4;
+            background-color: #2C5F2D;
             color: #ffffff !important;
             text-decoration: none;
             border-radius: 5px;
@@ -60,12 +60,12 @@
         }
         
         .button:hover {
-            background-color: #3d5afe;
+            background-color: #1B3B1C;
         }
         
         .info-box {
             background-color: #f8f9fa;
-            border-left: 4px solid #4a81d4;
+            border-left: 4px solid #2C5F2D;
             padding: 15px;
             margin: 15px 0;
             border-radius: 4px;
@@ -114,7 +114,7 @@
         }
         
         h2 {
-            color: #4a81d4;
+            color: #2C5F2D;
             font-size: 20px;
             margin-top: 25px;
             margin-bottom: 15px;
@@ -166,6 +166,7 @@
         </div>
         
         <div class="email-footer">
+            {% block footer %}
             <p>
                 <strong>{{ site_name }}</strong><br>
                 Thank you for choosing us for your travel needs!
@@ -173,6 +174,7 @@
             <p style="margin-top: 10px; color: #999; font-size: 11px;">
                 This is an automated email. Please do not reply directly to this message.
             </p>
+            {% endblock %}
         </div>
     </div>
 </body>
