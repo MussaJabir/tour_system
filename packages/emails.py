@@ -113,7 +113,7 @@ def send_custom_package_to_client(custom_package):
     subject = f'Your Custom Package Quote - {custom_package.inquiry.reference}'
     
     # Generate secure viewing URL
-    view_url = f"{settings.SITE_URL}/packages/custom/{custom_package.token}/"
+    view_url = f"{settings.SITE_URL}/custom/{custom_package.access_token}/"
     
     # Render HTML template
     html_content = render_to_string('packages/emails/custom_package_client.html', {
@@ -217,7 +217,7 @@ def send_custom_package_expiry_reminder(custom_package):
     subject = f'Reminder: Your Package Quote Expires Soon - {custom_package.inquiry.reference}'
     
     # Generate secure viewing URL
-    view_url = f"{settings.SITE_URL}/packages/custom/{custom_package.token}/"
+    view_url = f"{settings.SITE_URL}/custom/{custom_package.access_token}/"
     
     # Render HTML template
     html_content = render_to_string('packages/emails/custom_package_expiry_reminder.html', {
