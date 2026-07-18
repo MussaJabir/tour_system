@@ -1319,7 +1319,17 @@ def dashboard_custom_itinerary_copy(request, custom_package_pk):
                 # Get distance and drive time
                 distance = base_day.distance_km if hasattr(base_day, 'distance_km') else ''
                 drive_time = base_day.drive_duration if hasattr(base_day, 'drive_duration') else ''
-                
+
+                # Reference (not duplicate) a day image from its accommodation,
+                # falling back to the destination. We copy only the file PATH —
+                # both records point at the same file, so no extra storage is used.
+                day_image_name = ''
+                acc = base_day.accommodation
+                if acc and getattr(acc, 'featured_image', None) and acc.featured_image:
+                    day_image_name = acc.featured_image.name
+                elif acc and getattr(acc, 'destination', None) and getattr(acc.destination, 'featured_image', None) and acc.destination.featured_image:
+                    day_image_name = acc.destination.featured_image.name
+
                 CustomPackageItinerary.objects.create(
                     custom_package=custom_package,
                     day_number=base_day.day_number,
@@ -1336,6 +1346,7 @@ def dashboard_custom_itinerary_copy(request, custom_package_pk):
                     transport_details=transport_details,
                     distance=str(distance) if distance else '',
                     drive_time=str(drive_time) if drive_time else '',
+                    featured_image=day_image_name,
                     order=base_day.order,
                     is_active=base_day.is_active
                 )
